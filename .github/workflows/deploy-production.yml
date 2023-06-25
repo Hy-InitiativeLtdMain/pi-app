@@ -15,8 +15,8 @@ jobs:
           password: ${{ secrets.SSH_PRODUCTION_PASS }}
 
           script: |
-            cp env/.env /var/www/forex/.env
-            cd /var/www/forex
+            cp env/.env /var/www/piapp/.env
+            cd /var/www/piapp
             git pull origin production
             composer install
             php artisan migrate
