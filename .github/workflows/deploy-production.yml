@@ -1,0 +1,22 @@
+name: Build and deploy for Production
+
+on:
+  push:
+    branches: [production]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Laravel APP
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{secrets.SSH_PRODUCTION_HOST}}
+          username: ${{secrets.SSH_PRODUCTION_USER}}
+          password: ${{ secrets.SSH_PRODUCTION_PASS }}
+
+          script: |
+            cp env/.env /var/www/forex/.env
+            cd /var/www/forex
+            git pull origin production
+            composer install
+            php artisan migrate
