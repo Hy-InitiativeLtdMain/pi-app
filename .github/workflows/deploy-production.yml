@@ -2,7 +2,7 @@ name: Build and deploy for Production
 
 on:
   push:
-    branches: [production]
+    branches: [develop]
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,6 +17,6 @@ jobs:
           script: |
             cp env/.env /var/www/piapp/.env
             cd /var/www/piapp
-            git pull origin production
+            git pull origin develop
             composer install
             php artisan migrate
