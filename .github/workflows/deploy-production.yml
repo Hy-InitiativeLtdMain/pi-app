@@ -10,9 +10,9 @@ jobs:
       - name: Deploy Laravel APP
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{secrets.SSH_PRODUCTION_HOST}}
-          username: ${{secrets.SSH_PRODUCTION_USER}}
-          password: ${{ secrets.SSH_PRODUCTION_PASS }}
+          host: ${{secrets.SSH_HOST}}
+          username: ${{secrets.SSH_USER}}
+          password: ${{ secrets.SSH_PASS }}
 
           script: |
             cp env/.env /var/www/piapp/.env
