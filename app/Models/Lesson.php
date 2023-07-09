@@ -49,4 +49,15 @@ class Lesson extends Model
     {
         return $this->hasMany(LessonUser::class);
     }
+
+
+    /**
+     * Get all of the assignments for the Lesson
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class);
+    }
 }

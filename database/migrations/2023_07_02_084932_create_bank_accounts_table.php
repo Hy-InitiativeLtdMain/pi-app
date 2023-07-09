@@ -11,21 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('ref')->nullable();
-
-            $table->tinyText('type')->nullable();
-            $table->tinyInteger('status')->default(0);
-
-            $table->string('image')->nullable();
-            $table->string('image_id')->nullable();
-
-            $table->decimal('amount', 15)->default(0);
-
-            $table->timestamp('paid_at')->nullable();
-
+            $table->string('account_name')->nullable();
+            $table->string('account_number')->nullable();
+            $table->string('bank_name')->nullable();
+            $table->string('bank_code')->nullable();
             $table->string('bank_account_id')->nullable();
+
+            $table->string('recipient_code')->nullable();
 
             $table->unsignedBigInteger('user_id');
             $table->timestamps();
@@ -37,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('bank_accounts');
     }
 };

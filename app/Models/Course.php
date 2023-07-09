@@ -189,6 +189,16 @@ class Course extends Model
         # code...
     }
 
+    /**
+     * Get all of the assignments for the Course
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
 
     
 }

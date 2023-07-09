@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\TransactionRequest;
-use App\Http\Requests\Util\ReportRequest;
+
 use App\Models\Transaction;
 use App\Models\TransactionProduct;
 use App\Services\User\TransactionService;
@@ -26,11 +26,7 @@ class TransactionManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    public function indexAll(ReportRequest $request)
-    {
-        $_data = $this->transactionService->indexAll($request->validated());
-        return response($_data['data'], $_data['code']);
-    }
+    
 
 
     public function view(Transaction $transaction)

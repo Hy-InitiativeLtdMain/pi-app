@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -61,5 +62,15 @@ class User extends Authenticatable
     public function verifications()
     {
         return $this->hasMany(VerificationToken::class);
+    }
+
+    /**
+     * Get all of the bankAccounts for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(BankAccount::class);
     }
 }

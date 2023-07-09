@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\User\AssignmentManager;
+use App\Http\Controllers\User\AttachmentManager;
 use App\Http\Controllers\User\AuthManager;
+use App\Http\Controllers\User\BankAccountManager;
 use App\Http\Controllers\User\CategoryManager;
 use App\Http\Controllers\User\CourseManager;
 use App\Http\Controllers\User\DetailManager;
 use App\Http\Controllers\User\LessonManager;
+use App\Http\Controllers\User\PaystackManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\WebhooksManager;
 use Illuminate\Http\Request;
@@ -53,13 +57,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::patch('/', [DetailManager::class, 'update']);
                 Route::post('/', [DetailManager::class, 'update']);
                 Route::delete('/', [DetailManager::class, 'deleteAccount']);
+                Route::post('/request-payout', [DetailManager::class, 'requestPayout']);
             });
 
             Route::group(['prefix' => 'category', 'middleware' => []], function () {
                 Route::get('/', [CategoryManager::class, 'index']);
                 Route::post('/', [CategoryManager::class, 'store']);
                 Route::get('/{category}', [CategoryManager::class, 'view']);
-                Route::post('/{category}', [CategoryManager::class, 'update']);
+                Route::patch('/{category}', [CategoryManager::class, 'update']);
                 Route::delete('/{category}', [CategoryManager::class, 'delete']);
             });
 
@@ -88,6 +93,38 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::post('/{transaction}', [TransactionManager::class, 'update']);
                 Route::delete('/{transaction}', [TransactionManager::class, 'delete']);
                 Route::get('/{transaction}/payout', [TransactionManager::class, 'makePayout']);          
+            });
+
+            Route::group(['prefix' => 'assignment', 'middleware' => []], function () {
+                Route::get('/', [AssignmentManager::class, 'index']);
+                Route::post('/', [AssignmentManager::class, 'store']);
+                Route::get('/{assignment}', [AssignmentManager::class, 'view']);
+                Route::patch('/{assignment}', [AssignmentManager::class, 'update']);
+                Route::delete('/{assignment}', [AssignmentManager::class, 'delete']);
+            });
+
+            Route::group(['prefix' => 'attachment', 'middleware' => []], function () {
+                Route::get('/', [AttachmentManager::class, 'index']);
+                Route::post('/', [AttachmentManager::class, 'store']);
+                Route::get('/{attachment}', [AttachmentManager::class, 'view']);
+                Route::patch('/{attachment}', [AttachmentManager::class, 'update']);
+                Route::delete('/{attachment}', [AttachmentManager::class, 'delete']);
+            });
+
+            Route::group(['prefix' => 'bank-account', 'middleware' => []], function () {
+                Route::get('/', [BankAccountManager::class, 'index']);
+                Route::post('/', [BankAccountManager::class, 'store']);
+                Route::get('/{bankAccount}', [BankAccountManager::class, 'view']);
+                Route::post('/{bankAccount}', [BankAccountManager::class, 'update']);
+                Route::delete('/{bankAccount}', [BankAccountManager::class, 'delete']);
+            });
+
+            Route::group(['prefix' => 'banking', 'middleware' => []], function () {
+                Route::group(['prefix' => 'paystack', 'middleware' => []], function () {
+                    Route::get('/listbank', [PaystackManager::class, 'allBanks']);
+                    Route::get('/verify-account', [PaystackManager::class, 'verifyAccount']);          
+                    Route::post('/initialize-transaction', [PaystackManager::class, 'initializeTransaction']);          
+                });
             });
 
             

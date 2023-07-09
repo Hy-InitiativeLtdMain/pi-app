@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Jobs\User\AuthJobManager;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Media\CloudinaryService;
 use App\Services\Query\FilteringService;
@@ -33,6 +34,11 @@ class UserService
     public function show(User $user)
     {
         $data['user'] = $user->fresh([]);
+        $data['available_balance'] = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+        ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
+        ->where('courses.user_id', $user->id )
+        // ->select('transactions.*')
+        ->sum('transactions.amount');
         return [
             'data' => $data,
             'code' => 200
