@@ -34,7 +34,7 @@ class Course extends Model
     ];
 
     protected $appends = [
-        
+        "paid"
     ];
 
     public function scopePublished($query)
@@ -187,6 +187,13 @@ class Course extends Model
     public function seenLesson( Lesson $lesson, User $user)
     {
         # code...
+    }
+
+    public function paid(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->hasActivePayment,
+        );
     }
 
     /**

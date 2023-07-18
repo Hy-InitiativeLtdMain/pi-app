@@ -19,20 +19,20 @@ class LessonManager extends Controller
         $this->lessonService = $lessonService;
     }
 
-    public function index(Request $request, Course $course)
+    public function index(Request $request)
     {
-        $_data = $this->lessonService->index($course);
+        $_data = $this->lessonService->index($request->all());
         return response($_data['data'], $_data['code']);
     }
 
 
-    public function view(Course $course, Lesson $lesson)
+    public function view(Lesson $lesson)
     {
         $_data = $this->lessonService->view($lesson);
         return response($_data['data'], $_data['code']);
     }
 
-    public function update(Request $request, Course $course, Lesson $lesson)
+    public function update(Request $request, Lesson $lesson)
     {
         $validated = $request->validate(LessonRequest::$_updateRules);
         $_data = $this->lessonService->update($lesson, $validated);
@@ -58,13 +58,13 @@ class LessonManager extends Controller
         return response($_data, 200);
     }
 
-    public function delete(Course $course, Lesson $lesson)
+    public function delete( Lesson $lesson)
     {
         $_data = $this->lessonService->delete($lesson);
         return response($_data['data'], $_data['code']);
     }
 
-    public function seen(Request $request, Course $course, Lesson $lesson)
+    public function seen(Request $request,  Lesson $lesson)
     {
 
         $user = request()->user();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,10 @@ class Lesson extends Model
         "cover_url_id",
         "created_at",
         "updated_at",
+    ];
+
+    protected $appends = [
+        "seen",
     ];
      /**
      * Get the course that owns the Lesson
@@ -60,4 +65,14 @@ class Lesson extends Model
     {
         return $this->hasMany(Assignment::class);
     }
+
+    public function seen(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->lessonSeens()->first()?->seen == 1,
+        );
+        
+    }
+
+    
 }

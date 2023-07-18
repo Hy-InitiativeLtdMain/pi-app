@@ -83,9 +83,20 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                     Route::post('/', [LessonManager::class, 'store']);
                     Route::post('/list', [LessonManager::class, 'storeList']);
                     Route::get('/{lesson}', [LessonManager::class, 'view']);
+                    Route::get('/{lesson}/seen', [LessonManager::class, 'seen']);
                     Route::post('/{lesson}', [LessonManager::class, 'update']);
                     Route::delete('/{lesson}', [LessonManager::class, 'delete']);
                 });
+            });
+
+            Route::group(['prefix' => 'lesson', 'middleware' => []], function () {
+                Route::get('/', [LessonManager::class, 'index']);
+                Route::post('/{course}', [LessonManager::class, 'store']);
+                Route::post('/{course}/list', [LessonManager::class, 'storeList']);
+                Route::get('/{lesson}', [LessonManager::class, 'view']);
+                Route::get('/{lesson}/seen', [LessonManager::class, 'seen']);
+                Route::post('/{lesson}', [LessonManager::class, 'update']);
+                Route::delete('/{lesson}', [LessonManager::class, 'delete']);
             });
 
             Route::group(['prefix' => 'transaction', 'middleware' => []], function () {

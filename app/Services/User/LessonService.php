@@ -7,12 +7,16 @@ use App\Models\Lesson;
 use App\Models\LessonUser;
 use App\Models\User;
 use App\Services\Media\CloudinaryService;
+use App\Services\Query\FilteringService;
 
 class LessonService
 {
-    public function index(Course $course)
+    public function index($inputs)
     {
-        $data['lessons'] = $course->lessons()->paginate();
+        $filter = new FilteringService();
+        $lessons = Lesson::query();
+        $filter->filterColumns($lessons, $inputs);
+        $data['lessons'] = $lessons->paginate();
         return [
             'data' => $data, 
             'code' => 200
