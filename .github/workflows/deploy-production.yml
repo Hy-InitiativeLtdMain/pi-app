@@ -2,7 +2,7 @@ name: Build and deploy for Production
 
 on:
   push:
-    branches: [develop]
+    branches: [production]
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,13 +10,13 @@ jobs:
       - name: Deploy Laravel APP
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{secrets.SSH_HOST}}
-          username: ${{secrets.SSH_USER}}
-          password: ${{ secrets.SSH_PASS }}
+          host: ${{secrets.SSH_PRODUCTION_HOST}}
+          username: ${{secrets.SSH_PRODUCTION_USER}}
+          password: ${{ secrets.SSH_PRODUCTION_PASS }}
 
           script: |
             cp env/.env /var/www/piapp/.env
             cd /var/www/piapp
-            git pull origin develop
+            git pull origin production
             composer install
             php artisan migrate
