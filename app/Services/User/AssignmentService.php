@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Models\Assignment;
+use App\Models\AssignmentUser;
 use App\Services\Query\FilteringService;
 
 class AssignmentService
@@ -52,6 +53,21 @@ class AssignmentService
         return [
             'data' => $data, 
             'code' => 200
+        ];
+    }
+
+    
+    public function submit($input)
+    { 
+        
+        $assignmentUser = AssignmentUser::create($input);
+        
+
+        $data['message'] = "User Assignment Created";
+        $data['assignmentUser'] = $assignmentUser;
+        return [
+            'data' => $data, 
+            'code' => 201
         ];
     }
 

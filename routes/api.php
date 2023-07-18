@@ -9,6 +9,8 @@ use App\Http\Controllers\User\CourseManager;
 use App\Http\Controllers\User\DetailManager;
 use App\Http\Controllers\User\LessonManager;
 use App\Http\Controllers\User\PaystackManager;
+use App\Http\Controllers\User\QuestionManager;
+use App\Http\Controllers\User\QuizManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\WebhooksManager;
 use Illuminate\Http\Request;
@@ -99,6 +101,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::get('/', [AssignmentManager::class, 'index']);
                 Route::post('/', [AssignmentManager::class, 'store']);
                 Route::get('/{assignment}', [AssignmentManager::class, 'view']);
+                Route::post('/{assignment}/submit', [AssignmentManager::class, 'submit']);
                 Route::patch('/{assignment}', [AssignmentManager::class, 'update']);
                 Route::delete('/{assignment}', [AssignmentManager::class, 'delete']);
             });
@@ -127,6 +130,22 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 });
             });
 
+            Route::group(['prefix' => 'quiz', 'middleware' => []], function () {
+                Route::get('/', [QuizManager::class, 'index']);
+                Route::post('/', [QuizManager::class, 'store']);
+                Route::get('/{quiz}', [QuizManager::class, 'view']);
+                Route::patch('/{quiz}', [QuizManager::class, 'update']);
+                Route::post('/{quiz}/submit', [QuizManager::class, 'submit']);
+                Route::delete('/{quiz}', [QuizManager::class, 'delete']);
+            });
+
+            Route::group(['prefix' => 'question', 'middleware' => []], function () {
+                Route::get('/', [QuestionManager::class, 'index']);
+                Route::post('/', [QuestionManager::class, 'store']);
+                Route::get('/{question}', [QuestionManager::class, 'view']);
+                Route::patch('/{question}', [QuestionManager::class, 'update']);
+                Route::delete('/{question}', [QuestionManager::class, 'delete']);
+            });
             
 
             

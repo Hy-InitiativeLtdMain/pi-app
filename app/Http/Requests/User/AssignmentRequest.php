@@ -38,4 +38,12 @@ class AssignmentRequest extends FormRequest
         'course_id' => 'exists:courses,id',
         'lesson_id' => 'exists:lessons,id',
     ];
+
+
+    public static $_submitRules = [
+        
+        'attachment_id' => 'required|exists:attachments,id',
+        // 'assignment_id' => 'exists:assignments,id',
+        // 'user_id' => 'required|exists:users,id',
+    ];
 }

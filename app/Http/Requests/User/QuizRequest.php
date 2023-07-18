@@ -4,7 +4,7 @@ namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttachmentRequest extends FormRequest
+class QuizRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +24,8 @@ class AttachmentRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'type' => 'required|max:255',
-            'url' => 'required|max:255',
-
-            'assignment_id' => 'exists:assignments,id',
+            'title' => 'required|max:255',
+            'description' => 'required|max:255',
             'course_id' => 'exists:courses,id',
             'lesson_id' => 'exists:lessons,id',
         ];
@@ -35,11 +33,13 @@ class AttachmentRequest extends FormRequest
     }
 
     public static $_updateRules = [
-        'type' => 'max:255',
-        'url' => 'max:255',
-
-        'assignment_id' => 'exists:assignments,id',
-        'category_id' => 'exists:categories,id',
+        'title' => 'max:255',
+        'description' => 'max:255',
+        'course_id' => 'exists:courses,id',
         'lesson_id' => 'exists:lessons,id',
+    ];
+
+    public static $_submitRules = [
+        'points' => 'required|numeric',
     ];
 }

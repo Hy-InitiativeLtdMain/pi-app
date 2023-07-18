@@ -47,6 +47,15 @@ class AssignmentManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
+    public function submit(Request $request, Assignment $assignment)
+    {
+        $validated = $request->validate(AssignmentRequest::$_submitRules);
+        $validated['user_id'] = $request->user()->id;
+        $validated['assignment_id'] = $assignment->id;
+        $_data = $this->assignmentService->submit( $validated);
+        return response($_data['data'], $_data['code']);
+    }
+
     public function delete(Assignment $assignment)
     {
         $_data = $this->assignmentService->delete($assignment);
