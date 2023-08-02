@@ -17,6 +17,7 @@ class Lesson extends Model
         'cover_type',
         'cover_url',
         'cover_url_id',
+        'url',
         'content',
 
 
