@@ -67,6 +67,9 @@ class Kernel extends HttpKernel
         'cors' => \App\Http\Middleware\Cors::class,
         'json.response' => \App\Http\Middleware\JsonResponse::class,
 
+        'auth.admin.access' => \App\Http\Middleware\User\AdminAccess::class,
+        'auth.learner.access' => \App\Http\Middleware\User\LearnerAccess::class,
+
         'auth.user.state' => \App\Http\Middleware\User\LoginState::class,
 
 
