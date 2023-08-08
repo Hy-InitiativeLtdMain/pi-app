@@ -24,8 +24,8 @@ class LessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'title' => 'required|max:255',
-            'content' => 'required',
+            'title' => 'max:255',
+            'content' => '',
             'cover_type' => 'in:image,video',
             'cover_file' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg,mp4',
             'url' => '',
