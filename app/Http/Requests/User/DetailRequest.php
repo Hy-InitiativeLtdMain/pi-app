@@ -28,6 +28,7 @@ class DetailRequest extends FormRequest
             'last_name' => 'max:255',
             'gender' => 'max:255',
             'phone' => 'max:15',
+            'is_admin' => 'boolean',
             'password' => 'min:6|confirmed',
             'image' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg',
         ];
