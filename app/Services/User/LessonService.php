@@ -18,7 +18,7 @@ class LessonService
         $filter->filterColumns($lessons, $inputs);
         $data['lessons'] = $lessons->paginate();
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -27,15 +27,15 @@ class LessonService
     {
         $data['lesson'] = $lesson->fresh(['course']);
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
 
     public function store(Course $course, $input)
     {
-        
-        if($input['cover_file'] != null){
+
+        if (isset($input['cover_file']) &&  $input['cover_file'] != null) {
             $cloudinary = new CloudinaryService();
             $resp = $cloudinary->store($input['cover_file'], "lesson-images");
             $input['cover_url'] = $resp[0];
@@ -43,24 +43,24 @@ class LessonService
         }
 
         $lesson = $course->lessons()->create($input);
-        
+
 
         $data['message'] = "Lesson Created";
         $data['lesson'] = $lesson;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 201
         ];
     }
 
     public function update(Lesson $lesson, $input)
     {
-        if(isset($input['cover_file'] )){
+        if (isset($input['cover_file'])) {
             $cloudinary = new CloudinaryService();
-            if($lesson->cover_url_id != null){
+            if ($lesson->cover_url_id != null) {
                 $cloudinary->delete($lesson->cover_url_id);
             }
-            
+
             $resp = $cloudinary->store($input['cover_file'], "lesson-images");
             $input['cover_url'] = $resp[0];
             $input['cover_url_id'] = $resp[1];
@@ -72,17 +72,17 @@ class LessonService
         $data['message'] = "Lesson updated";
         $data['lesson'] = $lesson;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
 
     public function delete(Lesson $lesson)
     {
-        
+
         $lesson->delete();
 
-        if($lesson->cover_url_id != null){
+        if ($lesson->cover_url_id != null) {
             $cloudinary = new CloudinaryService();
             $cloudinary->delete($lesson->cover_url_id);
         }
@@ -90,7 +90,7 @@ class LessonService
         $data['message'] = "Deleted Successfully";
         $data['lesson'] = $lesson;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -100,11 +100,11 @@ class LessonService
         $lu = LessonUser::updateOrCreate([
             'lesson_id'  => $lesson->id,
             'user_id'  => $user->id,
-        ], ['seen'=>$seen]);                
+        ], ['seen' => $seen]);
         $data['message'] = "User Lesson Status Updated";
         $data['lu'] = $lu;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 202
         ];
     }
