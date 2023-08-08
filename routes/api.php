@@ -85,7 +85,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::post('/{course}/list', [LessonManager::class, 'storeList']);
                 Route::get('/{lesson}', [LessonManager::class, 'view']);
                 Route::get('/{lesson}/seen', [LessonManager::class, 'seen'])->middleware(["auth.learner.access"]);
-                Route::post('/{lesson}', [LessonManager::class, 'update'])->middleware(["auth.admin.access"]);
+                Route::post('/{lesson}/update', [LessonManager::class, 'update'])->middleware(["auth.admin.access"]);
                 Route::delete('/{lesson}', [LessonManager::class, 'delete'])->middleware(["auth.admin.access"]);
             });
 
