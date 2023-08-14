@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Media\AwsManager;
+use App\Http\Controllers\Media\VimeoManager;
 use App\Http\Controllers\User\AssignmentManager;
 use App\Http\Controllers\User\AttachmentManager;
 use App\Http\Controllers\User\AuthManager;
@@ -153,6 +155,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
 
             Route::get('/logout', [AuthManager::class, 'logout']);
+        });
+    });
+    Route::group(['prefix' => 'media'], function () {
+        Route::group(['prefix' => 'aws'], function () {
+            Route::post('/', [AwsManager::class, 'generatePresignedUrl']);
+        });
+        Route::group(['prefix' => 'vimeo'], function () {
+            Route::get('/', [VimeoManager::class, 'generatePresignedUrl']);
         });
     });
 });
