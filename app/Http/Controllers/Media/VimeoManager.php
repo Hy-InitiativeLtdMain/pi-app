@@ -21,20 +21,20 @@ class VimeoManager extends Controller
                 'required',
                 'numeric',
             ],
-            
+
         ]);
-        
+
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/vnd.vimeo.*+json;version=3.4'
         ])
-        ->withToken(env("VIMEO_ACCESS"))
-        ->post(env("VIMEO_HOST").'me/videos', [
-            'upload' => [
-                'approach' =>'tus',
-                'size' =>$request->input('size')
-            ],
-        ]);
+            ->withToken(env("VIMEO_ACCESS"))
+            ->post(env("VIMEO_HOST") . 'me/videos', [
+                'upload' => [
+                    'approach' => 'tus',
+                    'size' => $request->input('size')
+                ],
+            ]);
         return response()->json($response->json(), 200);
     }
 }
