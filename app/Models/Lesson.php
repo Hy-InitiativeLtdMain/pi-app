@@ -33,7 +33,7 @@ class Lesson extends Model
     protected $appends = [
         "seen",
     ];
-     /**
+    /**
      * Get the course that owns the Lesson
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -43,7 +43,7 @@ class Lesson extends Model
         return $this->belongsTo(Course::class);
     }
 
-    
+
 
 
     /**
@@ -70,10 +70,12 @@ class Lesson extends Model
     public function seen(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => $this->lessonSeens()->first()?->seen == 1,
+            get: function () {
+                $user = auth('user')->user();
+                if($user == null) return false;
+                $user_id = $user->id;
+                return $this->lessonSeens()->where('lesson_users.user_id', $user_id)->first()?->seen == 1;
+            },
         );
-        
     }
-
-    
 }
