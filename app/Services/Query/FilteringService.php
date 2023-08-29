@@ -19,7 +19,7 @@ class FilteringService
             if (trim($value) == '') {
                 continue;
             }
-            if (str_contains($value, '_id')) {
+            if (str_contains($key, '_id')) {
                 $query->where($key,  $value);
             } else {
                 $query->where($key, 'LIKE', '%' . $value . '%');
