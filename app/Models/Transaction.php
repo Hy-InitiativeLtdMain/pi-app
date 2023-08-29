@@ -25,7 +25,8 @@ class Transaction extends Model
         'image',
         'image_id',
 
-        'bank_account_id'
+        'bank_account_id',
+        'transfer_code'
 
     ];
 

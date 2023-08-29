@@ -9,11 +9,11 @@ use Illuminate\Support\Str;
 
 class PaystackService
 {
-    public function verifyAccount($account_number, $bank_code )
+    public function verifyAccount($account_number, $bank_code)
     {
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST').'bank/resolve', [
+        ])->get(getenv('PAYSTACK_HOST') . 'bank/resolve', [
             'account_number' => $account_number,
             'bank_code' => $bank_code,
         ])->json();
@@ -54,7 +54,7 @@ class PaystackService
 
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST') . 'transaction/verify/'.$transaction->ref);
+        ])->get(getenv('PAYSTACK_HOST') . 'transaction/verify/' . $transaction->ref);
         return [
             'data' => $resp->json(),
             'code' => $resp->status()
@@ -65,9 +65,9 @@ class PaystackService
     {
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->post(getenv('PAYSTACK_HOST').'transferrecipient', [
-            'type'=>"nuban",
-            'name'=>$bankAccount->account_name,
+        ])->post(getenv('PAYSTACK_HOST') . 'transferrecipient', [
+            'type' => "nuban",
+            'name' => $bankAccount->account_name,
             'account_number' => $bankAccount->account_number,
             'bank_code' => $bankAccount->bank_code,
             'description' => "Retrieve Bank Recipient Code",
@@ -83,7 +83,7 @@ class PaystackService
     public function makePayout(Transaction $transaction)
     {
 
-        if($transaction->type != "User Payout"){
+        if ($transaction->type != "User Payout") {
             return [
                 'data' => [
                     "message" => "This is not a payout transaction"
@@ -92,7 +92,7 @@ class PaystackService
             ];
         }
 
-        if($transaction->paid){
+        if ($transaction->paid) {
             return [
                 'data' => [
                     "message" => "Payment is paid"
@@ -100,7 +100,7 @@ class PaystackService
                 'code' => 422
             ];
         }
-        if($transaction->bankAccount == null){
+        if ($transaction->bankAccount == null) {
             return [
                 'data' => [
                     "message" => "Bank Account is not found"
@@ -120,7 +120,68 @@ class PaystackService
                 'code' => 403
             ];
         }
-        $amount = abs($transaction->amount)*100;
+        $amount = abs($transaction->amount) * 100;
+        $ref = Str::lower($transaction->ref);
+        $resp = Http::withHeaders([
+            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+        ])->post(getenv('PAYSTACK_HOST') . 'transfer', [
+            'source' => 'balance',
+            'amount' => $amount,
+            'recipient' => $transaction->bankAccount->recipient_code,
+            'reason' => 'Withdrawal of Funds',
+            'reference' => $ref
+        ]);
+        $_resp = $resp->json();
+        $transfer_code = $_resp['transfer_code'];
+        $transaction->transfer_code = $transfer_code;
+        $transaction->save();
+        return [
+            'data' => $_resp,
+            'code' => $resp->status()
+        ];
+    }
+
+    public function verifyOTPPayout(Transaction $transaction)
+    {
+
+        if ($transaction->type != "User Payout") {
+            return [
+                'data' => [
+                    "message" => "This is not a payout transaction"
+                ],
+                'code' => 422
+            ];
+        }
+
+        if ($transaction->paid) {
+            return [
+                'data' => [
+                    "message" => "Payment is paid"
+                ],
+                'code' => 422
+            ];
+        }
+        if ($transaction->bankAccount == null) {
+            return [
+                'data' => [
+                    "message" => "Bank Account is not found"
+                ],
+                'code' => 422
+            ];
+        }
+        $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+            ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
+            ->where('courses.user_id', $transaction->user->id)
+            // ->select('transactions.*')
+            ->sum('transactions.amount');
+        if ($transaction->amount > $available_balance) {
+            $data['message'] = "Insufficient Funds";
+            return [
+                'data' => $data,
+                'code' => 403
+            ];
+        }
+        $amount = abs($transaction->amount) * 100;
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
@@ -136,5 +197,4 @@ class PaystackService
             'code' => $resp->status()
         ];
     }
-
 }

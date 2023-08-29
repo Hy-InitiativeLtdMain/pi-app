@@ -26,7 +26,7 @@ class TransactionManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    
+
 
 
     public function view(Transaction $transaction)
@@ -42,7 +42,7 @@ class TransactionManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    
+
 
 
     public function delete(Transaction $transaction)
@@ -54,6 +54,11 @@ class TransactionManager extends Controller
     public function makePayout(Transaction $transaction)
     {
         $_data = $this->transactionService->makePayout($transaction);
+        return response($_data['data'], $_data['code']);
+    }
+    public function verifyOTPPayout(Transaction $transaction)
+    {
+        $_data = $this->transactionService->verifyOTPPayout($transaction);
         return response($_data['data'], $_data['code']);
     }
 }

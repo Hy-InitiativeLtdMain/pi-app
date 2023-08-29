@@ -106,4 +106,12 @@ class TransactionService
         // $flutterwaveService = new FlutterwaveService();
         return $paystackService->makePayout($transaction);
     }
+
+    public function verifyOTPPayout(Transaction $transaction)
+    {
+
+        $paystackService = new PaystackService();
+        // $flutterwaveService = new FlutterwaveService();
+        return $paystackService->verifyOTPPayout($transaction);
+    }
 }
