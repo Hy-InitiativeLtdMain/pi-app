@@ -38,7 +38,9 @@ class PaystackWebhookService
 
     public function transferSuccess($_data)
     {
+        Log::info('_data == ' . print_r($_data, true));
         $transaction = Transaction::whereRef($_data['reference'])->firstOrFail();
+        Log::info('transaction == ' . print_r($transaction, true));
         if (abs(floatval($transaction->amount)) * 100 == floatval($_data['amount'])) {
             $transaction->status = 1;
             $transaction->paid_at = Carbon::now();
@@ -47,6 +49,7 @@ class PaystackWebhookService
 
 
             $data['message'] = 'Updated';
+            Log::info('data == ' . print_r($data, true));
             return response()->json($data, 200);
         }
         $data['message'] = 'Not found';
