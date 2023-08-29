@@ -15,7 +15,7 @@ class TransactionManager extends Controller
 
     private $transactionService;
 
-    function __construct(TransactionService $transactionService )
+    function __construct(TransactionService $transactionService)
     {
         $this->transactionService = $transactionService;
     }
@@ -56,9 +56,12 @@ class TransactionManager extends Controller
         $_data = $this->transactionService->makePayout($transaction);
         return response($_data['data'], $_data['code']);
     }
-    public function verifyOTPPayout(Transaction $transaction)
+    public function verifyOTPPayout(Request $request, Transaction $transaction)
     {
-        $_data = $this->transactionService->verifyOTPPayout($transaction);
+        $validated = $request->validate([
+            'otp'=>'required'
+        ]);
+        $_data = $this->transactionService->verifyOTPPayout($transaction, $validated['otp']);
         return response($_data['data'], $_data['code']);
     }
 }

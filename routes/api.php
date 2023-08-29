@@ -98,7 +98,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::post('/{transaction}', [TransactionManager::class, 'update'])->middleware(["auth.admin.access"]);
                 Route::delete('/{transaction}', [TransactionManager::class, 'delete'])->middleware(["auth.admin.access"]);
                 Route::get('/{transaction}/payout', [TransactionManager::class, 'makePayout'])->middleware(["auth.admin.access"]);
-                Route::get('/{transaction}/payout-otp', [TransactionManager::class, 'verifyOTPPayout'])->middleware(["auth.admin.access"]);
+                Route::get('/{transaction}/verify-payout-otp', [TransactionManager::class, 'verifyOTPPayout'])->middleware(["auth.admin.access"]);
             });
 
             Route::group(['prefix' => 'assignment', 'middleware' => []], function () {

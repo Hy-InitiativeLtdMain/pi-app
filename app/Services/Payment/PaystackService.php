@@ -145,7 +145,7 @@ class PaystackService
         ];
     }
 
-    public function verifyOTPPayout(Transaction $transaction)
+    public function verifyOTPPayout(Transaction $transaction, String $otp)
     {
 
         if ($transaction->type != "User Payout") {
@@ -189,12 +189,9 @@ class PaystackService
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->post(getenv('PAYSTACK_HOST') . 'transfer', [
-            'source' => 'balance',
-            'amount' => $amount,
-            'recipient' => $transaction->bankAccount->recipient_code,
-            'reason' => 'Withdrawal of Funds',
-            'reference' => $ref
+        ])->post(getenv('PAYSTACK_HOST') . 'transfer/finalize_transfer', [
+            'transfer_code' => $transaction->transfer_code,
+            'otp' => $otp
         ]);
         return [
             'data' => $resp->json(),

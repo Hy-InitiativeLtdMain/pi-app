@@ -19,12 +19,12 @@ class TransactionService
         $transactions = Transaction::with(['user',  'courses']);
         $filter->filterColumns($transactions, $inputs);
 
-        if(isset($inputs['general'])){
+        if (isset($inputs['general'])) {
             $search = $inputs['general'];
             $transactions = $transactions->whereHas('user', function (Builder $query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('first_name', 'like', "%{$search}%")
-                          ->orWhere('last_name', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%");
                 });
             });
         }
@@ -39,10 +39,10 @@ class TransactionService
     {
 
         $transactions = Transaction::with(['user', 'courses']);
-        if(isset($inputs['size'])){
+        if (isset($inputs['size'])) {
             $transactions = $transactions->limit($inputs['size']);
         }
-        if(isset($inputs['order']) && $inputs['order'] == 'desc'){
+        if (isset($inputs['order']) && $inputs['order'] == 'desc') {
             $transactions = $transactions->latest();
         }
         $data['transactions'] = $transactions->get();
@@ -64,12 +64,10 @@ class TransactionService
 
     public function update(Transaction $transaction, $input)
     {
-        if(isset($input['status']) && !!$input['status']){
+        if (isset($input['status']) && !!$input['status']) {
             $transaction->status = 1;
             $transaction->paid_at = Carbon::now();
             $transaction->save();
-
-
         }
         $transaction->fill($input);
         if ($transaction->isDirty()) {
@@ -107,11 +105,11 @@ class TransactionService
         return $paystackService->makePayout($transaction);
     }
 
-    public function verifyOTPPayout(Transaction $transaction)
+    public function verifyOTPPayout(Transaction $transaction, String $otp)
     {
 
         $paystackService = new PaystackService();
         // $flutterwaveService = new FlutterwaveService();
-        return $paystackService->verifyOTPPayout($transaction);
+        return $paystackService->verifyOTPPayout($transaction, $otp);
     }
 }
