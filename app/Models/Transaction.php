@@ -108,7 +108,7 @@ class Transaction extends Model
     {
         return new Attribute(
             get: function(){
-                return $this->status == 1 && Carbon::parse($this->paid_at) >= now()->subMonth($this->duration);
+                return $this->status == 1 && $this->paid_at != null;
             },
         );
     }
