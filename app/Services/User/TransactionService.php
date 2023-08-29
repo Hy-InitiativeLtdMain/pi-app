@@ -30,7 +30,7 @@ class TransactionService
         }
         $data['transactions'] = $transactions->latest()->paginate();
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -47,7 +47,7 @@ class TransactionService
         }
         $data['transactions'] = $transactions->get();
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -56,7 +56,7 @@ class TransactionService
     {
         $data['transaction'] = $transaction->fresh(['user', 'courses']);
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -69,41 +69,41 @@ class TransactionService
             $transaction->paid_at = Carbon::now();
             $transaction->save();
 
-            
+
         }
         $transaction->fill($input);
         if ($transaction->isDirty()) {
             $transaction->save();
         }
 
-        
+
         $data['message'] = "Transaction updated";
         $data['transaction'] = $transaction;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
 
-    
+
 
     public function delete(Transaction $transaction)
     {
-        
+
         $transaction->delete();
         $data['message'] = "Deleted Successfully";
         $data['transaction'] = $transaction;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
 
     public function makePayout(Transaction $transaction)
     {
-        
-        // $paystackService = new PaystackService();
-        $flutterwaveService = new FlutterwaveService();
-        return $flutterwaveService->makePayout($transaction);
+
+        $paystackService = new PaystackService();
+        // $flutterwaveService = new FlutterwaveService();
+        return $paystackService->makePayout($transaction);
     }
 }

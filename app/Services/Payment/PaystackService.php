@@ -18,7 +18,7 @@ class PaystackService
             'bank_code' => $bank_code,
         ])->json();
         return [
-            'data' => $resp, 
+            'data' => $resp,
             'code' => 200
         ];
     }
@@ -29,7 +29,7 @@ class PaystackService
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
         ])->get(getenv('PAYSTACK_HOST') . 'bank');
         return [
-            'data' => $resp->json(), 
+            'data' => $resp->json(),
             'code' => $resp->status()
         ];
     }
@@ -38,12 +38,12 @@ class PaystackService
     public function initializeTransaction($input)
     {
 
-        $input['amount'] = intval($input['amount']) * 100; 
+        $input['amount'] = intval($input['amount']) * 100;
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post(getenv('PAYSTACK_HOST') . 'transaction/initialize', $input);
         return [
-            'data' => $resp->json(), 
+            'data' => $resp->json(),
             'code' => $resp->status()
         ];
     }
@@ -56,7 +56,7 @@ class PaystackService
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
         ])->get(getenv('PAYSTACK_HOST') . 'transaction/verify/'.$transaction->ref);
         return [
-            'data' => $resp->json(), 
+            'data' => $resp->json(),
             'code' => $resp->status()
         ];
     }
@@ -74,7 +74,7 @@ class PaystackService
             'currency' => "NGN"
         ]);
         return [
-            'data' => $resp->json(), 
+            'data' => $resp->json(),
             'code' => $resp->status()
         ];
     }
@@ -87,7 +87,7 @@ class PaystackService
             return [
                 'data' => [
                     "message" => "This is not a payout transaction"
-                ], 
+                ],
                 'code' => 422
             ];
         }
@@ -96,7 +96,7 @@ class PaystackService
             return [
                 'data' => [
                     "message" => "Payment is paid"
-                ], 
+                ],
                 'code' => 422
             ];
         }
@@ -104,18 +104,22 @@ class PaystackService
             return [
                 'data' => [
                     "message" => "Bank Account is not found"
-                ], 
+                ],
                 'code' => 422
             ];
         }
-        if($transaction->amount > $transaction->user->available_commission){
+        $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+            ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
+            ->where('courses.user_id', $transaction->user->id)
+            // ->select('transactions.*')
+            ->sum('transactions.amount');
+        if ($transaction->amount > $available_balance) {
             $data['message'] = "Insufficient Funds";
             return [
-                'data' => $data, 
+                'data' => $data,
                 'code' => 403
             ];
-            
-        }   
+        }
         $amount = abs($transaction->amount)*100;
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
@@ -128,7 +132,7 @@ class PaystackService
             'reference' => $ref
         ]);
         return [
-            'data' => $resp->json(), 
+            'data' => $resp->json(),
             'code' => $resp->status()
         ];
     }
