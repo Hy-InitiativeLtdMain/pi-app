@@ -18,18 +18,19 @@ class PaystackWebhookService
             $transaction->status = 1;
             $transaction->paid_at = Carbon::now();
             $transaction->save();
-            $_children = $transaction->transactions;
-            foreach ($_children as $_transaction) {
-                $_transaction->status = 1;
-                $_transaction->paid_at = Carbon::now();
-                $_transaction->save();
-            }
+            // $_children = $transaction->transactions;
+            // foreach ($_children as $_transaction) {
+            //     $_transaction->status = 1;
+            //     $_transaction->paid_at = Carbon::now();
+            //     $_transaction->save();
+            // }
             $data['message'] = 'Updated';
             return response()->json($data, 200);
         }
+
         $data['message'] = 'Not found';
         return response()->json($data, 404);
-        
+
     }
 
     public function transferSuccess($_data )
@@ -40,15 +41,15 @@ class PaystackWebhookService
             $transaction->paid_at = Carbon::now();
             $transaction->save();
             // $_userService = new UserService();
-            
-            
+
+
             $data['message'] = 'Updated';
             return response()->json($data, 200);
         }
         $data['message'] = 'Not found';
         return response()->json($data, 404);
-        
+
     }
 
-    
+
 }

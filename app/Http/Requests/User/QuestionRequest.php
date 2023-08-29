@@ -26,6 +26,7 @@ class QuestionRequest extends FormRequest
         $rules = [
             'question' => 'required|max:255',
             'options' => 'required',
+            'answer' => '',
             'quiz_id' => 'required|exists:quizzes,id',
 
         ];
@@ -35,6 +36,7 @@ class QuestionRequest extends FormRequest
     public static $_updateRules = [
         'question' => 'max:255',
         'options' => '',
+        'answer' => '',
         'quiz_id' => 'exists:quizzes,id',
     ];
 }

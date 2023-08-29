@@ -37,28 +37,28 @@ class Transaction extends Model
         parent::boot();
 
         self::updating(function ($transaction) {
-            
-            
+
+
             if($transaction->isDirty('status') && $transaction->paid()){
-                
-                
+
+
                 $_invoiceService = new InvoiceService();
                 $_invoiceService->sendMail($transaction);
 
 
             }
-            
-            
-            
+
+
+
         });
 
-        
+
     }
 
-    
 
 
-    
+
+
     public function scopePaid($query)
     {
         $query->where('status', 1);
@@ -75,8 +75,17 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function totalAmount(): Attribute
+    {
+        return new Attribute(
+            get: function(){
+                return $this->amount;
+            },
+        );
+    }
 
-   
+
+
 
     /**
      * The courses that belong to the Transaction
@@ -88,7 +97,7 @@ class Transaction extends Model
         return $this->belongsToMany(Course::class, 'transaction_course');
     }
 
-    
+
 
 
 
