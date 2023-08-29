@@ -132,10 +132,13 @@ class PaystackService
             'reference' => $ref
         ]);
         $_resp = $resp->json();
-        dd($_resp['status']);
-        $transfer_code = $_resp['data']['transfer_code'];
-        $transaction->transfer_code = $transfer_code;
-        $transaction->save();
+
+        if ($_resp['status']) {
+            $transfer_code = $_resp['data']['transfer_code'];
+            $transaction->transfer_code = $transfer_code;
+            $transaction->save();
+        }
+
         return [
             'data' => $_resp,
             'code' => $resp->status()
