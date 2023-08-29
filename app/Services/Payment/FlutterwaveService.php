@@ -67,7 +67,6 @@ class FlutterwaveService
             "debit_currency" => "NGN",
 
         ]);
-        dd(request()->ip());
         return [
             'data' => $resp->json(),
             'code' => $resp->status()
