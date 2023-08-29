@@ -14,7 +14,7 @@ class FlutterwaveService
     public function makePayout(Transaction $transaction)
     {
 
-        if($transaction->type != "User Payout"){
+        if ($transaction->type != "User Payout") {
             return [
                 'data' => [
                     "message" => "This is not a payout transaction"
@@ -23,7 +23,7 @@ class FlutterwaveService
             ];
         }
 
-        if($transaction->paid){
+        if ($transaction->paid) {
             return [
                 'data' => [
                     "message" => "Payment is paid"
@@ -31,7 +31,7 @@ class FlutterwaveService
                 'code' => 422
             ];
         }
-        if($transaction->bankAccount == null){
+        if ($transaction->bankAccount == null) {
             return [
                 'data' => [
                     "message" => "Bank Account is not found"
@@ -39,13 +39,17 @@ class FlutterwaveService
                 'code' => 422
             ];
         }
-        if($transaction->amount > $transaction->user->available_commission){
+        $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+            ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
+            ->where('courses.user_id', $transaction->user->id)
+            // ->select('transactions.*')
+            ->sum('transactions.amount');
+        if ($transaction->amount > $available_balance) {
             $data['message'] = "Insufficient Funds";
             return [
                 'data' => $data,
                 'code' => 403
             ];
-
         }
         $amount = abs($transaction->amount);
         $ref = Str::lower($transaction->ref);
@@ -53,14 +57,14 @@ class FlutterwaveService
             'Authorization' => 'Bearer ' . getenv('FLW_SECRET_KEY'),
         ])->post(getenv('FLW_HOST') . 'transfers', [
 
-            "account_bank"=> $transaction->bankAccount->bank_code,
-            "account_number"=> $transaction->bankAccount->account_number,
-            "amount"=> $amount,
-            "narration"=> "Withdrawal of Funds",
-            "currency"=> "NGN",
-            "reference"=> $ref,
+            "account_bank" => $transaction->bankAccount->bank_code,
+            "account_number" => $transaction->bankAccount->account_number,
+            "amount" => $amount,
+            "narration" => "Withdrawal of Funds",
+            "currency" => "NGN",
+            "reference" => $ref,
             // "callback_url"=> "https://webhook.site/b3e505b0-fe02-430e-a538-22bbbce8ce0d",
-            "debit_currency"=> "NGN",
+            "debit_currency" => "NGN",
 
         ]);
         return [
@@ -68,5 +72,4 @@ class FlutterwaveService
             'code' => $resp->status()
         ];
     }
-
 }
