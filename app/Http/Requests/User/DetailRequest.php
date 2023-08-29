@@ -40,9 +40,9 @@ class DetailRequest extends FormRequest
     ];
 
     public static $_requestPayoutRules = [
-        'amount' => 'required|numeric',
-        'bank_account_id' => 'required|exists:bank_accounts,id', 
+        'amount' => 'required|numeric|min:100',
+        'bank_account_id' => 'required|exists:bank_accounts,id',
     ];
 
-    
+
 }

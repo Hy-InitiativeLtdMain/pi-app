@@ -13,15 +13,18 @@ class FilteringService
     {
 
         foreach ($columns as $key => $value) {
-            if(in_array($key, $this->ignoreField)){
+            if (in_array($key, $this->ignoreField)) {
                 continue;
             }
-            if(trim($value) == ''){
+            if (trim($value) == '') {
                 continue;
             }
-            $query->where($key, 'LIKE', '%' . $value . '%');
+            if (str_contains($value, '_id')) {
+                $query->where($key,  $value);
+            } else {
+                $query->where($key, 'LIKE', '%' . $value . '%');
+            }
         }
-        
     }
 
 
@@ -29,15 +32,11 @@ class FilteringService
     {
 
         foreach ($columns as  $key => $column) {
-            if($key == 0){
+            if ($key == 0) {
                 $query->where($column, 'LIKE', '%' . $search . '%');
-            }else{
+            } else {
                 $query->Orwhere($column, 'LIKE', '%' . $search . '%');
             }
-            
         }
-        
     }
-    
-
 }
