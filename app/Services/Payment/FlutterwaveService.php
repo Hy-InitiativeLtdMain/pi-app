@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class FlutterwaveService
 {
-    
+
 
     public function makePayout(Transaction $transaction)
     {
@@ -18,7 +18,7 @@ class FlutterwaveService
             return [
                 'data' => [
                     "message" => "This is not a payout transaction"
-                ], 
+                ],
                 'code' => 422
             ];
         }
@@ -27,7 +27,7 @@ class FlutterwaveService
             return [
                 'data' => [
                     "message" => "Payment is paid"
-                ], 
+                ],
                 'code' => 422
             ];
         }
@@ -35,18 +35,18 @@ class FlutterwaveService
             return [
                 'data' => [
                     "message" => "Bank Account is not found"
-                ], 
+                ],
                 'code' => 422
             ];
         }
         if($transaction->amount > $transaction->user->available_commission){
             $data['message'] = "Insufficient Funds";
             return [
-                'data' => $data, 
+                'data' => $data,
                 'code' => 403
             ];
-            
-        }   
+
+        }
         $amount = abs($transaction->amount);
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
@@ -64,7 +64,7 @@ class FlutterwaveService
 
         ]);
         return [
-            'data' => $resp->json(), 
+            'data' => $resp->json(),
             'code' => $resp->status()
         ];
     }

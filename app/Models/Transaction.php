@@ -111,4 +111,14 @@ class Transaction extends Model
             },
         );
     }
+
+    /**
+     * Get the bankAccount that owns the Transaction
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
 }
