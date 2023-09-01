@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Media\AwsManager;
 use App\Http\Controllers\Media\VimeoManager;
+use App\Http\Controllers\User\AnalyticsManager;
 use App\Http\Controllers\User\AssignmentManager;
 use App\Http\Controllers\User\AttachmentManager;
 use App\Http\Controllers\User\AuthManager;
@@ -149,6 +150,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::get('/{question}', [QuestionManager::class, 'view']);
                 Route::patch('/{question}', [QuestionManager::class, 'update']);
                 Route::delete('/{question}', [QuestionManager::class, 'delete']);
+            });
+
+
+            Route::group(['prefix' => 'analytics', 'middleware' => []], function () {
+                Route::get('/users-enrollment', [AnalyticsManager::class, 'usersLineGraph']);
             });
 
 
