@@ -10,6 +10,7 @@ class AnalyticsService
     {
         $data['data'] = User::query()
         ->selectRaw('count(id) as number, DATE(created_at) as m_date')
+
         ->groupBy('m_date')->get();
         return [
             'data' => $data,
