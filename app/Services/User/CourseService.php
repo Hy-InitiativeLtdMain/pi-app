@@ -130,8 +130,9 @@ class CourseService
             ];
         }
 
-        if ($course->has_pending_payment) {
+        if ($course->pendingPayment != null) {
             $data['message'] = 'You have an Pending Payment';
+            $data['transaction'] = $course->pendingPayment;
             return [
                 'data' => $data,
                 'code' => 403
