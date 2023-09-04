@@ -25,4 +25,14 @@ class AnalyticsManager extends Controller
         $_data = $this->categoryService->usersLineGraph($validated);
         return response($_data['data'], $_data['code']);
     }
+
+    public function usersLineGraphYear(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+        $_data = $this->categoryService->usersLineGraphYear($validated);
+        return response($_data['data'], $_data['code']);
+    }
 }
