@@ -126,7 +126,7 @@ class CourseService
             $data['message'] = 'You have an active Subscription';
             return [
                 'data' => $data,
-                'code' => 403
+                'code' => 200
             ];
         }
 
@@ -135,7 +135,7 @@ class CourseService
             $data['transaction'] = $course->pendingPayment;
             return [
                 'data' => $data,
-                'code' => 403
+                'code' => 200
             ];
         }
 

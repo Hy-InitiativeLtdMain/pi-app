@@ -16,7 +16,7 @@ class TransactionService
     {
 
         $filter = new FilteringService();
-        $transactions = Transaction::with(['user',  'courses']);
+        $transactions = Transaction::with(['user',  'courses.user']);
         $filter->filterColumns($transactions, $inputs);
 
         if (isset($inputs['general'])) {
@@ -38,7 +38,7 @@ class TransactionService
     public function indexAll($inputs)
     {
 
-        $transactions = Transaction::with(['user', 'courses']);
+        $transactions = Transaction::with(['user', 'courses.user']);
         if (isset($inputs['size'])) {
             $transactions = $transactions->limit($inputs['size']);
         }
@@ -54,7 +54,7 @@ class TransactionService
 
     public function view(Transaction $transaction)
     {
-        $data['transaction'] = $transaction->fresh(['user', 'courses']);
+        $data['transaction'] = $transaction->fresh(['user', 'courses.user']);
         return [
             'data' => $data,
             'code' => 200
