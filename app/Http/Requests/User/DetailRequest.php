@@ -26,6 +26,8 @@ class DetailRequest extends FormRequest
         $rules = [
             'first_name' => 'max:255',
             'last_name' => 'max:255',
+            'signature' => 'max:255',
+
             'gender' => 'max:255',
             'phone' => 'max:15',
             'is_admin' => 'boolean',
@@ -43,6 +45,4 @@ class DetailRequest extends FormRequest
         'amount' => 'required|numeric|min:100',
         'bank_account_id' => 'required|exists:bank_accounts,id',
     ];
-
-
 }

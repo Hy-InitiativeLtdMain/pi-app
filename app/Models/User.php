@@ -32,6 +32,7 @@ class User extends Authenticatable
         'image_id',
         'institute',
         'location',
+        'signature'
     ];
 
     /**
