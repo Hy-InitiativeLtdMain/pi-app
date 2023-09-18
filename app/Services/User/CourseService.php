@@ -59,8 +59,8 @@ class CourseService
             foreach ($input['categories'] as $category_id) {
 
                 CourseCategory::create([
-                    'course_id'  => $course->id,
-                    'category_id'  => $category_id,
+                    'course_id' => $course->id,
+                    'category_id' => $category_id,
                 ]);
             }
         }
@@ -88,6 +88,15 @@ class CourseService
         $course->fill($input);
         if ($course->isDirty()) {
             $course->save();
+        }
+        if (isset($input['categories'])) {
+            CourseCategory::where('course_id', $course->id, )->delete();
+            foreach ($input['categories'] as $category_id) {
+                CourseCategory::create([
+                    'course_id' => $course->id,
+                    'category_id' => $category_id,
+                ]);
+            }
         }
 
         $data['message'] = "Course updated";

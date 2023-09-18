@@ -16,7 +16,7 @@ class LearnerAccess
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user()->is_admin) {
-            $reponse = ['message' => 'This resource is not available for learners'];
+            $reponse = ['message' => 'This resource is only available for learners'];
             return response($reponse, 403);
         }
         return $next($request);

@@ -19,16 +19,8 @@ class TransactionService
         $transactions = Transaction::with(['user',  'courses.user']);
         $filter->filterColumns($transactions, $inputs);
 
-        if (isset($inputs['general'])) {
-            $search = $inputs['general'];
-            $transactions = $transactions->whereHas('user', function (Builder $query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
-                });
-            });
-        }
-        $data['transactions'] = $transactions->latest()->paginate();
+
+        $data['transactions'] = $transactions->withDateFilter($inputs)->latest()->paginate();
         return [
             'data' => $data,
             'code' => 200

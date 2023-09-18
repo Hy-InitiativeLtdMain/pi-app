@@ -42,7 +42,7 @@ class Transaction extends Model
         self::updating(function ($transaction) {
 
 
-            if($transaction->isDirty('status') && $transaction->paid()){
+            if ($transaction->isDirty('status') && $transaction->paid()) {
 
 
                 $_invoiceService = new InvoiceService();
@@ -81,7 +81,7 @@ class Transaction extends Model
     public function totalAmount(): Attribute
     {
         return new Attribute(
-            get: function(){
+            get: function () {
                 return $this->amount;
             },
         );
@@ -107,7 +107,7 @@ class Transaction extends Model
     public function paid(): Attribute
     {
         return new Attribute(
-            get: function(){
+            get: function () {
                 return $this->status == 1 && $this->paid_at != null;
             },
         );
@@ -121,5 +121,17 @@ class Transaction extends Model
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(BankAccount::class);
+    }
+
+    public function scopeWithDateFilter($query, $data)
+    {
+
+        if (!(isset($data['start_date']) && isset($data['end_date']))) {
+            return $query;
+        }
+        $startDate = $data['start_date'];
+        $endDate = $data['end_date'];
+
+        return $query->whereBetween('transactions.created_at', [$startDate, $endDate]);
     }
 }
