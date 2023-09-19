@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -73,5 +74,22 @@ class User extends Authenticatable
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class);
+    }
+
+    public function courseSoldCount(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $user = auth('user')->user();
+                $user_id = $user->id;
+                return Transaction::
+                    leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+                    ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
+                    ->whereNotNull('transactions.paid_at')
+                    ->where('courses.user_id', $user_id)
+                    ->distinct()
+                    ->count();
+            }
+        );
     }
 }

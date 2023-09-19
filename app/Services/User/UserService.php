@@ -34,6 +34,7 @@ class UserService
     public function show(User $user)
     {
         $data['user'] = $user->fresh([]);
+        $data['user']->append(['course_sold_count']);
         $data['available_balance'] = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
         ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
         ->where('courses.user_id', $user->id )
@@ -47,7 +48,7 @@ class UserService
 
     public function store($input)
     {
-        
+
 
         if (isset($input['image'])) {
             $cloudinary = new CloudinaryService();
