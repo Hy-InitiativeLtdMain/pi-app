@@ -18,22 +18,22 @@ class AuthService
             if (Hash::check($input['password'], $user->password)) {
                 $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
                 $response = ['token' => $token, 'tokenType' => 'user',];
-                
+
                 return [
-                    'data' => $response, 
+                    'data' => $response,
                     'code' => 200
                 ];
             } else {
                 $response = ['message' => 'Password mismatch'];
                 return [
-                    'data' => $response, 
+                    'data' => $response,
                     'code' => 422
                 ];
             }
         }
         $response = ['message' => 'User does not exist'];
         return [
-            'data' => $response, 
+            'data' => $response,
             'code' => 422
         ];
     }
@@ -45,7 +45,7 @@ class AuthService
             $referrer = User::where('referral_code', $input['referrer_code'] )->firstOrFail();
             $input['referrer_user_id'] = $referrer->id;
         }
-        
+
         $user = User::create($input);
 
         $user->verifications()->create([
@@ -58,10 +58,10 @@ class AuthService
         $emailJob = (new AuthJobManager($user, "new_user"))->delay(Carbon::now()->addSeconds(2));
         dispatch($emailJob);
 
-        $data['message'] = 'Registration was successfully, Check your email to continue';
+        $data['message'] = 'Check your email for verification code';
         $data['email'] = $user->email;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 201
         ];
     }
@@ -80,9 +80,9 @@ class AuthService
 
 
         $data['message'] = 'Check your email for RESET link';
-        
+
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -93,7 +93,7 @@ class AuthService
         if ($verify === null) {
             $response = ['message' => 'Invalid Token'];
             return [
-                'data' => $response, 
+                'data' => $response,
                 'code' => 422
             ];
         }
@@ -101,9 +101,9 @@ class AuthService
         $user->update($input);
         $verify->delete();
         $data['message'] = 'Password reset successfully';
-        
+
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -115,20 +115,20 @@ class AuthService
         if ($verify === null) {
             $response = ['message' => 'Invalid Token'];
             return [
-                'data' => $response, 
+                'data' => $response,
                 'code' => 422
             ];
         }
         $user->email_verified_at = Carbon::now();
         $user->save();
         $verify->delete();
-        
+
         $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
         $data = ['token' => $token, 'tokenType' => 'user',];
-        
-        $data['message'] = 'Registration was completed successfully';    
+
+        $data['message'] = 'Registration was completed successfully';
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -140,7 +140,7 @@ class AuthService
         if ($user->email_verified_at != null) {
             $data['message'] = 'Account Already Comfirmed';
             return [
-                'data' => $data, 
+                'data' => $data,
                 'code' => 403
             ];
         }
@@ -154,7 +154,7 @@ class AuthService
 
         $data['message'] = 'Check your email for confirmation email';
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
