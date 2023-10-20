@@ -34,7 +34,8 @@ class Course extends Model
     ];
 
     protected $appends = [
-        "paid"
+        "paid",
+        "rating"
     ];
 
     public function scopePublished($query)
@@ -215,5 +216,22 @@ class Course extends Model
     public function assignments(): HasMany
     {
         return $this->hasMany(Assignment::class);
+    }
+
+    /**
+     * Get all of the reviews for the Course
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function rating(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->reviews()->avg("rate"),
+        );
     }
 }

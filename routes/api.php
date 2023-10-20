@@ -14,6 +14,7 @@ use App\Http\Controllers\User\LessonManager;
 use App\Http\Controllers\User\PaystackManager;
 use App\Http\Controllers\User\QuestionManager;
 use App\Http\Controllers\User\QuizManager;
+use App\Http\Controllers\User\ReviewManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\WebhooksManager;
 use Illuminate\Http\Request;
@@ -77,7 +78,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::get('/', [CourseManager::class, 'index']);
                 Route::post('/', [CourseManager::class, 'store'])->middleware(["auth.admin.access"]);
                 Route::get('/{course}', [CourseManager::class, 'view']);
-                Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);;
+                Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);
+                ;
                 Route::post('/{course}', [CourseManager::class, 'update'])->middleware(["auth.admin.access"]);
                 Route::delete('/{course}', [CourseManager::class, 'delete'])->middleware(["auth.admin.access"]);
             });
@@ -142,6 +144,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::patch('/{quiz}', [QuizManager::class, 'update']);
                 Route::post('/{quiz}/submit', [QuizManager::class, 'submit'])->middleware(["auth.learner.access"]);
                 Route::delete('/{quiz}', [QuizManager::class, 'delete']);
+            });
+
+
+            Route::group(['prefix' => 'review', 'middleware' => []], function () {
+                Route::get('/', [ReviewManager::class, 'index']);
+                Route::post('/', [ReviewManager::class, 'store']);
+                Route::get('/{review}', [ReviewManager::class, 'view']);
+                Route::patch('/{review}', [ReviewManager::class, 'update']);
+                Route::delete('/{review}', [ReviewManager::class, 'delete']);
             });
 
             Route::group(['prefix' => 'question', 'middleware' => []], function () {
