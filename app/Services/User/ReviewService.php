@@ -12,7 +12,7 @@ class ReviewService
         $filter = new FilteringService();
         $reviews = Review::query();
         $filter->filterColumns($reviews, $inputs);
-        $data['reviews'] = $reviews->latest()->paginate();
+        $data['reviews'] = $reviews->with(['user'])->latest()->paginate();
         return [
             'data' => $data,
             'code' => 200
