@@ -92,4 +92,14 @@ class User extends Authenticatable
             }
         );
     }
+
+    /**
+     * Get all of the courses for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function courses(): HasMany
+    {
+        return $this->hasMany(Course::class);
+    }
 }

@@ -14,7 +14,7 @@ class CourseManager extends Controller
 
     private $courseService;
 
-    function __construct(CourseService $courseService )
+    function __construct(CourseService $courseService)
     {
         $this->courseService = $courseService;
     }
@@ -22,6 +22,12 @@ class CourseManager extends Controller
     public function index(Request $request)
     {
         $_data = $this->courseService->index($request->all());
+        return response($_data['data'], $_data['code']);
+    }
+
+    public function buyers(Request $request)
+    {
+        $_data = $this->courseService->buyers($request->user(), $request->all());
         return response($_data['data'], $_data['code']);
     }
 
@@ -59,9 +65,9 @@ class CourseManager extends Controller
         $validated = $request->validate(TransactionRequest::$_paymentTypeRules);
         $user = $request->user();
 
-        
-        
-        
+
+
+
         $_data = $this->courseService->subscribe($user, $course, $validated['type']);
         return response($_data['data'], $_data['code']);
     }

@@ -32,6 +32,31 @@ class CourseService
         ];
     }
 
+
+    public function buyers(User $user, $inputs)
+    {
+
+        $filter = new FilteringService();
+        // $courses = $user->courses()->with(['user', 'categories']);
+        // $filter->filterColumns($courses, $inputs);
+        // $data['courses'] = $courses->latest()->paginate();
+        // $data['courses']->each(function ($course) {
+        //     // $course->user_count = $course->batches->pluck('users')->collapse()->count();
+        // });
+        $data['tranastions'] = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+            ->leftJoin('users', 'transactions.user_id', '=', 'users.id')
+            ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
+            ->whereNotNull('transactions.paid_at')
+            ->where('courses.user_id', $user->id)
+            ->select('users.*')
+            ->distinct()
+            ->paginate();
+        return [
+            'data' => $data,
+            'code' => 200
+        ];
+    }
+
     public function view(Course $course)
     {
 

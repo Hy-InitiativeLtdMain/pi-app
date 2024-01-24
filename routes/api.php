@@ -76,6 +76,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
             Route::group(['prefix' => 'course', 'middleware' => []], function () {
                 Route::get('/', [CourseManager::class, 'index']);
+                Route::get('/buyers', [CourseManager::class, 'buyers']);
                 Route::post('/', [CourseManager::class, 'store'])->middleware(["auth.admin.access"]);
                 Route::get('/{course}', [CourseManager::class, 'view']);
                 Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);
