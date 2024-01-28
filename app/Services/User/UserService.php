@@ -30,6 +30,16 @@ class UserService
         ];
     }
 
+    public function view(User $user)
+    {
+        $data['user'] = $user;
+        return [
+            'data' => $data,
+            'code' => 200
+        ];
+    }
+
+
 
     public function show(User $user)
     {

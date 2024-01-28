@@ -15,6 +15,7 @@ use App\Http\Controllers\User\PaystackManager;
 use App\Http\Controllers\User\QuestionManager;
 use App\Http\Controllers\User\QuizManager;
 use App\Http\Controllers\User\ReviewManager;
+use App\Http\Controllers\User\UserManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\WebhooksManager;
 use Illuminate\Http\Request;
@@ -154,6 +155,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::get('/{review}', [ReviewManager::class, 'view']);
                 Route::patch('/{review}', [ReviewManager::class, 'update']);
                 Route::delete('/{review}', [ReviewManager::class, 'delete']);
+            });
+
+            Route::group(['prefix' => 'user', 'middleware' => []], function () {
+                Route::get('/', [UserManager::class, 'index']);
+                Route::get('/{user}', [UserManager::class, 'view']);
+                Route::patch('/{user}', [UserManager::class, 'update']);
+                Route::delete('/{user}', [UserManager::class, 'delete']);
             });
 
             Route::group(['prefix' => 'question', 'middleware' => []], function () {
