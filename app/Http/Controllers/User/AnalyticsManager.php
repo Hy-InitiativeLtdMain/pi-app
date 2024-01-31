@@ -9,11 +9,21 @@ use Illuminate\Http\Request;
 class AnalyticsManager extends Controller
 {
 
-    private $categoryService;
+    private $analyticsService;
 
-    function __construct(AnalyticsService $categoryService)
+    function __construct(AnalyticsService $analyticsService)
     {
-        $this->categoryService = $categoryService;
+        $this->analyticsService = $analyticsService;
+    }
+
+    public function stats(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+        $_data = $this->analyticsService->stats($validated);
+        return response($_data['data'], $_data['code']);
     }
 
     public function usersLineGraph(Request $request)
@@ -22,7 +32,7 @@ class AnalyticsManager extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date',
         ]);
-        $_data = $this->categoryService->usersLineGraph($validated);
+        $_data = $this->analyticsService->usersLineGraph($validated);
         return response($_data['data'], $_data['code']);
     }
 
@@ -32,7 +42,7 @@ class AnalyticsManager extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date',
         ]);
-        $_data = $this->categoryService->usersLineGraphYear($validated);
+        $_data = $this->analyticsService->usersLineGraphYear($validated);
         return response($_data['data'], $_data['code']);
     }
 }

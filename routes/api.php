@@ -174,6 +174,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
 
             Route::group(['prefix' => 'analytics', 'middleware' => []], function () {
+                Route::get('/stats', [AnalyticsManager::class, 'stats']);
                 Route::get('/users-enrollment', [AnalyticsManager::class, 'usersLineGraph']);
                 Route::get('/users-enrollment-year', [AnalyticsManager::class, 'usersLineGraphYear']);
             });
