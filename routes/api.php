@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Media\AwsManager;
 use App\Http\Controllers\Media\VimeoManager;
+use App\Http\Controllers\Mentee\MenteeManager;
+use App\Http\Controllers\Mentor\MentorManager;
 use App\Http\Controllers\User\AnalyticsManager;
 use App\Http\Controllers\User\AssignmentManager;
 use App\Http\Controllers\User\AttachmentManager;
@@ -57,6 +59,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/complete-registration/{user:email}/{token}', [AuthManager::class, 'completeRegistration']);
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
+
+        Route::resource('mentor', MentorManager::class)->middleware('auth.admin.access')->except('index');
+        Route::resource('mentee', MenteeManager::class)->middleware('auth.learner.access')->except('index');
+
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
 
             Route::group(['prefix' => 'account', 'excluded_middleware' => []], function () {
