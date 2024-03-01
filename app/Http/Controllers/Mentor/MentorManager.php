@@ -25,7 +25,17 @@ class MentorManager extends Controller
      */
     public function store(MentorRequest $request)
     {
-        $mentor = Mentor::create($request->validated());
+        // get the user_id from the auth user
+        $userId = auth()->user()->id;
+        $userEmail = auth()->user()->email;
+
+        $request->merge([
+            'user_id' => $userId,
+            'email' => $userEmail
+        ]);
+        // dd($request->all());
+
+        $mentor = Mentor::create($request->all());
         return $this->successResponse(new MentorResource($mentor), 201);
     }
 
@@ -34,7 +44,7 @@ class MentorManager extends Controller
      */
     public function show(Mentor $mentor)
     {
-        return $this->successResponse(new MentorResource($mentor), 201);
+        return $this->successResponse(new MentorResource($mentor), 200);
     }
 
     /**
@@ -43,7 +53,7 @@ class MentorManager extends Controller
     public function update(MentorRequest $request, Mentor $mentor)
     {
         $mentor->update($request->validated());
-        return $this->successResponse(new MentorResource($mentor), 201);
+        return $this->successResponse(new MentorResource($mentor), 200);
     }
 
     /**
@@ -52,6 +62,6 @@ class MentorManager extends Controller
     public function destroy(Mentor $mentor)
     {
         $mentor->delete();
-        return $this->successResponse(null, 204);
+        return $this->successResponse('Mentor profile deleted successfully', 204);
     }
 }

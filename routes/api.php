@@ -3,6 +3,7 @@
 use App\Http\Controllers\Media\AwsManager;
 use App\Http\Controllers\Media\VimeoManager;
 use App\Http\Controllers\Mentee\MenteeManager;
+use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Mentor\MentorManager;
 use App\Http\Controllers\User\AnalyticsManager;
 use App\Http\Controllers\User\AssignmentManager;
@@ -20,6 +21,7 @@ use App\Http\Controllers\User\ReviewManager;
 use App\Http\Controllers\User\UserManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\WebhooksManager;
+use App\Models\MentorAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,8 +62,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::resource('mentor', MentorManager::class)->middleware('auth.admin.access')->except('index');
-        Route::resource('mentee', MenteeManager::class)->middleware('auth.learner.access')->except('index');
+        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index');
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except('index');
+
+        // Availability
+        Route::group(['prefix' => 'mentor', 'middleware' => ['auth:user', 'auth.admin.access']], function () {
+            Route::post('/availability', [AvailabilityController::class, 'store']);
+            Route::put('/availability/{availability}', [AvailabilityController::class, 'update']);
+            Route::delete('/availability/{availability}', [AvailabilityController::class, 'destory']);
+        });
 
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
 
