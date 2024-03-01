@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Media\AwsManager;
 use App\Http\Controllers\Media\VimeoManager;
+use App\Http\Controllers\Mentee\BookingManager;
 use App\Http\Controllers\Mentee\MenteeManager;
 use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Mentor\MentorManager;
@@ -68,8 +69,19 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         // Availability
         Route::group(['prefix' => 'mentor', 'middleware' => ['auth:user', 'auth.admin.access']], function () {
             Route::post('/availability', [AvailabilityController::class, 'store']);
+            Route::get('/availability', [AvailabilityController::class, 'index']);
+            Route::get('/availability/bookings', [AvailabilityController::class, 'booking']);
             Route::put('/availability/{availability}', [AvailabilityController::class, 'update']);
-            Route::delete('/availability/{availability}', [AvailabilityController::class, 'destory']);
+            Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy']);
+        });
+
+        //Booking
+        Route::group(['prefix' => 'mentee', 'middleware' => ['auth:user', 'auth.learner.access']], function () {
+            Route::get('/bookings', [BookingManager::class, 'index']);
+            Route::post('/bookings', [BookingManager::class, 'store']);
+            Route::get('/bookings/{id}', [BookingManager::class, 'show']);
+            Route::put('/bookings/{id}', [BookingManager::class, 'update']);
+            Route::delete('/bookings/{id}', [BookingManager::class, 'destroy']);
         });
 
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {

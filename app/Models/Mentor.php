@@ -16,7 +16,7 @@ class Mentor extends Model
         'email',
         'phone',
         'company',
-        'job-title',
+        'job_title',
     ];
 
     public function user()

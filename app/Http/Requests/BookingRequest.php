@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class MentorAvailabilityRequest extends FormRequest
+class BookingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +22,9 @@ class MentorAvailabilityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'mentor_id' => 'required|exists:mentors,id',
-            'availability' => 'required|array',
-            'availability.*.date' => 'required|date',
-            'availability.*.time_slots' => 'required|date_format:H:i',
-            'duration' => 'required|string',
-            'about' => 'required|string',
-            'meeting_link' => 'required|url',
+            'mentor_availability_id' => 'required|exists:mentor_availabilities,id',
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i',
         ];
     }
 }

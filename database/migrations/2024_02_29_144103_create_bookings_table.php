@@ -14,8 +14,11 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('mentee_id')->constrained('mentees');
             $table->foreignId('mentor_availability_id')->constrained('mentor_availabilities');
+            $table->foreignId('mentor_id')->constrained('mentors');
             $table->date('date');
             $table->time('time');
+            $table->string('reason')->nullable();
+            $table->string('status')->default('Pending');
             $table->timestamps();
         });
     }

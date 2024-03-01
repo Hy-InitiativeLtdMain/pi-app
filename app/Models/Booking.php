@@ -12,8 +12,11 @@ class Booking extends Model
     protected $fillable = [
         'mentee_id',
         'mentor_availability_id',
+        'mentor_id',
         'date',
         'time',
+        'reason',
+        'status'
     ];
 
     public function mentee()
@@ -24,5 +27,9 @@ class Booking extends Model
     public function mentorAvailability()
     {
         return $this->belongsTo(MentorAvailability::class);
+    }
+
+    public function mentor() {
+        return $this->belongsTo(Mentor::class);
     }
 }

@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mentor_id')->constrained('mentors');
             $table->json('availability');
+            $table->string('duration');
+            $table->string('about');
+            $table->string('meeting_link'); // meeting link
             $table->timestamps();
         });
     }

@@ -11,7 +11,11 @@ class MentorAvailability extends Model
 
     protected $fillable = [
         'mentor_id',
-        'availability' // JSON column
+        'availability', // JSON column
+        'duration',
+        'about',
+        'meeting_link',
+
     ];
 
     protected $casts = [
@@ -21,6 +25,16 @@ class MentorAvailability extends Model
     public function mentor()
     {
         return $this->belongsTo(Mentor::class);
+    }
+
+    /**
+     * Get all of the booking for the MentorAvailability
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function booking()
+    {
+        return $this->hasMany(Booking::class);
     }
 
 }
