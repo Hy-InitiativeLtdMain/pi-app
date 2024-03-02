@@ -82,6 +82,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/bookings/{id}', [BookingManager::class, 'show']);
             Route::put('/bookings/{id}', [BookingManager::class, 'update']);
             Route::delete('/bookings/{id}', [BookingManager::class, 'destroy']);
+            // View Available Mentors
+            Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
         });
 
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {

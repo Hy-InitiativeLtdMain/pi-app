@@ -10,6 +10,7 @@ use App\Models\Booking;
 use App\Models\MentorAvailability;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class BookingManager extends Controller
 {
@@ -55,10 +56,25 @@ class BookingManager extends Controller
 
         $availableMentors = MentorAvailability::whereJsonContains('availability', function ($query) use ($currentTime) {
             $query->where('date', $currentTime->toDateString())
-                ->where('time_slot', '<=', $currentTime->format('H:i'))
-                ->where('end_time', '>=', $currentTime->format('H:i'));
+                  ->where('time_slots', 'like', '%'.$currentTime->format('H:i').'%');
         })->with('mentor')->get();
 
         return $this->successResponse(AvailabilityResource::collection($availableMentors), 200);
+    }
+
+    // Needs mentee input (Fetch Available Mentors at a given time)
+    public function getAvailableMentorsAtTime(Request $request)
+    {
+        $request->validate([
+            'time' => 'required|date_format:H:i',
+        ]);
+
+        $requestedTime = Carbon::createFromFormat('H:i', $request->input('time'));
+
+        $availableMentors = MentorAvailability::whereJsonContains('availability', function ($query) use ($requestedTime) {
+            $query->where('time_slots', 'like', '%' . $requestedTime->format('H:i') . '%');
+        })->with('mentor')->get();
+
+        return $availableMentors;
     }
 }
