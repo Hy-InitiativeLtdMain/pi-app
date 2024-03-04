@@ -15,7 +15,10 @@ class AdminAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user()->is_admin) {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        if (!auth()->user()->is_admin) {
             $reponse = ['message' => 'This resource is only available for admins'];
             return response($reponse, 403);
         }

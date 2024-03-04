@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\Media\AwsManager;
 use App\Http\Controllers\Media\VimeoManager;
+use App\Http\Controllers\Mentee\BookingManager;
+use App\Http\Controllers\Mentee\MenteeManager;
+use App\Http\Controllers\Mentor\AvailabilityController;
+use App\Http\Controllers\Mentor\MentorManager;
 use App\Http\Controllers\User\AnalyticsManager;
 use App\Http\Controllers\User\AssignmentManager;
 use App\Http\Controllers\User\AttachmentManager;
@@ -18,6 +22,7 @@ use App\Http\Controllers\User\ReviewManager;
 use App\Http\Controllers\User\UserManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\WebhooksManager;
+use App\Models\MentorAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +62,30 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/complete-registration/{user:email}/{token}', [AuthManager::class, 'completeRegistration']);
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
+
+        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index');
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except('index');
+
+        // Availability
+        Route::group(['prefix' => 'mentor', 'middleware' => ['auth:user', 'auth.admin.access']], function () {
+            Route::post('/availability', [AvailabilityController::class, 'store']);
+            Route::get('/availability', [AvailabilityController::class, 'index']);
+            Route::get('/availability/bookings', [AvailabilityController::class, 'booking']);
+            Route::put('/availability/{availability}', [AvailabilityController::class, 'update']);
+            Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy']);
+        });
+
+        //Booking
+        Route::group(['prefix' => 'mentee', 'middleware' => ['auth:user', 'auth.learner.access']], function () {
+            Route::get('/bookings', [BookingManager::class, 'index']);
+            Route::post('/bookings', [BookingManager::class, 'store']);
+            Route::get('/bookings/{id}', [BookingManager::class, 'show']);
+            Route::put('/bookings/{id}', [BookingManager::class, 'update']);
+            Route::delete('/bookings/{id}', [BookingManager::class, 'destroy']);
+            // View Available Mentors
+            Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
+        });
+
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
 
             Route::group(['prefix' => 'account', 'excluded_middleware' => []], function () {
