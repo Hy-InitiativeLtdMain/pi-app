@@ -36,7 +36,7 @@ class AvailabilityController extends Controller
 
            $data =  MentorAvailability::create([
                 'mentor_id' => $mentorId,
-                'availability' => json_encode($availability),
+                'availability' => $availability,
                 'meeting_link' => $request->input('meeting_link'),
                 'duration' => $request->input('duration'),
                 'about' => $request->input('about'),
@@ -52,11 +52,11 @@ class AvailabilityController extends Controller
     public function update(MentorAvailabilityRequest $request, MentorAvailability $availability)
     {
         $mentorId = auth()->user()->mentor->id;
-        $availability = $request->input('availability');
+        $current = $request->input('availability');
 
         $availability->update([
             'mentor_id' => $mentorId,
-            'availability' => json_encode($availability),
+            'availability' => json_encode($current),
             'meeting_link' => $request->input('meeting_link')
         ]);
         return $this->successResponse(new AvailabilityResource($availability), 201);

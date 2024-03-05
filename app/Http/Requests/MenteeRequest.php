@@ -22,9 +22,7 @@ class MenteeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id',
             'name' => 'required|string',
-            'email' => 'required|email|unique:mentees,email,' . ($this->mentee ? $this->mentee->id : ''),
             'phone' => 'required|string',
             'level' => 'required|string',
             'course' => 'required|string',

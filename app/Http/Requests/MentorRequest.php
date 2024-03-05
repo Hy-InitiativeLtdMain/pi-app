@@ -26,7 +26,7 @@ class MentorRequest extends FormRequest
             'lastname' => 'required|string',
             'phone' => 'required|string',
             'address' => 'nullable|string',
-            'job-title' => 'nullable|string',
+            'job_title' => 'nullable|string',
             'company' => 'nullable|string',
         ];
     }

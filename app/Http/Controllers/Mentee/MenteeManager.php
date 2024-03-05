@@ -25,7 +25,14 @@ class MenteeManager extends Controller
      */
     public function store(MenteeRequest $request)
     {
-        $mentee = Mentee::create($request->validated());
+        $userId = auth()->user()->id;
+        $userEmail = auth()->user()->email;
+
+        $request->merge([
+            'user_id' => $userId,
+            'email' => $userEmail
+        ]);
+        $mentee = Mentee::create($request->all());
         return $this->successResponse(new MenteeResource($mentee), 201);
     }
 
