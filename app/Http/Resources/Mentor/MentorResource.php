@@ -22,7 +22,7 @@ class MentorResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'company' => $this->company,
-            'job-title' => $this->job_title,
+            'job_title' => $this->job_title,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

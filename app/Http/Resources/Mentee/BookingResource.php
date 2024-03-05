@@ -18,13 +18,13 @@ class BookingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'mentee' => MenteeResource::collection($this->mentee),
-            'availability' => AvailabilityResource::collection($this->availability),
+            'mentee' => $this->mentee,
+            'availability' => json_decode($this->mentorAvailability->availability),
             'status' => $this->status,
             'date' => $this->date,
             'time' => $this->time,
             'reason' => $this->reason,
-            'mentor' => MentorResource::collection($this->mentor)
+            'mentor' => $this->mentor
         ];
     }
 }
