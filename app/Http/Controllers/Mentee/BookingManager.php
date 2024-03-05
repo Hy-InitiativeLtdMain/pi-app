@@ -50,14 +50,22 @@ class BookingManager extends Controller
         return response()->json(['message' => 'Booking deleted successfully'], 204);
     }
 
-    public function getAvailableMentorsAtCurrentTime()
+    public function getAvailableMentorsAtCurrentTime(Request $request)
     {
-        $currentTime = Carbon::now();
+        $request->validate([
+            'date' => 'required|date',
+            // 'time' => 'required|date_format:H:i',
+        ]);
 
-        $availableMentors = MentorAvailability::whereJsonContains('availability', function ($query) use ($currentTime) {
-            $query->where('date', $currentTime->toDateString())
-                  ->where('time_slots', 'like', '%'.$currentTime->format('H:i').'%');
-        })->with('mentor')->get();
+        $date = $request->input('date');
+        // $time = $request->input('time');
+
+
+        $availableMentors = MentorAvailability::whereJsonContains('availability->date', $date)
+            // ->whereJsonContains('availability->time_slots','like', '%' . $time. '%')
+            ->get();
+
+        // dd($availableMentors);
 
         return $this->successResponse(AvailabilityResource::collection($availableMentors), 200);
     }
