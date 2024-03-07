@@ -19,7 +19,7 @@ class MentorAvailability extends Model
     ];
 
     protected $casts = [
-        'availability' => 'array',
+        'availability' => 'json',
     ];
 
     public function mentor()
