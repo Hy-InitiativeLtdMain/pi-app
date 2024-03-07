@@ -24,9 +24,9 @@ class MentorAvailabilityRequest extends FormRequest
         return [
             // 'mentor_id' => 'required|exists:mentors,id',
             'availability' => 'required|json',
-            'availability.date' => 'required|date',
-            'availability.time_slots' => 'required|array',
-            'availability.time_slots.*' => 'required|date_format:H:i',
+            // 'availability.date' => 'required|date',
+            // 'availability.time_slots' => 'required|array',
+            // 'availability.time_slots.*' => 'required|date_format:H:i',
             'duration' => 'required|string',
             'about' => 'required|string',
             'meeting_link' => 'required|url',
