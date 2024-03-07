@@ -25,7 +25,6 @@ class MentorManager extends Controller
      */
     public function store(MentorRequest $request)
     {
-        // God help me
         // get the user_id from the auth user
         $userId = auth()->user()->id;
         $userEmail = auth()->user()->email;
