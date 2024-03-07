@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('mentor_availabilities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mentor_id')->constrained('mentors');
