@@ -14,6 +14,7 @@ class MentorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Some checks
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
