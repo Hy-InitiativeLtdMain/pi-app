@@ -19,6 +19,6 @@ jobs:
             cd /var/www/piapp
             git pull origin develop
             composer install
-            php artisan migrate:rollback --step=1
+            php artisan migrate:rollback --step=4
             php artisan migrate
             php artisan cache:clear
