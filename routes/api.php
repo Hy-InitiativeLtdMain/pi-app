@@ -63,8 +63,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index'); // Docs Done
-        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except('index'); // Docs Done
+        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index'); 
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except('index');
 
         // Availability
         Route::group(['prefix' => 'mentors', 'middleware' => ['auth:user', 'auth.admin.access']], function () {
@@ -73,6 +73,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 return response()->json(['message' => 'Testing availability index endpoint']);
             });
             Route::get('availability/bookings', [AvailabilityController::class, 'booking']);
+
+            // Update booking status
+            Route::patch('availability/bookings/{booking}', [BookingManager::class, 'updateStatus']);
         });
 
         //Booking

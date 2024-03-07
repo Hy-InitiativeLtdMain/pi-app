@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mentee;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
+use App\Http\Resources\Mentee\AvailableMentorsResource;
 use App\Http\Resources\Mentee\BookingResource;
 use App\Http\Resources\Mentor\AvailabilityResource;
 use App\Models\Booking;
@@ -53,36 +54,47 @@ class BookingManager extends Controller
     public function getAvailableMentorsAtCurrentTime(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
-            // 'time' => 'required|date_format:H:i',
+            'date' => 'required|date'
         ]);
 
         $date = $request->input('date');
-        // $time = $request->input('time');
 
-
-        $availableMentors = MentorAvailability::whereJsonContains('availability->date', $date)
-            // ->whereJsonContains('availability->time_slots','like', '%' . $time. '%')
-            ->get();
-
+        $availableMentors = MentorAvailability::whereJsonContains('availability->date', $date)->with('mentor')->get();
         // dd($availableMentors);
-
-        return $this->successResponse(AvailabilityResource::collection($availableMentors), 200);
+        return $this->successResponse(AvailableMentorsResource::collection($availableMentors), 200);
     }
 
-    // Needs mentee input (Fetch Available Mentors at a given time)
-    public function getAvailableMentorsAtTime(Request $request)
+    // Update Status of Booking
+    public function updateStatus(Request $request, Booking $booking)
     {
+        // CHECK IF THE BOOKING IS OWNED BY THE CURRENT USER
+        if ($booking->mentor_id != auth()->user()->mentor->id) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
         $request->validate([
-            'time' => 'required|date_format:H:i',
+            'status' => 'required|in:Pending,Approved,Declined',
         ]);
 
-        $requestedTime = Carbon::createFromFormat('H:i', $request->input('time'));
 
-        $availableMentors = MentorAvailability::whereJsonContains('availability', function ($query) use ($requestedTime) {
-            $query->where('time_slots', 'like', '%' . $requestedTime->format('H:i') . '%');
-        })->with('mentor')->get();
-
-        return $availableMentors;
+        $booking->update(['status' => $request->input('status')]);
+        return response()->json(['message' => 'Booking status updated successfully'], 200);
     }
+
+    // // Needs mentee input (Fetch Available Mentors at a given time)
+    // public function getAvailableMentorsAtTime(Request $request)
+    // {
+    //     $request->validate([
+    //         'time' => 'required|date_format:H:i',
+    //     ]);
+
+    //     $requestedTime = Carbon::createFromFormat('H:i', $request->input('time'));
+
+    //     $availableMentors = MentorAvailability::whereJsonContains('availability', function ($query) use ($requestedTime) {
+    //         $query->where('time_slots', 'like', '%' . $requestedTime->format('H:i') . '%');
+    //     })->with('mentor')->get();
+
+    //     return $availableMentors;
+    // }
+
+
 }

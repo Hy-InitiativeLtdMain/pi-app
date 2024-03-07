@@ -18,13 +18,13 @@ class BookingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'mentee' => $this->mentee,
-            'availability' => json_decode($this->mentorAvailability->availability),
+            'mentee_id' => $this->mentee_id,
             'status' => $this->status,
             'date' => $this->date,
             'time' => $this->time,
             'reason' => $this->reason,
-            'mentor' => $this->mentor
+            'mentor_id' => $this->mentor_id,
+            'mentor_name' => $this->mentor->firstname. " ". $this->mentor->lastname,
         ];
     }
 }
