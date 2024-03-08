@@ -54,13 +54,16 @@ class BookingManager extends Controller
 
     public function getAvailableMentorsAtCurrentTime(Request $request)
     {
+        // Validate the incoming request
         $request->validate([
             'date' => 'required|date'
         ]);
 
+        // Retrieve the date from the request
         $date = $request->input('date');
-        // dd($date);
-        // Retrieve all MentorAvailability records
+
+        // Paginate the MentorAvailability records
+        $perPage = $request->input('per_page', 10); // Default to 10 items per page
         $allAvailability = MentorAvailability::all();
 
         // Filter the records based on the date field within the availability JSON
@@ -71,10 +74,11 @@ class BookingManager extends Controller
             return is_array($availabilityData) && isset ($availabilityData['date']) && $availabilityData['date'] === $date;
         });
 
+        $data = AvailableMentorsResource::collection($availableMentors);
 
-        // If needed, you can convert the filtered collection to an array
 
-        return $this->successResponse(AvailableMentorsResource::collection($availableMentors), 200);
+        // Return the paginated response
+        return $this->paginate($data, $perPage);
     }
 
     // Update Status of Booking
