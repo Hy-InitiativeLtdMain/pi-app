@@ -12,6 +12,7 @@ use App\Models\MentorAvailability;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookingManager extends Controller
 {
@@ -58,9 +59,19 @@ class BookingManager extends Controller
         ]);
 
         $date = $request->input('date');
+        // dd($date);
+        // Retrieve all MentorAvailability records
+        $allAvailability = MentorAvailability::all();
 
-        $availableMentors = MentorAvailability::whereJsonContains('availability->date', $date)->with('mentor')->get();
-        // dd($availableMentors);
+        // Filter the records based on the date field within the availability JSON
+        $availableMentors = $allAvailability->filter(function ($availability) use ($date) {
+            $availabilityData = json_decode($availability->availability, true);
+            return $availabilityData['date'] === $date;
+        });
+
+
+        // If needed, you can convert the filtered collection to an array
+
         return $this->successResponse(AvailableMentorsResource::collection($availableMentors), 200);
     }
 
