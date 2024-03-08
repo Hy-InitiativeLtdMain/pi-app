@@ -36,6 +36,8 @@ class AvailabilityController extends Controller
             return $this->errorResponse('You are not a mentor', 401);
         }
         $availability = $request->input('availability');
+        // parse the availability array to json string
+        $availability = json_encode($availability);
 
 
            $data =  MentorAvailability::create([
@@ -60,7 +62,7 @@ class AvailabilityController extends Controller
 
         $availability->update([
             'mentor_id' => $mentorId,
-            'availability' => $current,
+            'availability' => json_encode($current),
             'meeting_link' => $request->input('meeting_link')
         ]);
         return $this->successResponse(new AvailabilityResource($availability), 201);
