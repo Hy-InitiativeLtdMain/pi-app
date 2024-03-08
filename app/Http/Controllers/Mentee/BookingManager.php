@@ -65,8 +65,10 @@ class BookingManager extends Controller
 
         // Filter the records based on the date field within the availability JSON
         $availableMentors = $allAvailability->filter(function ($availability) use ($date) {
-            $availabilityData = json_decode($availability->availability, true);
-            return $availabilityData['date'] === $date;
+            // Decode the availability field only if it's a string
+            $availabilityData = is_string($availability->availability) ? json_decode($availability->availability, true) : $availability->availability;
+            // Check if the decoded data has the expected structure and date
+            return is_array($availabilityData) && isset ($availabilityData['date']) && $availabilityData['date'] === $date;
         });
 
 
