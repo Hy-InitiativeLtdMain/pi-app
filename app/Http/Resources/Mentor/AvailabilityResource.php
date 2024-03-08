@@ -17,7 +17,7 @@ class AvailabilityResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'availability' => $this->availability,
+            'availability' => json_decode($this->availability),
             'duration' => $this->duration,
             'about' => $this->about,
             'meeting_link' => $this->meeting_link,
