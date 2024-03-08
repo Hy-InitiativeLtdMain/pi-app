@@ -17,8 +17,12 @@ class AvailableMentorsResource extends JsonResource
         return [
             'id' => $this->mentor->id,
             'name' => $this->mentor->firstname . ' '. $this->mentor->lastname,
+            'email' => $this->mentor->email,
+            'profile_image' => $this->mentor->user->image ?? null,
             'job_title' => $this->mentor->job_title,
             'company' => $this->mentor->company,
+            'about' => $this->about
+
         ];
     }
 }
