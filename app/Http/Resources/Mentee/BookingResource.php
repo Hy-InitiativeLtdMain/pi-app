@@ -19,6 +19,8 @@ class BookingResource extends JsonResource
         return [
             'id' => $this->id,
             'mentee_id' => $this->mentee_id,
+            'mentee_email' => $this->mentee->user->email,
+            'mentee_profile_pic' => $this->mentee->user->image,
             'status' => $this->status,
             'date' => $this->date,
             'time' => $this->time,
