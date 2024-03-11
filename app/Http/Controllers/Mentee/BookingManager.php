@@ -29,7 +29,7 @@ class BookingManager extends Controller
     {
         $mentee = auth()->user()->mentee->id;
         $bookings = Booking::where('mentee_id', $mentee)->get();
-        return $this->successResponse(BookingResource::collection($bookings), 200);
+        return $this->showAll(BookingResource::collection($bookings), 200);
     }
 
     public function show($id)
