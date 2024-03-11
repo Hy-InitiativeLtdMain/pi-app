@@ -26,6 +26,7 @@ class BookingResource extends JsonResource
             'time' => $this->time,
             'reason' => $this->reason,
             'mentor_id' => $this->mentor_id,
+            // 'mentor_meeting_link' => $this->mentorAvailability->meeting_link
             'mentor_name' => $this->mentor->firstname. " ". $this->mentor->lastname,
         ];
     }
