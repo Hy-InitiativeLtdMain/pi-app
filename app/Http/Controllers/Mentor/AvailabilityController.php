@@ -26,7 +26,7 @@ class AvailabilityController extends Controller
     {
         // Get booking
         $data = Booking::where("mentor_id", auth()->user()->mentor->id)->get();
-        return $this->successResponse(BookingResource::collection($data), 200);
+        return $this->showAll(BookingResource::collection($data), 200);
     }
     public function store(MentorAvailabilityRequest $request)
     {
