@@ -22,7 +22,7 @@ class AvailableMentorsResource extends JsonResource
             'job_title' => $this->mentor->job_title,
             'company' => $this->mentor->company,
             'about' => $this->about,
-            'availability' => json_decode($this->availability)
+            'availability' => $this->availability
 
         ];
     }
