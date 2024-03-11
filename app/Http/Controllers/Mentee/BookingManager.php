@@ -74,11 +74,8 @@ class BookingManager extends Controller
             return is_array($availabilityData) && isset ($availabilityData['date']) && $availabilityData['date'] === $date;
         });
 
-        $data = AvailableMentorsResource::collection($availableMentors);
-
-
         // Return the paginated response
-        return $this->paginate($data, $perPage);
+        return $this->paginate(AvailableMentorsResource::collection($availableMentors), $perPage);
     }
 
     // Update Status of Booking
