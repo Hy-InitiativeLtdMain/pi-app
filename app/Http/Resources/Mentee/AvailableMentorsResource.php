@@ -21,7 +21,8 @@ class AvailableMentorsResource extends JsonResource
             'profile_image' => $this->mentor->user->image ?? null,
             'job_title' => $this->mentor->job_title,
             'company' => $this->mentor->company,
-            'about' => $this->about
+            'about' => $this->about,
+            'availability' => json_decode($this->availability)
 
         ];
     }
