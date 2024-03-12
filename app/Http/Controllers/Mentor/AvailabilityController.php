@@ -25,7 +25,16 @@ class AvailabilityController extends Controller
     public function booking()
     {
         // Get booking
+        // Error handling for mentor not found
+        if (!auth()->user()->mentor) {
+            return $this->errorResponse('You are not a mentor', 401);
+        }
+
         $data = Booking::where("mentor_id", auth()->user()->mentor->id)->get();
+        // Error handling for booking not found
+        if (!$data) {
+            return $this->errorResponse('No Bookings made!', 404);
+        }
         return $this->showAll(BookingResource::collection($data), 200);
     }
     public function store(MentorAvailabilityRequest $request)
