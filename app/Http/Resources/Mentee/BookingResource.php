@@ -17,8 +17,9 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'booking_id' => $this->id,
             'mentee_id' => $this->mentee_id,
+            'mentee_name' => $this->mentee->name,
             'mentee_email' => $this->mentee->user->email,
             'mentee_profile_pic' => $this->mentee->user->image,
             'status' => $this->status,
@@ -26,7 +27,7 @@ class BookingResource extends JsonResource
             'time' => $this->time,
             'reason' => $this->reason,
             'mentor_id' => $this->mentor_id,
-            // 'mentor_meeting_link' => $this->mentorAvailability->meeting_link
+            'mentor_duration' => $this->mentorAvailability->duration,
             'mentor_name' => $this->mentor->firstname. " ". $this->mentor->lastname,
         ];
     }
