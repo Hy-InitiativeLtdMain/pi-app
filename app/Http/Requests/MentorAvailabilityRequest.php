@@ -27,6 +27,7 @@ class MentorAvailabilityRequest extends FormRequest
             // 'availability.date' => 'required|date',
             // 'availability.time_slots' => 'required|array',
             // 'availability.time_slots.*' => 'required|date_format:H:i',
+            'title' => 'required|string',
             'duration' => 'required|string',
             'about' => 'required|string',
             'meeting_link' => 'required|url',

@@ -50,6 +50,7 @@ class AvailabilityController extends Controller
            $data =  MentorAvailability::create([
                 'mentor_id' => $mentorId,
                 'availability' => $availability,
+                'title' => $request->input('title'),
                 'meeting_link' => $request->input('meeting_link'),
                 'duration' => $request->input('duration'),
                 'about' => $request->input('about'),
@@ -70,6 +71,7 @@ class AvailabilityController extends Controller
         $availability->update([
             'mentor_id' => $mentorId,
             'availability' => $current,
+            'title' => $request->input('title'),
             'meeting_link' => $request->input('meeting_link')
         ]);
         return $this->successResponse(new AvailabilityResource($availability), 201);

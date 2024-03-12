@@ -24,6 +24,7 @@ class AvailableMentorsResource extends JsonResource
             'about' => $this->about,
             'availability_id' => $this->id,
             'availability' => $this->availability,
+            'title' => $this->title,
             'duration' => $this->duration
 
         ];
