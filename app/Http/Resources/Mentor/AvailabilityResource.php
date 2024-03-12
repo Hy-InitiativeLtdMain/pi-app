@@ -20,6 +20,7 @@ class AvailabilityResource extends JsonResource
             'availability' => $this->availability,
             'duration' => $this->duration,
             'about' => $this->about,
+            'title' => $this->title,
             'meeting_link' => $this->meeting_link,
             'mentor' => $this->mentor,
             'bookings' => BookingResource::collection($this->booking),

@@ -11,6 +11,7 @@ class MentorAvailability extends Model
 
     protected $fillable = [
         'mentor_id',
+        'title',
         'availability', // JSON column
         'duration',
         'about',
