@@ -17,7 +17,25 @@ class AuthService
         if ($user) {
             if (Hash::check($input['password'], $user->password)) {
                 $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
-                $response = ['token' => $token, 'tokenType' => 'user',];
+
+                // check if user is a learner
+                if ($user->is_admin){
+                    $response = ['token' => $token, 'tokenType' => 'user', 'user' => 'Creator'];
+                    if ($user->mentor){
+                        $response['mentor'] = $user->mentor;
+                    } else {
+                        $response['mentor'] = null;
+                    }
+                }
+                if (!$user->is_admin){
+                    $response = ['token' => $token, 'tokenType' => 'user', 'user' => 'Learner'];
+                    if ($user->mentee){
+                        $response['mentee'] = $user->mentee;
+                    } else {
+                        $response['mentee'] = null;
+                    }
+                }
+                // IF USER IS MENTOR/MENTOR
 
                 return [
                     'data' => $response,
