@@ -63,8 +63,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index'); 
-        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except('index');
+        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index');
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except(['index', 'show']);
+        Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:user', 'auth.learner.access']);
+
+        Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user', 'auth.admin.access']);
+        
 
         // Availability
         Route::group(['prefix' => 'mentors', 'middleware' => ['auth:user', 'auth.admin.access']], function () {

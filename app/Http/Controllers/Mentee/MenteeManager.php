@@ -39,9 +39,13 @@ class MenteeManager extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Mentee $mentee)
+    public function showProfile()
     {
-        return $this->successResponse(new MenteeResource($mentee), 201);
+        if (!auth()->user()->mentee) {
+            return $this->errorResponse('Mentee not found', 404);
+        }
+        $mentee = Mentee::find(auth()->user()->mentee->id);
+        return $this->showOne(new MenteeResource($mentee), 200);
     }
 
     /**
