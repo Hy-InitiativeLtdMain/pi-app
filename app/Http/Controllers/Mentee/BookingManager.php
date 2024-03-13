@@ -29,6 +29,18 @@ class BookingManager extends Controller
     {
         $mentee = auth()->user()->mentee->id;
         $bookings = Booking::where('mentee_id', $mentee)->get();
+        // Add flags for expired bookings and meeting links for approved bookings
+        $bookings->transform(function ($booking) {
+            if ($booking->hasExpired()) {
+                $booking->expired = true;
+            }
+
+            if ($booking->isApproved()) {
+                $booking->meeting_link = $booking->mentorAvailability->meeting_link;
+            }
+
+            return $booking;
+        });
         return $this->showAll(BookingResource::collection($bookings), 200);
     }
 
@@ -86,7 +98,7 @@ class BookingManager extends Controller
             // Check if the mentor has been booked
             $isBooked = $menteeBookings->contains($availability->id);
             // Add a temporary field to the availability record to indicate if the mentor is booked
-            $availability->is_booked = $isBooked ? 'yes':'no';
+            $availability->is_booked = $isBooked ? 'yes' : 'no';
             // Return the availability record with the temporary field
             return $isAvailable;
         });

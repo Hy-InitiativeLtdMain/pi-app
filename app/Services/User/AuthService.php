@@ -22,17 +22,17 @@ class AuthService
                 if ($user->is_admin){
                     $response = ['token' => $token, 'tokenType' => 'user', 'user' => 'Creator'];
                     if ($user->mentor){
-                        $response['mentor'] = $user->mentor;
+                        $response['is_mentor'] = true;
                     } else {
-                        $response['mentor'] = null;
+                        $response['is_mentor'] = false;
                     }
                 }
                 if (!$user->is_admin){
                     $response = ['token' => $token, 'tokenType' => 'user', 'user' => 'Learner'];
                     if ($user->mentee){
-                        $response['mentee'] = $user->mentee;
+                        $response['is_mentee'] = true;
                     } else {
-                        $response['mentee'] = null;
+                        $response['is_mentee'] = false;
                     }
                 }
                 // IF USER IS MENTOR/MENTOR
