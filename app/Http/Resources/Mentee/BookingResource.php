@@ -30,6 +30,8 @@ class BookingResource extends JsonResource
             'mentor_duration' => $this->mentorAvailability->duration,
             'mentor_availability_title' => $this->mentorAvailability->title,
             'mentor_name' => $this->mentor->firstname. " ". $this->mentor->lastname,
+            'expired' => $this->expired,
+            'meeting_link' => $this->meeting_link,
         ];
     }
 }
