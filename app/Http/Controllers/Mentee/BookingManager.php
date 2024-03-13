@@ -28,7 +28,8 @@ class BookingManager extends Controller
     public function index()
     {
         $mentee = auth()->user()->mentee->id;
-        $bookings = Booking::where('mentee_id', $mentee)->get();
+        $bookings = Booking::where('mentee_id', $mentee)->with('mentorAvailability')->get();
+        // dd($bookings);
         // Add flags for expired bookings and meeting links for approved bookings
         $bookings->transform(function ($booking) {
             if ($booking->hasExpired()) {
@@ -38,9 +39,9 @@ class BookingManager extends Controller
             if ($booking->isApproved()) {
                 $booking->meeting_link = $booking->mentorAvailability->meeting_link;
             }
-
             return $booking;
         });
+
         return $this->showAll(BookingResource::collection($bookings), 200);
     }
 

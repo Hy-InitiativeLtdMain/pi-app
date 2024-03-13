@@ -42,9 +42,13 @@ class MentorManager extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Mentor $mentor)
+    public function showProfile()
     {
-        return $this->successResponse(new MentorResource($mentor), 200);
+        if (!auth()->user()->mentor) {
+            return $this->errorResponse('Mentor not found', 404);
+        }
+        $mentor = Mentor::find(auth()->user()->mentor->id);
+        return $this->showOne(new MentorResource($mentor), 200);
     }
 
     /**
