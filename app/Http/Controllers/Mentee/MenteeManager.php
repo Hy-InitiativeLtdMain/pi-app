@@ -16,6 +16,9 @@ class MenteeManager extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->mentee) {
+            return $this->errorResponse('User is not a mentee!', 404);
+        }
         $mentees = Mentee::all();
         return $this->showAll(MenteeResource::collection($mentees), 200);
     }
@@ -53,6 +56,9 @@ class MenteeManager extends Controller
      */
     public function update(MenteeRequest $request, Mentee $mentee)
     {
+        if (!auth()->user()->mentee) {
+            return $this->errorResponse('User is not a mentee!', 404);
+        }
         $mentee->update($request->validated());
         return $this->successResponse(new MenteeResource($mentee), 201);
     }
@@ -62,6 +68,9 @@ class MenteeManager extends Controller
      */
     public function destroy(Mentee $mentee)
     {
+        if (!auth()->user()->mentee) {
+            return $this->errorResponse('User is not a mentee!', 404);
+        }
         $mentee->delete();
         return $this->successResponse(null, 204);
     }
