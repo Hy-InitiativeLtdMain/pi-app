@@ -63,15 +63,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::resource('mentor', MentorManager::class)->middleware(['auth:user', 'auth.admin.access'])->except('index');
-        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user', 'auth.learner.access'])->except(['index', 'show']);
-        Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:user', 'auth.learner.access']);
+        Route::resource('mentor', MentorManager::class)->middleware(['auth:user'])->except('index');
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user'])->except(['index', 'show']);
+        Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:user']);
 
-        Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user', 'auth.admin.access']);
+        Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user']);
 
 
         // Availability
-        Route::group(['prefix' => 'mentors', 'middleware' => ['auth:user', 'auth.admin.access']], function () {
+        Route::group(['prefix' => 'mentors', 'middleware' => ['auth:user']], function () {
             Route::apiResource('availability', AvailabilityController::class)->except('show');
             Route::get('availabilities', function () {
                 return response()->json(['message' => 'Testing availability index endpoint']);
@@ -84,7 +84,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         });
 
         //Booking
-        Route::group(['prefix' => 'mentees', 'middleware' => ['auth:user', 'auth.learner.access']], function () {
+        Route::group(['prefix' => 'mentees', 'middleware' => ['auth:user']], function () {
             Route::get('/bookings', [BookingManager::class, 'index']);
             Route::post('/bookings', [BookingManager::class, 'store']);
             Route::get('/bookings/{id}', [BookingManager::class, 'show']);
