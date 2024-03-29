@@ -46,8 +46,8 @@ class MentorResource extends JsonResource
                     'about' => $avail->about,
                     'duration' => $avail->duration,
                     'meeting_link' => $avail->meeting_link,
-                    'date' => $avail->availability->date,
-                    'time_slots' => $avail->availability->time_slots,
+                    'date' => $avail->availability['date'],
+                    'time_slots' => $avail->availability['time_slots'],
                 ];
                 ;
             }),
