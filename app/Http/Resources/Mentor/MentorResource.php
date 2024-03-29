@@ -25,16 +25,19 @@ class MentorResource extends JsonResource
             'company' => $this->company,
             'job_title' => $this->job_title,
             'availability' => $this->availability->map(function ($avail) {
-                return [
-                    'id' => $avail->id,
-                    'title' => $avail->title,
-                    'about' => $avail->about,
-                    'duration' => $avail->duration,
-                    'meeting_link' => $avail->meeting_link,
-                    'date' => json_decode($avail->availability)->date,
-                    'time_slots' => json_decode($avail->availability)->time_slots,
-                ];
-            }),
+                if (is_string($avail->availability)) {
+                    $availability = json_decode($avail->availability);
+                    if ($availability) {
+                        return [
+                            'id' => $avail->id,
+                            'date' => isset($availability->date) ? $availability->date : null,
+                            'time_slots' => isset($availability->time_slots) ? $availability->time_slots : null,
+                        ];
+                    }
+                }
+                // If it's not a string or not valid JSON, return as is
+                return $avail->availability;
+                }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
