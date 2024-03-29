@@ -40,7 +40,16 @@ class MentorResource extends JsonResource
                     }
                 }
                 // If it's not a string or not valid JSON, return as is
-                return $avail->availability;
+                return [
+                    'id' => $avail->id,
+                    'title' => $avail->title,
+                    'about' => $avail->about,
+                    'duration' => $avail->duration,
+                    'meeting_link' => $avail->meeting_link,
+                    'date' => $avail->availability->date,
+                    'time_slots' => $avail->availability->time_slots,
+                ];
+                ;
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
