@@ -24,6 +24,17 @@ class MentorResource extends JsonResource
             'phone' => $this->phone,
             'company' => $this->company,
             'job_title' => $this->job_title,
+            'availability' => $this->availability->map(function ($avail) {
+                return [
+                    'id' => $avail->id,
+                    'title' => $avail->title,
+                    'about' => $avail->about,
+                    'duration' => $avail->duration,
+                    'meeting_link' => $avail->meeting_link,
+                    'date' => json_decode($avail->availability)->date,
+                    'time_slots' => json_decode($avail->availability)->time_slots,
+                ];
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Mentor;
 
-use App\Models\Mentor;
-use App\Traits\ApiResponser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MentorRequest;
 use App\Http\Resources\Mentor\MentorResource;
+use App\Models\Mentor;
+use App\Traits\ApiResponser;
 
 class MentorManager extends Controller
 {
@@ -16,7 +16,8 @@ class MentorManager extends Controller
      */
     public function index()
     {
-        $mentors = Mentor::all();
+        $mentors = Mentor::with('availability')->get();
+        // dd($mentors);
         return $this->showAll(MentorResource::collection($mentors), 200);
     }
 
@@ -31,7 +32,7 @@ class MentorManager extends Controller
 
         $request->merge([
             'user_id' => $userId,
-            'email' => $userEmail
+            'email' => $userEmail,
         ]);
         // dd($request->all());
 

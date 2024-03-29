@@ -23,4 +23,9 @@ class Mentor extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function availability()
+    {
+        return $this->hasMany(MentorAvailability::class);
+    }
 }
