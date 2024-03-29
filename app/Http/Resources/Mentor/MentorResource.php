@@ -30,6 +30,10 @@ class MentorResource extends JsonResource
                     if ($availability) {
                         return [
                             'id' => $avail->id,
+                            'title' => $avail->title,
+                            'about' => $avail->about,
+                            'duration' => $avail->duration,
+                            'meeting_link' => $avail->meeting_link,
                             'date' => isset($availability->date) ? $availability->date : null,
                             'time_slots' => isset($availability->time_slots) ? $availability->time_slots : null,
                         ];
@@ -37,7 +41,7 @@ class MentorResource extends JsonResource
                 }
                 // If it's not a string or not valid JSON, return as is
                 return $avail->availability;
-                }),
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
