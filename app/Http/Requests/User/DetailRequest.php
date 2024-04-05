@@ -32,6 +32,7 @@ class DetailRequest extends FormRequest
             'phone' => 'max:15',
             'is_admin' => 'boolean',
             'password' => 'min:6|confirmed',
+            'current_password' => 'min:6',
             'image' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg',
         ];
         return $rules;
