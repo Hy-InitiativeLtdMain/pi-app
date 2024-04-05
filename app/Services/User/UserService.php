@@ -2,14 +2,14 @@
 
 namespace App\Services\User;
 
-use App\Jobs\User\AuthJobManager;
-use App\Models\Transaction;
-use App\Models\User;
-use App\Services\Media\CloudinaryService;
-use App\Services\Query\FilteringService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Transaction;
 use Illuminate\Support\Str;
+use App\Jobs\User\AuthJobManager;
+use Illuminate\Support\Facades\Hash;
+use App\Services\Query\FilteringService;
+use App\Services\Media\CloudinaryService;
 
 class UserService
 {
@@ -96,15 +96,17 @@ class UserService
 
     public function update(User $user, $input)
     {
+        // dd($input);
         if (isset($input['password'])) {
-            if (!isset($input['current_password']) ||  !Hash::check($input['current_password'], $user->password)) {
+            if (!isset($input['current_password'])) {
+                if (!Hash::check($input['current_password'], $user->password)){
                 $data['message'] = 'Current Password is incorrect';
                 return [
                     'data' => $data,
                     'code' => 422
-                ];
+                ];}
             }
-            $input['password'] = Hash::make($input['password']);
+
             $user->password = $input['password'];
             $user->save();
             $data['message'] = 'Password Updated';

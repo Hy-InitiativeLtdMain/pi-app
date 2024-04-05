@@ -11,10 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('bookings');
-        Schema::dropIfExists('mentees');
-        Schema::dropIfExists('mentor_availabilities');
-        Schema::dropIfExists('mentors');
+
 
         Schema::create('mentors', function (Blueprint $table) {
             $table->id();
