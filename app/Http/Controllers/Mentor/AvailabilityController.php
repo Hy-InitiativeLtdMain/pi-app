@@ -27,7 +27,7 @@ class AvailabilityController extends Controller
         // Get booking
         // Error handling for mentor not found
         if (!auth()->user()->mentor) {
-            return $this->errorResponse('You are not a mentor', 401);
+            return $this->errorResponse('You are not a mentor', 404);
         }
 
         $data = Booking::where("mentor_id", auth()->user()->mentor->id)->get();
@@ -43,7 +43,7 @@ class AvailabilityController extends Controller
     {
         // Error handling for mentor not found
         if (!auth()->user()->mentor) {
-            return $this->errorResponse('You are not a mentor', 401);
+            return $this->errorResponse('You are not a mentor', 404);
         }
 
         $data = Booking::where("mentor_id", auth()->user()->mentor->id)->where("id", $id)->first();
@@ -56,7 +56,7 @@ class AvailabilityController extends Controller
         $mentorId = auth()->user()->mentor->id;
         // error handling
         if (!$mentorId) {
-            return $this->errorResponse('You are not a mentor', 401);
+            return $this->errorResponse('You are not a mentor', 404);
         }
         $availability = $request->input('availability');
 
