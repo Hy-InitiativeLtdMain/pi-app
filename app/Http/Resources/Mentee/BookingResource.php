@@ -4,11 +4,13 @@ namespace App\Http\Resources\Mentee;
 
 use App\Http\Resources\Mentor\AvailabilityResource;
 use App\Http\Resources\Mentor\MentorResource;
+use App\Traits\ProcessAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BookingResource extends JsonResource
 {
+    use ProcessAvailability;
     /**
      * Transform the resource into an array.
      *
@@ -28,10 +30,9 @@ class BookingResource extends JsonResource
             'reason' => $this->reason,
             'mentor_id' => $this->mentor_id,
             'mentor_duration' => $this->mentorAvailability->duration,
-            'mentor_availability_title' => $this->mentorAvailability->title,
+            'mentor_availability' => $this->processAvailability($this->mentorAvailability),
             'mentor_name' => $this->mentor->firstname. " ". $this->mentor->lastname,
-            'expired' => $this->expired,
-            'meeting_link' => $this->meeting_link,
+            'meeting_link' => $this->mentorAvailability->meeting_link,
         ];
     }
 }

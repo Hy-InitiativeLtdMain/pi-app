@@ -7,6 +7,7 @@ use App\Http\Requests\BookingRequest;
 use App\Http\Resources\Mentee\AvailableMentorsResource;
 use App\Http\Resources\Mentee\BookingResource;
 use App\Http\Resources\Mentor\AvailabilityResource;
+use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Booking;
 use App\Models\MentorAvailability;
 use App\Traits\ApiResponser;
@@ -141,4 +142,16 @@ class BookingManager extends Controller
     // }
 
 
+    // get mentors based on approved booking
+    public function getMentors()
+    {
+        $menteeId = auth()->user()->mentee->id;
+        $bookings = Booking::where('mentee_id', $menteeId)->where('status', 'Approved')->with('mentor')->get();
+        // get the mentors from the bookings
+        $mentors = $bookings->pluck('mentor');
+
+
+
+        return $this->showAll(MentorResource::collection($mentors), 200);
+    }
 }

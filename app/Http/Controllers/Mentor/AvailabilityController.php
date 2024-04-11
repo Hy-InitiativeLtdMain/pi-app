@@ -9,17 +9,26 @@ use App\Http\Resources\Mentor\AvailabilityResource;
 use App\Models\Booking;
 use App\Models\MentorAvailability;
 use App\Traits\ApiResponser;
+use App\Traits\ProcessAvailability as TraitsProcessAvailability;
 use Illuminate\Http\Request;
 
 class AvailabilityController extends Controller
 {
-    use ApiResponser;
+    use ApiResponser, TraitsProcessAvailability;
+
 
     public function index()
     {
         $mentorId = auth()->user()->mentor->id;
         $availability = MentorAvailability::where('mentor_id', $mentorId)->with('booking')->get();
-        return $this->showAll(AvailabilityResource::collection($availability), 200);
+
+        $allAvailability=[];
+        foreach ($availability as $index => $avail) {
+
+            $allAvailability[$avail->id] = $this->processAvailability(new AvailabilityResource($avail));
+
+        }
+        return $this->successResponse($allAvailability, 200);
     }
 
     public function booking()
@@ -73,7 +82,7 @@ class AvailabilityController extends Controller
 
         return response()->json([
             'message' => 'Availability stored successfully',
-            'data' => new AvailabilityResource($data)
+            'data' => $this->processAvailability(new AvailabilityResource($data))
             ], 201);
     }
 
@@ -88,7 +97,10 @@ class AvailabilityController extends Controller
             'title' => $request->input('title'),
             'meeting_link' => $request->input('meeting_link')
         ]);
-        return $this->successResponse(new AvailabilityResource($availability), 201);
+        $resource = new AvailabilityResource($availability);
+        // replace the avialability in the resource with the new availability
+
+        return $this->successResponse($this->processAvailability($resource), 201);
     }
 
     public function destroy(MentorAvailability $availability)
@@ -96,4 +108,7 @@ class AvailabilityController extends Controller
         $availability->delete();
         return $this->successResponse(null, 204);
     }
+
+
+
 }
