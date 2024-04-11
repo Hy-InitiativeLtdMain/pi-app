@@ -23,7 +23,7 @@ class BookingRequest extends FormRequest
     {
         return [
             'mentor_availability_id' => 'required|exists:mentor_availabilities,id',
-            'date' => 'required|date',
+            'day' => 'required|string',
             'time' => 'required|date_format:H:i',
             'mentor_id' => 'required|exists:mentors,id',
             'reason' => 'nullable|string',

@@ -18,10 +18,25 @@ use Illuminate\Support\Facades\DB;
 class BookingManager extends Controller
 {
     use ApiResponser;
+
     public function store(BookingRequest $request)
     {
         $request->validated();
-        $request->merge(['mentee_id' => auth()->user()->mentee->id]);
+
+        $day = $request->day;
+        $currentDay = Carbon::today()->format('l');
+
+        // Find the next occurrence of $day
+        if ($currentDay !== $day) {
+            $nextDay = Carbon::now()->next($day);
+        } else {
+            $nextDay = Carbon::now()->next($day);
+        }
+
+        // Get the date of the next occurrence
+        $nextDayDate = $nextDay->format('Y-m-d');
+
+        $request->merge(['mentee_id' => auth()->user()->mentee->id, 'date' => $nextDayDate]);
         $booking = Booking::create($request->all());
         return response()->json(['data' => new BookingResource($booking), 'message' => 'Booking created successfully'], 201);
     }
