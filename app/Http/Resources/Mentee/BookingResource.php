@@ -18,7 +18,13 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $dateTime = \DateTime::createFromFormat('H:i:s', $this->time);
+        if(\DateTime::createFromFormat('H:i:s', $this->time))
+        {
+            $dateTime = \DateTime::createFromFormat('H:i:s', $this->time);
+        } else {
+            $dateTime = \DateTime::createFromFormat('H:i', $this->time);
+        }
+
         return [
             'booking_id' => $this->id,
             'mentee_id' => $this->mentee_id,
