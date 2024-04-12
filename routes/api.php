@@ -94,6 +94,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/mentors', [MentorManager::class, 'index']);
             Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
             Route::get('/my-mentors', [BookingManager::class,'getMentors']);
+            Route::get('/bookings/{bookingId}/mentor', [BookingManager::class, 'getMentor']);
         });
 
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
