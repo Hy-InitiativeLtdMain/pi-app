@@ -169,4 +169,12 @@ class BookingManager extends Controller
 
         return $this->showAll(MentorResource::collection($mentors), 200);
     }
+
+    public function getMentor($bookingId)
+    {
+        $booking = Booking::findOrFail($bookingId);
+        $mentor = $booking->mentor;
+        return $this->showOne(new MentorResource($mentor), 200);
+    }
 }
+
