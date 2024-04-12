@@ -81,6 +81,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             // Update booking status
             Route::patch('availability/bookings/{booking}', [BookingManager::class, 'updateStatus']);
             Route::get('availability/bookings/{id}', [AvailabilityController::class, 'getBooking']);
+            Route::get('accepted-bookings', [BookingManager::class, 'getAcceptedBookings']);
         });
 
         //Booking

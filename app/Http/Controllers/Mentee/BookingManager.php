@@ -36,6 +36,7 @@ class BookingManager extends Controller
         // Get the date of the next occurrence
         $nextDayDate = $nextDay->format('Y-m-d');
 
+
         $request->merge(['mentee_id' => auth()->user()->mentee->id, 'date' => $nextDayDate]);
         $booking = Booking::create($request->all());
         return response()->json(['data' => new BookingResource($booking), 'message' => 'Booking created successfully'], 201);
@@ -175,6 +176,14 @@ class BookingManager extends Controller
         $booking = Booking::findOrFail($bookingId);
         $mentor = $booking->mentor;
         return $this->showOne(new MentorResource($mentor), 200);
+    }
+
+    // A function for the mentor to get all bookings he has accepted
+    public function getAcceptedBookings()
+    {
+        $mentorId = auth()->user()->mentor->id;
+        $bookings = Booking::where('mentor_id', $mentorId)->where('status', 'Approved')->with('mentee')->get();
+        return $this->showAll(BookingResource::collection($bookings), 200);
     }
 }
 

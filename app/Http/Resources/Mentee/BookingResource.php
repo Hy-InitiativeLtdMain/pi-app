@@ -18,6 +18,7 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $dateTime = \DateTime::createFromFormat('H:i:s', $this->time);
         return [
             'booking_id' => $this->id,
             'mentee_id' => $this->mentee_id,
@@ -27,6 +28,10 @@ class BookingResource extends JsonResource
             'status' => $this->status,
             'date' => $this->date,
             'time' => $this->time,
+            'calendar' => [
+                'start' => $this->date . "T" . $dateTime->format('H:i'),
+                'end' => $this->date . "T" . $this->calculateEndTimeWithSeconds($this->time, $this->mentorAvailability->duration)
+            ],
             'reason' => $this->reason,
             'mentor_id' => $this->mentor_id,
             'mentor_duration' => $this->mentorAvailability->duration,
