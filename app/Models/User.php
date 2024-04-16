@@ -33,7 +33,8 @@ class User extends Authenticatable
         'image_id',
         'institute',
         'location',
-        'signature'
+        'signature',
+        'institute_slug'
     ];
 
     /**

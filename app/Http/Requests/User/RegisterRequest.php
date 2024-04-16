@@ -29,6 +29,7 @@ class RegisterRequest extends FormRequest
             'phone' => 'required|max:15',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:6|confirmed',
+            'institute_slug' => 'required',
         ];
         return $rules;
     }
