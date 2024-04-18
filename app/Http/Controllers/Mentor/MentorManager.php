@@ -7,16 +7,25 @@ use App\Http\Requests\MentorRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
 use App\Traits\ApiResponser;
+use Illuminate\Support\Facades\Auth;
 
 class MentorManager extends Controller
 {
     use ApiResponser;
+
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $mentors = Mentor::with('availability')->get();
+        $instituteSlug = Auth::user()->institute_slug;
+
+        $mentors = Mentor::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->with('availability')->get();
+        // dd($mentors);
+        // $mentors = Mentor::with('availability')->get();
         // dd($mentors);
         return $this->showAll(MentorResource::collection($mentors), 200);
     }

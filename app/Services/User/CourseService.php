@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\Media\CloudinaryService;
 use App\Services\Payment\PaystackService;
 use App\Services\Query\FilteringService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class CourseService
@@ -20,7 +21,10 @@ class CourseService
     {
 
         $filter = new FilteringService();
-        $courses = Course::with(['user', 'categories']);
+        $instituteSlug = Auth::user()->institute_slug;
+        $courses = Course::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->with(['user', 'categories']);
         $filter->filterColumns($courses, $inputs);
         $data['courses'] = $courses->latest()->paginate();
         $data['courses']->each(function ($course) {

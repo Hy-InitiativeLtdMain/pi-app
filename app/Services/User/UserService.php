@@ -10,14 +10,16 @@ use App\Jobs\User\AuthJobManager;
 use Illuminate\Support\Facades\Hash;
 use App\Services\Query\FilteringService;
 use App\Services\Media\CloudinaryService;
+use Illuminate\Support\Facades\Auth;
 
 class UserService
 {
 
     public function index($inputs)
     {
+        $instituteSlug = Auth::user()->institute_slug;
         $filter = new FilteringService();
-        $users = User::query();
+        $users = User::where('institute_slug', $instituteSlug)->query();
         $filter->filterColumns($users, $inputs);
         $data = [];
         $data['users'] = $users->with([])->latest()->paginate();

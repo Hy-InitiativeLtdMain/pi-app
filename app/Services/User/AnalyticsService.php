@@ -5,22 +5,31 @@ namespace App\Services\User;
 use App\Models\Course;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AnalyticsService
 {
 
     public function stats($inputs)
     {
-        $data['user_count'] = User::query()
+        $instituteSlug = Auth::user()->institute_slug;
+
+        $data['user_count'] = User::where('institute_slug', $instituteSlug)->query()
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->count();
-        $data['course_count'] = Course::query()
+        $data['course_count'] = Course::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->query()
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->count();
-        $data['transaction_count'] = Transaction::query()
+        $data['transaction_count'] = Transaction::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->query()
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->count();
-        $data['transaction_total'] = Transaction::query()
+        $data['transaction_total'] = Transaction::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->query()
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->paid()
             ->sum('amount');
@@ -31,7 +40,8 @@ class AnalyticsService
     }
     public function usersLineGraph($inputs)
     {
-        $data['data'] = User::query()
+        $instituteSlug = Auth::user()->institute_slug;
+        $data['data'] = User::where('institute_slug', $instituteSlug)->query()
             ->selectRaw('count(id) as number, DATE(created_at) as m_date')
             ->whereBetween('users.created_at', [$inputs['start_date'], $inputs['end_date']])
             ->groupBy('m_date')->get();
@@ -43,7 +53,8 @@ class AnalyticsService
 
     public function usersLineGraphYear($inputs)
     {
-        $data['data'] = User::query()
+        $instituteSlug = Auth::user()->institute_slug;
+        $data['data'] = User::where('institute_slug', $instituteSlug)->query()
             ->selectRaw("count(id) as number, CONCAT(YEAR(created_at),'-',MONTHNAME(created_at)) as m_date")
             ->whereBetween('users.created_at', [$inputs['start_date'], $inputs['end_date']])
             ->groupBy('m_date')->get();
