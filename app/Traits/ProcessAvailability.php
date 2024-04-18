@@ -51,7 +51,7 @@ trait ProcessAvailability
     private function generateAvailabilitySlot($day, $timeSlot, $requestData)
     {
         return [
-            'dayOfWeek' => $day,
+            'day' => $day,
             'startTime' => $timeSlot,
             'endTime' => $this->calculateEndTime($timeSlot, $requestData['duration']),
             'title' => $requestData['title'],
