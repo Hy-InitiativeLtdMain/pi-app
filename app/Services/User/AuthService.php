@@ -12,49 +12,42 @@ use Illuminate\Support\Facades\Hash;
 class AuthService
 {
     public function login($input)
-    {
-        $user = User::where('email', $input['email'])->first();
-        if ($user) {
-            if (Hash::check($input['password'], $user->password)) {
-                $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
+{
+    $user = User::where('email', $input['email'])->first();
 
-                // check if user is a learner
-                if ($user->is_admin){
-                    $response = ['token' => $token, 'tokenType' => 'user', 'user' => 'Creator'];
-                    if ($user->mentor){
-                        $response['is_mentor'] = true;
-                    } else {
-                        $response['is_mentor'] = false;
-                    }
-                }
-                if (!$user->is_admin){
-                    $response = ['token' => $token, 'tokenType' => 'user', 'user' => 'Learner'];
-                    if ($user->mentee){
-                        $response['is_mentee'] = true;
-                    } else {
-                        $response['is_mentee'] = false;
-                    }
-                }
-                // IF USER IS MENTOR/MENTOR
+    if ($user && Hash::check($input['password'], $user->password)) {
+        // Check if user is admin or learner
+        $userType = $user->is_admin ? 'Creator' : 'Learner';
 
-                return [
-                    'data' => $response,
-                    'code' => 200
-                ];
-            } else {
-                $response = ['message' => 'Password mismatch'];
-                return [
-                    'data' => $response,
-                    'code' => 422
-                ];
-            }
+        // Include institute slug in token payload
+        $token = $user->createToken('user_auth_token', ['server:user'])
+            ->plainTextToken;
+        $tokenPayload = [
+            'token' => $token,
+            'tokenType' => 'user',
+            'user' => $userType,
+            'institute_slug' => $user->institute_slug,
+        ];
+
+        // Check if user is mentor or mentee
+        if ($user->is_admin && $user->mentor) {
+            $tokenPayload['is_mentor'] = true;
+        } elseif (!$user->is_admin && $user->mentee) {
+            $tokenPayload['is_mentee'] = true;
         }
-        $response = ['message' => 'User does not exist'];
+
+        return [
+            'data' => $tokenPayload,
+            'code' => 200
+        ];
+    } else {
+        $response = ['message' => 'Invalid email or password'];
         return [
             'data' => $response,
             'code' => 422
         ];
     }
+}
 
     public function register($input)
     {

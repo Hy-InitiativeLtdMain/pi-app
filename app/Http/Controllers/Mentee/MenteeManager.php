@@ -7,10 +7,19 @@ use App\Traits\ApiResponser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MenteeRequest;
 use App\Http\Resources\Mentee\MenteeResource;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MenteeManager extends Controller
 {
     use ApiResponser;
+
+    private $instituteSlug;
+
+    function __construct(Request $request)
+    {
+        $this->instituteSlug = $request->institute_slug;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -19,7 +28,12 @@ class MenteeManager extends Controller
         if (!auth()->user()->mentee) {
             return $this->errorResponse('User is not a mentee!', 404);
         }
-        $mentees = Mentee::all();
+
+        $instituteSlug = $this->instituteSlug;
+        // dd($instituteSlug);
+        $mentees = Mentee::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->get();
         return $this->showAll(MenteeResource::collection($mentees), 200);
     }
 

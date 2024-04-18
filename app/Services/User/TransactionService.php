@@ -9,14 +9,17 @@ use App\Services\Payment\PaystackService;
 use App\Services\Query\FilteringService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionService
 {
     public function index($inputs)
     {
-
+        $instituteSlug = Auth::user()->institute_slug;
         $filter = new FilteringService();
-        $transactions = Transaction::with(['user',  'courses.user']);
+        $transactions = Transaction::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->with(['user',  'courses.user']);
         $filter->filterColumns($transactions, $inputs);
 
 
@@ -29,8 +32,11 @@ class TransactionService
 
     public function indexAll($inputs)
     {
+        $instituteSlug = Auth::user()->institute_slug;
 
-        $transactions = Transaction::with(['user', 'courses.user']);
+        $transactions = Transaction::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->with(['user', 'courses.user']);
         if (isset($inputs['size'])) {
             $transactions = $transactions->limit($inputs['size']);
         }

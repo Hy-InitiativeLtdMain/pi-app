@@ -72,6 +72,7 @@ class Kernel extends HttpKernel
 
         'auth.user.state' => \App\Http\Middleware\User\LoginState::class,
 
+        'auth.user.institute' => \App\Http\Middleware\User\ExtractInstituteSlug::class,
 
     ];
 }
