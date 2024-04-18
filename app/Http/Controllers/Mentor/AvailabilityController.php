@@ -86,11 +86,13 @@ class AvailabilityController extends Controller
             ], 201);
     }
 
-    public function update(MentorAvailabilityRequest $request, MentorAvailability $availability)
+    public function update(Request $request, MentorAvailability $availability)
     {
         $mentorId = auth()->user()->mentor->id;
-        $current = $request->input('availability');
+        // dd($request);
 
+        $current = $request->input('availability');
+        // dd($current);
         $availability->update([
             'mentor_id' => $mentorId,
             'availability' => $current,
