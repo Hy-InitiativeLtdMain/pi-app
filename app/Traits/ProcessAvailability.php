@@ -66,12 +66,14 @@ trait ProcessAvailability
     // Helper function to calculate end time
     private function calculateEndTime($startTime, $duration)
     {
-        dd($startTime, $duration);
+        // dd($startTime, $duration);
         // Convert the start time to a DateTime object
         if (DateTime::createFromFormat('H:i:s', $startTime)) {
             $startTime = DateTime::createFromFormat('H:i:s', $startTime);
-        } else {
+        } else if (DateTime::createFromFormat('H:i', $startTime)) {
             $startTime = DateTime::createFromFormat('H:i', $startTime);
+        } else {
+            $startTime = DateTime::createFromFormat('h:i A', $startTime);
         }
 
         // Parse the duration to extract the number of hours and minutes
