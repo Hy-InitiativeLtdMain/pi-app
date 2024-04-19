@@ -34,7 +34,7 @@ class MentorResource extends JsonResource
                             'about' => $avail->about,
                             'duration' => $avail->duration,
                             'meeting_link' => $avail->meeting_link,
-                            'days' => isset($availability->day) ? $availability->day : $availability->days,
+                            'days' => isset($availability->day) ? $availability->day : null,
                             'time_slots' => isset($availability->time_slots) ? $availability->time_slots : null,
                         ];
                     }
