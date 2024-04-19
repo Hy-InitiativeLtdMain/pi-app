@@ -96,10 +96,12 @@ trait ProcessAvailability
         // dd($startTime, $duration);
         // get starttime format
 
-        if(DateTime::createFromFormat('H:i:s', $startTime)){
+        if (DateTime::createFromFormat('H:i:s', $startTime)) {
             $startTime = DateTime::createFromFormat('H:i:s', $startTime);
-        } else {
+        } else if (DateTime::createFromFormat('H:i', $startTime)) {
             $startTime = DateTime::createFromFormat('H:i', $startTime);
+        } else {
+            $startTime = DateTime::createFromFormat('h:i A', $startTime);
         }
         // dd($startTime);
 
