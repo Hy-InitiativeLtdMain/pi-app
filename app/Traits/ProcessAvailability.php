@@ -53,7 +53,7 @@ trait ProcessAvailability
         return [
             'day' => $day,
             'startTime' => $timeSlot,
-            'endTime' => $this->calculateEndTimeWithSeconds($timeSlot, $requestData['duration']),
+            'endTime' => $this->calculateEndTime($timeSlot, $requestData['duration']),
             'title' => $requestData['title'],
             'meeting_link' => $requestData['meeting_link'],
             'duration' => $requestData['duration'],
@@ -66,6 +66,7 @@ trait ProcessAvailability
     // Helper function to calculate end time
     private function calculateEndTime($startTime, $duration)
     {
+        dd($startTime, $duration);
         // Convert the start time to a DateTime object
         if (DateTime::createFromFormat('H:i:s', $startTime)) {
             $startTime = DateTime::createFromFormat('H:i:s', $startTime);
