@@ -53,7 +53,7 @@ trait ProcessAvailability
         return [
             'day' => $day,
             'startTime' => $timeSlot,
-            'endTime' => $this->calculateEndTime($timeSlot, $requestData['duration']),
+            'endTime' => $this->calculateEndTimeWithSeconds($timeSlot, $requestData['duration']),
             'title' => $requestData['title'],
             'meeting_link' => $requestData['meeting_link'],
             'duration' => $requestData['duration'],
