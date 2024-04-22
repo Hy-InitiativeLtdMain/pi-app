@@ -23,6 +23,12 @@ class BookingManager extends Controller
     {
         $request->validated();
 
+        $mentee_id = auth()->user()->mentee->id;
+
+        if (!$mentee_id){
+            return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
+        }
+
         $day = $request->day;
         $currentDay = Carbon::today()->format('l');
 
@@ -37,7 +43,7 @@ class BookingManager extends Controller
         $nextDayDate = $nextDay->format('Y-m-d');
 
 
-        $request->merge(['mentee_id' => auth()->user()->mentee->id, 'date' => $nextDayDate]);
+        $request->merge(['mentee_id' => $mentee_id, 'date' => $nextDayDate]);
         $booking = Booking::create($request->all());
         return response()->json(['data' => new BookingResource($booking), 'message' => 'Booking created successfully'], 201);
     }
@@ -46,6 +52,10 @@ class BookingManager extends Controller
     {
         $mentee = auth()->user()->mentee->id;
         $bookings = Booking::where('mentee_id', $mentee)->with('mentorAvailability')->get();
+
+        if (!$mentee){
+            return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
+        }
         // dd($bookings);
         // Add flags for expired bookings and meeting links for approved bookings
         $bookings->transform(function ($booking) {
@@ -64,6 +74,7 @@ class BookingManager extends Controller
 
     public function show($id)
     {
+
         $booking = Booking::findOrFail($id);
         return response()->json(['data' => new BookingResource($booking)], 200);
     }
@@ -162,6 +173,12 @@ class BookingManager extends Controller
     public function getMentors()
     {
         $menteeId = auth()->user()->mentee->id;
+
+        if (!$menteeId){
+            return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
+        }
+        
+
         $bookings = Booking::where('mentee_id', $menteeId)->where('status', 'Approved')->with('mentor')->get();
         // get the mentors from the bookings
         $mentors = $bookings->pluck('mentor');
