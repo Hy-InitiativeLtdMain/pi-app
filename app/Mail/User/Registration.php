@@ -43,7 +43,7 @@ class Registration extends Mailable
     public function content(): Content
     {
         return new Content(
-            html: 'emails.user.registration',
+            view: 'email.user.registration',
         );
     }
 
