@@ -27,35 +27,33 @@ class Registration extends Mailable
         $this->url = $url;
     }
 
-
-
     /**
-     * Build the message.
-     *
-     * @return $this
+     * Get the message envelope.
      */
-    public function build()
+    public function envelope(): Envelope
     {
-        return $this->view('email.user.registration')->subject('Registration');
+        return new Envelope(
+            subject: 'Registration',
+        );
     }
 
-    // /**
-    //  * Get the message content definition.
-    //  */
-    // public function content(): Content
-    // {
-    //     return new Content(
-    //         markdown: 'emails.user.registration',
-    //     );
-    // }
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            html: 'emails.user.registration',
+        );
+    }
 
-    // /**
-    //  * Get the attachments for the message.
-    //  *
-    //  * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-    //  */
-    // public function attachments(): array
-    // {
-    //     return [];
-    // }
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
+    }
 }
