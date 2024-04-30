@@ -62,11 +62,12 @@ class AvailabilityController extends Controller
     }
     public function store(MentorAvailabilityRequest $request)
     {
-        $mentorId = auth()->user()->mentor->id;
+
         // error handling
-        if (!$mentorId) {
+        if (!auth()->user()->mentor->id) {
             return $this->errorResponse('You are not a mentor', 404);
         }
+        $mentorId = auth()->user()->mentor->id;
         $availability = $request->input('availability');
 
 
