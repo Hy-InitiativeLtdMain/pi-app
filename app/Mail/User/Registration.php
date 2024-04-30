@@ -27,15 +27,7 @@ class Registration extends Mailable
         $this->url = $url;
     }
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Registration',
-        );
-    }
+    
 
     /**
      * Get the message content definition.
