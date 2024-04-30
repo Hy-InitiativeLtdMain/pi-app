@@ -27,7 +27,15 @@ class Registration extends Mailable
         $this->url = $url;
     }
 
-    
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Registration',
+        );
+    }
 
     /**
      * Get the message content definition.
@@ -35,7 +43,7 @@ class Registration extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.user.registration',
+            markdown: 'emails.user.registration',
         );
     }
 
