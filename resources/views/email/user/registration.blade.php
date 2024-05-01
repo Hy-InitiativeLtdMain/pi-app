@@ -191,6 +191,7 @@
 
               </tr>
 
+
               <tr>
                 <td align="center" style="color: #979797; font-size: 16px; line-height: 25px;">
 
@@ -207,6 +208,38 @@
               </td>
             </tr>
 
+            <tr>
+                    <td align="center" width="140" height="auto" style="padding: 50px 0 50px">
+                        <hr style="border-top: 5px solid #0056B0">
+                         <span>if you are having trouble, contact us @ <a href="mailto:info@wesonline.ng">info@wesonline.ng</a><br>
+                        </span>
+                        <p style="color: #667585; font-weight: 500;margin-bottom: 0">Follow Us:</p>
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding-bottom: 30px">
+                        <a href="#" role="button" style="font-size:14px; font-weight:400;webkit-appearance: button;-moz-appearance: button;appearance: button;
+								text-decoration: none;color: #0056B0; padding: 10px 20px; background: #EBF5FF;border-radius: 10px;">
+                            <i class="gg-facebook"></i>
+                        </a>
+                        <a href="#" role="button" style="font-size:14px; font-weight:400;webkit-appearance: button;-moz-appearance: button;appearance: button;
+								text-decoration: none;color: #0056B0; padding: 10px 20px; background: #EBF5FF;border-radius: 10px;">
+                            <i class="gg-twitter"></i>
+                        </a>
+                        <a href="#" role="button" style="font-size:14px; font-weight:400;webkit-appearance: button;-moz-appearance: button;appearance: button;
+								text-decoration: none;color: #0056B0; padding: 10px 20px; background: #EBF5FF;border-radius: 10px;">
+                            <i class="gg-google"></i>
+                        </a>
+                    </td>
+                </tr>
 
 
           </tbody>
