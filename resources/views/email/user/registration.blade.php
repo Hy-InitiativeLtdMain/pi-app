@@ -164,7 +164,7 @@
             </tr>
             <tr>
               <td style="padding-bottom: 60px">
-                <h3 style="margin-bottom: 0;color: #000000">Hello {{ $data['name'] }}</h3>
+                <h3 style="margin-bottom: 0;color: #000000">Hello {{ $user['first_name'] . ' ' . $user['last_name'] }}</h3>
                 <p style="line-height: 25px;color: #667585; font-weight: 500">
                   Thank you for creating a WESOnline account!<br>
                   We are happy you’re here. This is your token.
@@ -182,7 +182,7 @@
             @isset($url[0])
               <tr>
                 <td style="padding-bottom: 60px">
-                  <h3 style="margin-bottom: 0;color: #000000">Hello {{ $data['name'] }}</h3>
+                  <h3 style="margin-bottom: 0;color: #000000">Hello {{ $user['first_name'] . ' ' . $user['last_name'] }}</h3>
                   <p style="line-height: 25px;color: #667585; font-weight: 500">
                     Your account was added by the patform! <br>
                     We are happy you’re here. This is your password.
