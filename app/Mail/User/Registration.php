@@ -43,7 +43,12 @@ class Registration extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.user.registration',
+            // markdown: 'emails.user.registration',
+                view: 'email.user.registration',
+                with: [
+                    'user' => $this->user,
+                    'url' => $this->url
+                ]
         );
     }
 
