@@ -6,6 +6,7 @@ use App\Http\Controllers\Mentee\BookingManager;
 use App\Http\Controllers\Mentee\MenteeManager;
 use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Mentor\MentorManager;
+use App\Http\Controllers\SessionsManager;
 use App\Http\Controllers\User\AnalyticsManager;
 use App\Http\Controllers\User\AssignmentManager;
 use App\Http\Controllers\User\AttachmentManager;
@@ -82,6 +83,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::patch('availability/bookings/{booking}', [BookingManager::class, 'updateStatus']);
             Route::get('availability/bookings/{id}', [AvailabilityController::class, 'getBooking']);
             Route::get('accepted-bookings', [BookingManager::class, 'getAcceptedBookings']);
+
+            Route::get('/session-data', [SessionsManager::class, 'sessions']);
+
         });
 
         //Booking
@@ -96,6 +100,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
             Route::get('/my-mentors', [BookingManager::class,'getMentors']);
             Route::get('/bookings/{bookingId}/mentor', [BookingManager::class, 'getMentor']);
+            Route::get('/session-data', [SessionsManager::class, 'sessions']);
         });
 
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
