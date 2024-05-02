@@ -68,12 +68,13 @@ class MenteeManager extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(MenteeRequest $request, Mentee $mentee)
+    public function update(Request $request, Mentee $mentee)
     {
         if (!auth()->user()->mentee) {
             return $this->errorResponse('User is not a mentee!', 404);
         }
-        $mentee->update($request->validated());
+        $validated = $request->validate(MenteeRequest::$_updateRules);
+        $mentee->update($validated);
         return $this->successResponse(new MenteeResource($mentee), 201);
     }
 
