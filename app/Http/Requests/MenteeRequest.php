@@ -28,4 +28,11 @@ class MenteeRequest extends FormRequest
             'course' => 'required|string',
         ];
     }
+
+    public static $_updateRules = [
+        'name' => 'string',
+            'phone' => 'string',
+            'level' => 'string',
+            'course' => 'string'
+        ];
 }
