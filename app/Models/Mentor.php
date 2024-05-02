@@ -17,6 +17,7 @@ class Mentor extends Model
         'phone',
         'company',
         'job_title',
+        'bio',
     ];
 
     public function user()
@@ -27,5 +28,17 @@ class Mentor extends Model
     public function availability()
     {
         return $this->hasMany(MentorAvailability::class);
+    }
+
+    public function experience(){
+        return $this->hasOne(MentorExperience::class);
+    }
+
+    public function skills(){
+        return $this->hasOne(MentorSkill::class);
+    }
+
+    public function accessability(){
+        return $this->hasOne(MentorAccessability::class);
     }
 }

@@ -86,6 +86,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
             Route::get('/session-data', [SessionsManager::class, 'sessions']);
 
+            Route::post('experience', [MentorManager::class, 'createExperience']);
+            Route::post('skills', [MentorManager::class, 'createSkills']);
+            Route::post('accessability', [MentorManager::class, 'createAccessability']);
         });
 
         //Booking
@@ -98,7 +101,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             // View Available Mentors
             Route::get('/mentors', [MentorManager::class, 'index']);
             Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
-            Route::get('/my-mentors', [BookingManager::class,'getMentors']);
+            Route::get('/my-mentors', [BookingManager::class, 'getMentors']);
             Route::get('/bookings/{bookingId}/mentor', [BookingManager::class, 'getMentor']);
             Route::get('/session-data', [SessionsManager::class, 'sessions']);
         });
@@ -126,8 +129,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::get('/buyers', [CourseManager::class, 'buyers']);
                 Route::post('/', [CourseManager::class, 'store'])->middleware(["auth.admin.access"]);
                 Route::get('/{course}', [CourseManager::class, 'view']);
-                Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);
-                ;
+                Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);;
                 Route::post('/{course}', [CourseManager::class, 'update'])->middleware(["auth.admin.access"]);
                 Route::delete('/{course}', [CourseManager::class, 'delete'])->middleware(["auth.admin.access"]);
             });

@@ -11,6 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('mentor_accessabilities');
         Schema::create('mentor_accessabilities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mentor_id')->constrained('mentors')->onDelete('cascade');

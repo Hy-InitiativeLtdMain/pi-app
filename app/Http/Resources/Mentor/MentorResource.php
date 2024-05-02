@@ -22,8 +22,13 @@ class MentorResource extends JsonResource
             'lastname' => $this->lastname,
             'email' => $this->email,
             'phone' => $this->phone,
+            'bio' => $this->bio,
+
             'company' => $this->company,
             'job_title' => $this->job_title,
+            'experience' => $this->experience,
+            'skills' => $this->skills,
+            'accessability' => $this->accessability,
             'availability' => $this->availability->map(function ($avail) {
                 if (is_string($avail->availability)) {
                     $availability = json_decode($avail->availability);

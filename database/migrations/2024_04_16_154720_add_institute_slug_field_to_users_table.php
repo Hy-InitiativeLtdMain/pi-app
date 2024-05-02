@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // if the table already exists, we don't want to run this migration again.
+        if (Schema::hasColumn('users', 'institute_slug')) {
+            return;
+        }
         Schema::table('users', function (Blueprint $table) {
             $table->string('institute_slug')->default('wesonline');
         });
