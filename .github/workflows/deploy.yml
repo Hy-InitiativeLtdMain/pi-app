@@ -21,4 +21,4 @@ jobs:
             composer install
             php artisan migrate --force
             php artisan cache:clear
-            php artisan db:seed --class=SkillSeeder
+            
