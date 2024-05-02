@@ -1,31 +1,33 @@
 <?php
 
-use App\Http\Controllers\Media\AwsManager;
-use App\Http\Controllers\Media\VimeoManager;
-use App\Http\Controllers\Mentee\BookingManager;
-use App\Http\Controllers\Mentee\MenteeManager;
-use App\Http\Controllers\Mentor\AvailabilityController;
-use App\Http\Controllers\Mentor\MentorManager;
+use Illuminate\Http\Request;
+use App\Models\MentorAvailability;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SessionsManager;
-use App\Http\Controllers\User\AnalyticsManager;
-use App\Http\Controllers\User\AssignmentManager;
-use App\Http\Controllers\User\AttachmentManager;
+use App\Http\Controllers\WebhooksManager;
+use App\Http\Controllers\Media\AwsManager;
 use App\Http\Controllers\User\AuthManager;
-use App\Http\Controllers\User\BankAccountManager;
-use App\Http\Controllers\User\CategoryManager;
+use App\Http\Controllers\User\QuizManager;
+use App\Http\Controllers\User\UserManager;
+use App\Http\Controllers\Media\VimeoManager;
 use App\Http\Controllers\User\CourseManager;
 use App\Http\Controllers\User\DetailManager;
 use App\Http\Controllers\User\LessonManager;
+use App\Http\Controllers\User\ReviewManager;
+use App\Http\Controllers\Mentee\MenteeManager;
+use App\Http\Controllers\Mentor\MentorManager;
+use App\Http\Controllers\User\CategoryManager;
 use App\Http\Controllers\User\PaystackManager;
 use App\Http\Controllers\User\QuestionManager;
-use App\Http\Controllers\User\QuizManager;
-use App\Http\Controllers\User\ReviewManager;
-use App\Http\Controllers\User\UserManager;
+use App\Http\Controllers\Mentee\BookingManager;
+use App\Http\Controllers\User\AnalyticsManager;
+use App\Http\Controllers\User\AssignmentManager;
+use App\Http\Controllers\User\AttachmentManager;
+use App\Http\Controllers\User\BankAccountManager;
 use App\Http\Controllers\User\TransactionManager;
-use App\Http\Controllers\WebhooksManager;
-use App\Models\MentorAvailability;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Mentor\AvailabilityController;
+use App\Http\Controllers\Admin\AuthManager as AdminAuth;
+use App\Http\Controllers\Admin\InstituteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +59,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
             Route::post('/login', [AuthManager::class, 'login']);
             Route::post('/register', [AuthManager::class, 'register']);
+            Route::post('/admin/register', [AdminAuth::class, 'register']);
             Route::post('/forgot-password', [AuthManager::class, 'forgot']);
             Route::post('/reset-password/{user:email}/{token}', [AuthManager::class, 'resetPassword']);
 
@@ -70,6 +73,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
         Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user']);
 
+        Route::group(['prefix' => 'admin', 'middleware' => ['auth:user', 'auth.administrator.access']], function () {
+            Route::get('/users', [InstituteController::class, 'users']);
+            Route::get('/courses', [InstituteController::class, 'courses']);
+            Route::get('/transactions', [InstituteController::class, 'transactions']);
+            Route::get('/mentors', [InstituteController::class, 'mentors']);
+
+            Route::post('/mentor/status/{mentor}', [InstituteController::class, 'updateMentorStatus']);
+        });
 
         // Availability
         Route::group(['prefix' => 'mentors', 'middleware' => ['auth:user']], function () {
