@@ -74,5 +74,7 @@ class Kernel extends HttpKernel
 
         'auth.user.institute' => \App\Http\Middleware\User\ExtractInstituteSlug::class,
 
+        'auth.administrator.access' => \App\Http\Middleware\AdminCheck::class,
+
     ];
 }

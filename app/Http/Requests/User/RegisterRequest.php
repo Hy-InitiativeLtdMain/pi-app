@@ -42,4 +42,14 @@ class RegisterRequest extends FormRequest
     public static $_resetRules = [
         'password' => 'required|min:6|confirmed',
     ];
+
+    public static $_adminRules = [
+        'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'phone' => 'required|max:15',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+            'institute_slug' => 'nullable',
+            'admin' => 'required'
+    ];
 }

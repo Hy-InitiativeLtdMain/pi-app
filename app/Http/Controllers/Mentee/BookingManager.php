@@ -139,10 +139,19 @@ class BookingManager extends Controller
     // Update Status of Booking
     public function updateStatus(Request $request, Booking $booking)
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         // CHECK IF THE BOOKING IS OWNED BY THE CURRENT USER
         if ($booking->mentor_id != auth()->user()->mentor->id) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+
         $request->validate([
             'status' => 'required|in:Pending,Approved,Declined',
         ]);
@@ -177,7 +186,7 @@ class BookingManager extends Controller
         if (!$menteeId){
             return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
         }
-        
+
 
         $bookings = Booking::where('mentee_id', $menteeId)->where('status', 'Approved')->with('mentor')->get();
         // get the mentors from the bookings
@@ -198,6 +207,14 @@ class BookingManager extends Controller
     // A function for the mentor to get all bookings he has accepted
     public function getAcceptedBookings()
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $mentorId = auth()->user()->mentor->id;
         $bookings = Booking::where('mentor_id', $mentorId)->where('status', 'Approved')->with('mentee')->get();
         return $this->showAll(BookingResource::collection($bookings), 200);

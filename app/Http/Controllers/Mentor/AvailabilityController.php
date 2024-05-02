@@ -19,6 +19,14 @@ class AvailabilityController extends Controller
 
     public function index()
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $mentorId = auth()->user()->mentor->id;
         $availability = MentorAvailability::where('mentor_id', $mentorId)->with('booking')->get();
 
@@ -38,6 +46,11 @@ class AvailabilityController extends Controller
         if (!auth()->user()->mentor) {
             return $this->errorResponse('You are not a mentor', 404);
         }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
 
         $data = Booking::where("mentor_id", auth()->user()->mentor->id)->get();
         // Error handling for booking not found
@@ -54,7 +67,12 @@ class AvailabilityController extends Controller
         if (!auth()->user()->mentor) {
             return $this->errorResponse('You are not a mentor', 404);
         }
-
+        if (auth()->user()->mentor->status == 'pending'
+        ) {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $data = Booking::where("mentor_id", auth()->user()->mentor->id)->where("id", $id)->first();
 
         return $this->showOne(new BookingResource($data), 200);
@@ -66,6 +84,11 @@ class AvailabilityController extends Controller
         // error handling
         if (!auth()->user()->mentor->id) {
             return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending'){
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined'){
+            return $this->errorResponse('Your account is rejected', 404);
         }
         $mentorId = auth()->user()->mentor->id;
         $availability = $request->input('availability');
@@ -89,6 +112,14 @@ class AvailabilityController extends Controller
 
     public function update(Request $request, MentorAvailability $availability)
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $mentorId = auth()->user()->mentor->id;
         // dd($request);
 
@@ -108,6 +139,14 @@ class AvailabilityController extends Controller
 
     public function destroy(MentorAvailability $availability)
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $availability->delete();
         return $this->successResponse(null, 204);
     }

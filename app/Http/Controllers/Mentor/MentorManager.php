@@ -58,8 +58,13 @@ class MentorManager extends Controller
      */
     public function showProfile()
     {
-        if (!auth()->user()->mentor) {
-            return $this->errorResponse('Mentor not found', 404);
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
         }
         $mentor = Mentor::find(auth()->user()->mentor->id);
         return $this->showOne(new MentorResource($mentor), 200);
@@ -70,6 +75,14 @@ class MentorManager extends Controller
      */
     public function update(MentorRequest $request, Mentor $mentor)
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $mentor->update($request->validated());
         return $this->successResponse(new MentorResource($mentor), 200);
     }
@@ -79,6 +92,14 @@ class MentorManager extends Controller
      */
     public function destroy(Mentor $mentor)
     {
+        if (!auth()->user()->mentor->id) {
+            return $this->errorResponse('You are not a mentor', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $mentor->delete();
         return $this->successResponse('Mentor profile deleted successfully', 204);
     }
@@ -89,6 +110,11 @@ class MentorManager extends Controller
 
         if (!auth()->user()->mentor) {
             return response()->json('Please fill your mentor details', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
         }
         $mentor = auth()->user()->mentor;
 
@@ -113,6 +139,11 @@ class MentorManager extends Controller
         if (!auth()->user()->mentor) {
             return response()->json('Please fill your mentor details', 404);
         }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
         $mentor = auth()->user()->mentor;
 
         $validate = $request->validate(SkillRequest::$_updateRule);
@@ -134,6 +165,11 @@ class MentorManager extends Controller
     {
         if (!auth()->user()->mentor) {
             return response()->json('Please fill your mentor details', 404);
+        }
+        if (auth()->user()->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if (auth()->user()->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
         }
         $mentor = auth()->user()->mentor;
 
