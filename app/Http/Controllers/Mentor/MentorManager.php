@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MentorRequest;
+use App\Http\Requests\Mentors\AssessabilityRequest;
+use App\Http\Requests\Mentors\ExperienceRequest;
+use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
 use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MentorManager extends Controller
@@ -77,5 +81,74 @@ class MentorManager extends Controller
     {
         $mentor->delete();
         return $this->successResponse('Mentor profile deleted successfully', 204);
+    }
+
+    // create/update mentor experience
+    public function createExperience(Request $request)
+    {
+
+        if (!auth()->user()->mentor) {
+            return response()->json('Please fill your mentor details', 404);
+        }
+        $mentor = auth()->user()->mentor;
+
+        $validate = $request->validate(ExperienceRequest::$_updateRules);
+        // check if mentor has experience
+        if ($mentor->experience) {
+            // update experience
+            $mentor->experience->update($validate);
+
+            return $this->successResponse(new MentorResource($mentor), 200);
+        } else {
+            // create experience
+            $mentor->experience()->create($validate);
+
+            return $this->successResponse(new MentorResource($mentor), 200);
+        }
+    }
+
+    public function createSkills(Request $request)
+    {
+
+        if (!auth()->user()->mentor) {
+            return response()->json('Please fill your mentor details', 404);
+        }
+        $mentor = auth()->user()->mentor;
+
+        $validate = $request->validate(SkillRequest::$_updateRule);
+        // check if mentor has experience
+        if ($mentor->skills) {
+            // update experience
+            $mentor->skills->update($validate);
+
+            return $this->successResponse(new MentorResource($mentor), 200);
+        } else {
+            // create experience
+            $mentor->skills()->create($validate);
+
+            return $this->successResponse(new MentorResource($mentor), 200);
+        }
+    }
+
+    public function createAccessability(Request $request)
+    {
+        if (!auth()->user()->mentor) {
+            return response()->json('Please fill your mentor details', 404);
+        }
+        $mentor = auth()->user()->mentor;
+
+        $validate = $request->validate(AssessabilityRequest::$_updateRules);
+        // check if mentor has experience
+        if ($mentor->accessability) {
+            // update experience
+            $mentor->accessability->update($validate);
+
+            return $this->successResponse(new MentorResource($mentor), 200);
+        } else {
+            // create experience
+            $mentor->accessability()->create($validate);
+
+            return $this->successResponse(new MentorResource($mentor), 200);
+        }
     }
 }
