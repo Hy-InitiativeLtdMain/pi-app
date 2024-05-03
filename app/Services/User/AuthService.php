@@ -18,6 +18,12 @@ class AuthService
     if ($user && Hash::check($input['password'], $user->password)) {
         // Check if user is admin or learner
         $userType = $user->is_admin ? 'Creator' : 'Learner';
+        // check if user->admin is true
+
+        if ($user->admin) {
+            $userType = 'Admin';
+        }
+
 
         // Include institute slug in token payload
         $token = $user->createToken('user_auth_token', ['server:user'])
