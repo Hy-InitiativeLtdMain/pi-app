@@ -166,6 +166,53 @@ class AnalyticsController extends Controller
         ]);
     }
 
+    // get the users in order of number of lessons taken\
+    public function usersByLessonsTaken()
+    {
+        // Get users who are not admins and not admins
+        $users = $this->users()->where('is_admin', 0)->where('admin', 0);
+
+        // Use collection map to transform each user into an array with lessons taken count and details
+        $usersByLessonsTaken = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'phone' => $user->phone,
+                'email' => $user->email,
+                'lessons_taken' => LessonUser::where('user_id', $user->id)->count(),
+            ];
+        });
+
+        // Sort the users by the number of lessons taken in descending order
+        $usersByLessonsTaken = $usersByLessonsTaken->sortByDesc('lessons_taken');
+
+        // Return the users in order of the number of lessons taken
+        return response()->json($usersByLessonsTaken);
+    }
+
+    public function usersByCoursesCreated()
+    {
+        // Get users who are  Creators
+        $users = $this->users()->where('is_admin', 1)->where('admin', 0);
+
+        // Use collection map to transform each user into an array with lessons taken count and details
+        $usersByCoursesCreated = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'phone' => $user->phone,
+                'email' => $user->email,
+                'courses_created' => Course::where('user_id', $user->id)->count(),
+            ];
+        });
+
+        // Sort the users by the number of lessons taken in descending order
+        $usersByCoursesCreated = $usersByCoursesCreated->sortByDesc('courses_created');
+
+        // Return the users in order of the number of lessons taken
+        return response()->json($usersByCoursesCreated);
+    }
+
     private function users()
     {
         $institute_slug = auth()->user()->institute_slug;
