@@ -91,6 +91,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('analytics/users/count', [AnalyticsController::class, 'userCount']);
             Route::get('analytics/enrollment/percent', [AnalyticsController::class, 'enrollmentPercentage']);
             Route::get('analytics/courses/count', [AnalyticsController::class, 'coursesCount']);
+            Route::get('analytics/enrollment/learners', [AnalyticsController::class, 'enrollmentCountPerMonth']);
+            Route::get('analytics/enrollment/creators', [AnalyticsController::class, 'creatorsEnrollmentCountPerMonth']);
         });
 
         // Availability

@@ -79,6 +79,12 @@ class AnalyticsController extends Controller
         // Define the end date as the current date and time
         $endDate = date('Y-m-d H:i:s');
 
+        $studentUsers = $this->users()->where('is_admin', 0);
+        $studentUsers = $studentUsers->where('admin', 0);
+        // dd($studentUsers);
+        // Get id of $studentUsers
+        $studentUsers = $studentUsers->pluck('id')->toArray();
+        // dd($studentUsers);
         // Initialize an array to store enrollment counts for each month
         $enrollmentCounts = [];
 
@@ -92,6 +98,7 @@ class AnalyticsController extends Controller
             // Get the total number of enrolled users within the current month
             $enrolledCount = LessonUser::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereIn('user_id', $studentUsers)
                 ->count();
 
             // Store the enrollment count for the current month
@@ -107,5 +114,62 @@ class AnalyticsController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
         ]);
+    }
+
+    public function creatorsEnrollmentCountPerMonth()
+    {
+        // Get the current year and month
+        $currentYear = date('Y');
+        $currentMonth = date('m');
+
+        // Define the start date as one year before the current month
+        $startYear = $currentYear - 1;
+        $startDate = "{$startYear}-{$currentMonth}-01 00:00:00";
+
+        // Define the end date as the current date and time
+        $endDate = date('Y-m-d H:i:s');
+
+        $creatorsUsers = $this->users()->where('is_admin', 1);
+        $creatorsUsers = $creatorsUsers->where('admin', 0);
+        // dd($creatorsUsers);
+        // Get id of $creatorsUsers
+        $creatorsUsers = $creatorsUsers->pluck('id')->toArray();
+        // dd($creatorsUsers);
+        // Initialize an array to store enrollment counts for each month
+        $enrollmentCounts = [];
+
+        // Loop through each month from the start date to the end date
+        $currentDate = new DateTime($startDate);
+        while ($currentDate <= new DateTime($endDate)) {
+            // Get the year and month of the current date
+            $year = $currentDate->format('Y');
+            $month = $currentDate->format('m');
+
+            // Get the total number of enrolled users within the current month
+            $enrolledCount = LessonUser::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('user_id', $creatorsUsers)
+                ->count();
+
+            // Store the enrollment count for the current month
+            $enrollmentCounts[$month] = $enrolledCount;
+
+            // Move to the next month
+            $currentDate->modify('+1 month');
+        }
+
+        // Return the enrollment counts for each month from the start date to the end date
+        return response()->json([
+            'enrollment_counts' => $enrollmentCounts,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ]);
+    }
+
+    private function users()
+    {
+        $institute_slug = auth()->user()->institute_slug;
+        $users = User::where('institute_slug', $institute_slug)->get();
+        return $users;
     }
 }
