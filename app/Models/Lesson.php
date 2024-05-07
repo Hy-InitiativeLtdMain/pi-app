@@ -74,7 +74,7 @@ class Lesson extends Model
                 $user = auth('user')->user();
                 if($user == null) return false;
                 $user_id = $user->id;
-                return $this->lessonSeens()->where('lesson_users.user_id', $user_id)->first()?->seen == 1;
+                return $this->lessonSeens()->where('lesson_users.user_id', $user_id)->first()->seen == 1;
             },
         );
     }
