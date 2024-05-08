@@ -46,7 +46,7 @@ class MentorController extends Controller
     // get mentors that are pending
     public function getPendingMentors()
     {
-        $users = $this->users()->where('is_admin', 1)->where('admin', 0);
+        $users = $this->users()->where('admin', 0);
         $user_ids = $users->pluck('id')->toArray();
         $mentors = Mentor::whereIn('user_id', $user_ids)->where('status', 'pending')->get();
         return response()->json($mentors);
