@@ -30,6 +30,7 @@ use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Admin\AuthManager as AdminAuth;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\InstituteController;
+use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\TransactionController;
 
 /*
@@ -100,6 +101,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             // Courses/Lessons
             Route::get('/courses/{category}', [CourseController::class, 'getCourses']);
             Route::post('lessons/{lesson}/status', [CourseController::class, 'flagCourse']);
+
+            // Mentor
+            Route::get('/mentors', [MentorController::class, 'getMentorSearch']);
         });
 
         // Availability
