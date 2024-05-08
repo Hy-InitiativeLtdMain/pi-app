@@ -12,7 +12,7 @@ class MentorController extends Controller
     // get mentor list
     public function getMentors()
     {
-        $users = $this->users()->where('is_admin', 1)->where('admin', 0);
+        $users = $this->users()->where('admin', 0);
         $user_ids = $users->pluck('id')->toArray();
         $mentors = Mentor::whereIn('user_id', $user_ids)->get();
         return response()->json($mentors);
@@ -21,7 +21,7 @@ class MentorController extends Controller
     public function getMentorSearch(Request $request)
     {
         // Start with querying the mentors table
-        $users = User::where('is_admin', 1)->where('admin', 0)->where('institute_slug', auth()->user()->institute_slug);
+        $users = User::where('admin', 0)->where('institute_slug', auth()->user()->institute_slug);
         $userIds = $users->pluck('id')->toArray();
 
         // If a search query is provided, filter mentors by name
