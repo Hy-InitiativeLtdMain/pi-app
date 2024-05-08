@@ -104,6 +104,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
             // Mentor
             Route::get('/mentors', [MentorController::class, 'getMentorSearch']);
+            Route::get('/mentors/pending', [MentorController::class, 'getPendingMentors']);
+            Route::get('/mentors/mentor/{id}', [MentorController::class, 'getMentor']);
+
         });
 
         // Availability
