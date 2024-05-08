@@ -28,6 +28,7 @@ use App\Http\Controllers\User\BankAccountManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Admin\AuthManager as AdminAuth;
+use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\InstituteController;
 use App\Http\Controllers\Admin\TransactionController;
 
@@ -95,6 +96,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('analytics/enrollment/creators', [AnalyticsController::class, 'creatorsEnrollmentCountPerMonth']);
             Route::get('analytics/top-students', [AnalyticsController::class, 'usersByLessonsTaken']);
             Route::get('analytics/top-creators', [AnalyticsController::class, 'usersByCoursesCreated']);
+
+            // Courses/Lessons
+            Route::get('/courses/{category}', [CourseController::class, 'getCourses']);
+            Route::post('lessons/{lesson}/status', [CourseController::class, 'flagCourse']);
         });
 
         // Availability
