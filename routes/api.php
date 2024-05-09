@@ -78,7 +78,19 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user']);
 
         Route::group(['prefix' => 'admin', 'middleware' => ['auth:user', 'auth.administrator.access']], function () {
+            // Users
             Route::get('/users', [InstituteController::class, 'users']);
+            Route::get('/users/recent', [InstituteController::class, 'recentUsers']);
+            Route::get('/user-page/count', [InstituteController::class, 'count']);
+            Route::get('users/learners', [InstituteController::class, 'learners']);
+            Route::get('users/learners/recent', [InstituteController::class, 'recentLearners']);
+            Route::get('users/creators', [InstituteController::class, 'creators']);
+            Route::get('users/creators/recent', [InstituteController::class, 'recentCreators']);
+
+            // CREATE USERS
+            Route::post('users/create/learner', [InstituteController::class, 'createLearner']);
+            Route::post('users/create/creator', [InstituteController::class, 'createCreator']);
+
             Route::get('/courses', [InstituteController::class, 'courses']);
             Route::get('/transactions', [InstituteController::class, 'transactions']);
             Route::get('/mentors', [InstituteController::class, 'mentors']);

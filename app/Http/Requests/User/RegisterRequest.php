@@ -52,4 +52,20 @@ class RegisterRequest extends FormRequest
             'institute_slug' => 'nullable',
             'admin' => 'required'
     ];
+
+    public static $_creatorRules = [
+        'first_name' => 'required|max:255',
+        'last_name' => 'required|max:255',
+        'phone' => 'required|max:255',
+        'gender' => 'nullable|max:255',
+        'email' => 'required|email|max:255|unique:users,email'
+    ];
+
+    public static $_learnerRules = [
+        'first_name' => 'required|max:255',
+        'last_name' => 'required|max:255',
+        'phone' => 'required|max:255',
+        'gender' => 'nullable|max:255',
+        'email' => 'required|email|max:255|unique:users,email'
+    ];
 }

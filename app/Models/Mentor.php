@@ -42,4 +42,25 @@ class Mentor extends Model
     public function accessability(){
         return $this->hasOne(MentorAccessability::class);
     }
+
+    // Define the relationship with bookings
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    // Define the no_of_mentees function to count the number of mentees
+    public function getNumberOfMentees($status = null)
+    {
+        // Start building the query
+        $query = $this->bookings();
+
+        // If a status is provided, filter the bookings by status
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // Count the number of mentees
+        return $query->distinct('mentee_id')->count('mentee_id');
+    }
 }
