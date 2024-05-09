@@ -177,14 +177,18 @@ class AnalyticsController extends Controller
             return [
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
-                'phone' => $user->phone,
-                'email' => $user->email,
+                // 'phone' => $user->phone,
+                // 'email' => $user->email,
                 'lessons_taken' => LessonUser::where('user_id', $user->id)->count(),
             ];
         });
 
         // Sort the users by the number of lessons taken in descending order
         $usersByLessonsTaken = $usersByLessonsTaken->sortByDesc('lessons_taken');
+        // dont send the data if the lessons_taken is 0
+        $usersByLessonsTaken = $usersByLessonsTaken->filter(function ($user) {
+            return $user['lessons_taken'] > 0;
+        });
 
         // Return the users in order of the number of lessons taken
         return response()->json($usersByLessonsTaken);
@@ -200,14 +204,19 @@ class AnalyticsController extends Controller
             return [
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
-                'phone' => $user->phone,
-                'email' => $user->email,
+                // 'phone' => $user->phone,
+                // 'email' => $user->email,
                 'courses_created' => Course::where('user_id', $user->id)->count(),
             ];
         });
 
         // Sort the users by the number of lessons taken in descending order
         $usersByCoursesCreated = $usersByCoursesCreated->sortByDesc('courses_created');
+
+        // dont send the data if the courses_created is 0
+        $usersByCoursesCreated = $usersByCoursesCreated->filter(function ($user) {
+            return $user['courses_created'] > 0;
+        });
 
         // Return the users in order of the number of lessons taken
         return response()->json($usersByCoursesCreated);
