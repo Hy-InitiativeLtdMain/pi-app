@@ -186,9 +186,13 @@ class AnalyticsController extends Controller
         // Sort the users by the number of lessons taken in descending order
         $usersByLessonsTaken = $usersByLessonsTaken->sortByDesc('lessons_taken');
         // dont send the data if the lessons_taken is 0
+
         $usersByLessonsTaken = $usersByLessonsTaken->filter(function ($user) {
             return $user['lessons_taken'] > 0;
         });
+
+        // only the first 5 should be returned
+        $usersByLessonsTaken = $usersByLessonsTaken->take(5);
 
         // Return the users in order of the number of lessons taken
         return response()->json($usersByLessonsTaken);
@@ -217,6 +221,9 @@ class AnalyticsController extends Controller
         $usersByCoursesCreated = $usersByCoursesCreated->filter(function ($user) {
             return $user['courses_created'] > 0;
         });
+
+        // only the first 5 should be returned
+        $usersByCoursesCreated = $usersByCoursesCreated->take(5);
 
         // Return the users in order of the number of lessons taken
         return response()->json($usersByCoursesCreated);
