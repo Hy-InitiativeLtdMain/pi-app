@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\TransactionsResource;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Traits\ApiResponser;
@@ -20,7 +21,7 @@ class TransactionController extends Controller
         $transactions = Transaction::orderBy('created_at', 'desc')->whereIn('user_id', $this->userByInstitute())->get();
 
 
-        return $this->showAll($transactions);
+        return $this->showAll(TransactionsResource::collection($transactions));
     }
 
     /**
