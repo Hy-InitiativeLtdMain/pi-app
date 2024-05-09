@@ -92,7 +92,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('users/create/creator', [InstituteController::class, 'createCreator']);
 
             Route::get('/courses', [InstituteController::class, 'courses']);
-            Route::get('/transactions', [InstituteController::class, 'transactions']);
+            Route::get('/transactions', [TransactionController::class, 'index']);
             Route::get('/mentors', [InstituteController::class, 'mentors']);
 
             Route::post('/mentor/status/{mentor}', [InstituteController::class, 'updateMentorStatus']);
