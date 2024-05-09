@@ -178,7 +178,7 @@ class AnalyticsController extends Controller
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
                 // 'phone' => $user->phone,
-                // 'email' => $user->email,
+                'email' => $user->email,
                 'lessons_taken' => LessonUser::where('user_id', $user->id)->count(),
             ];
         });
@@ -209,7 +209,7 @@ class AnalyticsController extends Controller
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
                 // 'phone' => $user->phone,
-                // 'email' => $user->email,
+                'email' => $user->email,
                 'courses_created' => Course::where('user_id', $user->id)->count(),
             ];
         });
