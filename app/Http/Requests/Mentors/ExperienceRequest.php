@@ -23,25 +23,25 @@ class ExperienceRequest extends FormRequest
     {
         return [
             // 'mentor_id',
-            'employment_type' => 'string',
-            'company_name' => 'string',
-            'job_title' => 'string',
-            'location' => 'string',
-            'location_type' => 'string',
-            'current_job' => 'boolean',
-            'start_date' => 'string',
+            'employment_type' => 'string|nullable',
+            'company_name' => 'string|nullable',
+            'job_title' => 'string|nullable',
+            'location' => 'string|nullable',
+            'location_type' => 'string|nullable',
+            'current_job' => 'boolean|nullable',
+            'start_date' => 'string|nullable',
             'end_date' => 'string|nullable',
         ];
     }
 
     public static $_updateRules = [
-        'employment_type' => 'string',
-        'company_name' => 'string',
-        'job_title' => 'string',
-        'location' => 'string',
-        'location_type' => 'string',
-        'current_job' => 'boolean',
-        'start_date' => 'string',
+        'employment_type' => 'string|nullable',
+        'company_name' => 'string|nullable',
+        'job_title' => 'string|nullable',
+        'location' => 'string|nullable',
+        'location_type' => 'string|nullable',
+        'current_job' => 'boolean|nullable',
+        'start_date' => 'string|nullable',
         'end_date' => 'string|nullable',
     ];
 }
