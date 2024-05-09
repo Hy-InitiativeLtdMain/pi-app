@@ -114,4 +114,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Mentee::class);
     }
+
+    public function lessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_users', 'user_id', 'lesson_id')->withTimestamps();
+    }
 }
