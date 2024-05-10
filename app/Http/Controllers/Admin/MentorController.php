@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\MentorsResource;
+use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
 use App\Models\User;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 
 class MentorController extends Controller
 {
+    use ApiResponser;
     // get mentor list
     public function getMentors()
     {
         $users = $this->users()->where('admin', 0);
         $user_ids = $users->pluck('id')->toArray();
         $mentors = Mentor::whereIn('user_id', $user_ids)->get();
-        return response()->json($mentors);
+        return $this->showAll(MentorsResource::collection($mentors));
     }
 
     public function getMentorSearch(Request $request)
@@ -40,7 +44,7 @@ class MentorController extends Controller
             $filteredMentors = Mentor::whereIn('user_id', $userIds)->get();
         }
 
-        return response()->json($filteredMentors);
+        return $this->showAll(MentorsResource::collection($filteredMentors));
     }
 
     // get mentors that are pending
@@ -56,7 +60,8 @@ class MentorController extends Controller
     public function getMentor($id)
     {
         $mentor = Mentor::findOrFail($id);
-        return response()->json($mentor);
+        $noOfMentees = $mentor->getNumberOfMentees('accepted');
+        return response()->json(['number_of_mentees' => $noOfMentees,$mentor]);
     }
 
 
