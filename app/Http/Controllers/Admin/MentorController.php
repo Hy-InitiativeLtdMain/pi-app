@@ -60,7 +60,7 @@ class MentorController extends Controller
     public function getMentor($id)
     {
         $mentor = Mentor::findOrFail($id);
-        $noOfMentees = $mentor->getNumberOfMentees('accepted');
+        $noOfMentees = $mentor->getNumberOfMentees('approved');
         return response()->json(['number_of_mentees' => $noOfMentees,$mentor]);
     }
 

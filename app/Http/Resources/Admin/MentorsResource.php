@@ -14,13 +14,14 @@ class MentorsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // dd($this->getNumberOfMentees('approved'));
         return [
             'id' => $this->id,
             'name' => $this->firstname. ' '. $this->lastname,
             'email' => $this->email,
             'phone' => $this->phone,
             'created_at' => $this->created_at,
-            'no_of_mentees' => $this->getNumbersOfMentees(),
+            'no_of_mentees' => $this->getNumberOfMentees('approved'),
         ];
     }
 }
