@@ -27,7 +27,8 @@ class CreatorsResource extends JsonResource
             'email' => $this->email,
             'no_of_courses' => $this->courses->count(),
             'no_of_mentees' => $numberOfMentees,
-            'created_at' => $this->created_at
+            'created_at' => $this->created_at,
+            'image' => $this->image,
         ];
     }
 }

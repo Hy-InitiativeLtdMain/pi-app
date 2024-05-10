@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'role' => $this->is_admin ? 'Creator' : 'Learner',
             'created_at' => $this->created_at,
+            'image' => $this->image,
         ];
     }
 }
