@@ -12,6 +12,7 @@ use App\Models\Course;
 use App\Models\Mentor;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,13 +32,13 @@ class InstituteController extends Controller
 
             // Search mentors by first name or last name
             $users = User::where('institute_slug', $institute_slug)
-            ->where(function ($query) use ($searchTerm) {
-                $query->where('first_name', 'like', '%' . $searchTerm . '%')
-                ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
-            })
-            ->get();
+                ->where(function ($query) use ($searchTerm) {
+                    $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
+                })
+                ->get();
         } else {
-        $users = User::where('institute_slug', $institute_slug)->get();
+            $users = User::where('institute_slug', $institute_slug)->get();
         }
         return $this->showAll(UserResource::collection($users));
     }
@@ -68,10 +69,10 @@ class InstituteController extends Controller
                 })
                 ->get();
         } else {
-        $learners = User::where('institute_slug', $institute_slug)
-                        ->where('is_admin', 0)
-                        ->where('admin', 0)
-                        ->get();
+            $learners = User::where('institute_slug', $institute_slug)
+                ->where('is_admin', 0)
+                ->where('admin', 0)
+                ->get();
         }
         return $this->showAll(LearnersResource::collection($learners));
     }
@@ -108,10 +109,10 @@ class InstituteController extends Controller
                 })
                 ->get();
         } else {
-        $creators = User::where('institute_slug', $institute_slug)
-                        ->where('is_admin', 1)
-                        ->where('admin', 0)
-                        ->get();
+            $creators = User::where('institute_slug', $institute_slug)
+                ->where('is_admin', 1)
+                ->where('admin', 0)
+                ->get();
         }
         return $this->showAll(CreatorsResource::collection($creators));
     }
@@ -130,13 +131,27 @@ class InstituteController extends Controller
     }
 
     // get creator by id return no of courses , no of mentees
-    public function creatorById($id){
+    public function creatorById($id)
+    {
         $institute_slug = auth()->user()->institute_slug;
         $creator = User::where('institute_slug', $institute_slug)->where('id', $id)->first();
+
+        // sum user balance from transactions
+        $balance = Transaction::where('user_id', $creator->id)->sum('amount');
+
         $courses = Course::where('user_id', $id)->get();
         $courseCount = $courses->count();
-        $mentees = User::where('institute_slug', $institute_slug)->where('creator_id', $id)->get();
-        return $this->showOne(new UserResource($creator), ['courses' => $courses, 'mentees' => $mentees]);
+
+        if ($creator->mentor) {
+            $mentees = $creator->mentor()->first()->getNumberOfMentees('accepted');
+        } else {
+            $mentees = 0;
+        }
+        return response()->json([
+            'revenue' => $balance,
+            'total_courses' => $courseCount,
+            'mentees' => $mentees,
+        ]);
     }
 
 
@@ -146,14 +161,27 @@ class InstituteController extends Controller
     public function createCreator(Request $request)
     {
         $institute_slug = auth()->user()->institute_slug;
-        $validated =$request->validate(RegisterRequest::$_creatorRules);
+        $validated = $request->validate(RegisterRequest::$_creatorRules);
         $validated['password'] = bcrypt('qwerty12345');
         $validated['institute_slug'] = $institute_slug;
         $validated['is_admin'] = 1;
+
         $user = User::create($validated);
         $user->verifications()->create([
             'token' => mt_rand(1000, 9999)
         ]);
+
+        if ($request->hasFile('image')) {
+            $cloudinary = new CloudinaryService();
+            if ($user->image_id != null) {
+                $cloudinary->delete($user->image_id);
+            }
+
+            $resp = $cloudinary->store($request->file('image'), "user-images");
+            $user->image = $resp[0];
+            $user->image_id = $resp[1];
+        }
+
         $user->save();
 
         $emailJob = (new AuthJobManager($user, "new_user_admin"))->delay(Carbon::now()->addSeconds(5));
@@ -169,7 +197,7 @@ class InstituteController extends Controller
     public function createLearner(Request $request)
     {
         $institute_slug = auth()->user()->institute_slug;
-        $validated =$request->validate(RegisterRequest::$_learnerRules);
+        $validated = $request->validate(RegisterRequest::$_learnerRules);
         $validated['password'] = bcrypt('qwerty12345');
         $validated['institute_slug'] = $institute_slug;
 
@@ -177,6 +205,14 @@ class InstituteController extends Controller
         $user->verifications()->create([
             'token' => mt_rand(1000, 9999)
         ]);
+
+        if ($request->hasFile('image')) {
+            $cloudinary = new CloudinaryService();
+            $resp = $cloudinary->store($request->file('image'), "user-images");
+            $user->image = $resp[0];
+            $user->image_id = $resp[1];
+        }
+
         $user->save();
 
         $emailJob = (new AuthJobManager($user, "new_user_admin"))->delay(Carbon::now()->addSeconds(2));
@@ -187,6 +223,7 @@ class InstituteController extends Controller
             'status' => 'success',
         ]);
     }
+
 
 
     //  Get all courses based on the institute_slug of the authenticated user
