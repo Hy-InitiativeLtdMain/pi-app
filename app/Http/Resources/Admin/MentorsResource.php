@@ -22,6 +22,8 @@ class MentorsResource extends JsonResource
             'phone' => $this->phone,
             'created_at' => $this->created_at,
             'no_of_mentees' => $this->getNumberOfMentees('approved'),
+            'status' => $this->status,
+            'job_title' => $this->job_title,
         ];
     }
 }
