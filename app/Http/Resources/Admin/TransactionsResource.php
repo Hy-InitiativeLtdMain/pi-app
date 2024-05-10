@@ -20,8 +20,6 @@ class TransactionsResource extends JsonResource
             'date_done' => $this->created_at,
             'amount' => $this->amount,
             'status' => $this->status == 0? 'pending':( $this->status == 1? 'paid': 'failed'),
-            
-
         ];
     }
 }
