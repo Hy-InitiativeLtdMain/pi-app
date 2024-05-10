@@ -16,7 +16,7 @@ class LearnersResource extends JsonResource
     {
         $mentee = $this->mentee()->first(); // Retrieve the mentee model instance
         if ($mentee) {
-            $numberOfMentors = $mentee->getNumberOfMentors('accepted');
+            $numberOfMentors = $mentee->getNumberOfMentors('Approved');
             // dd($numberOfMentors);
         } else {
             $numberOfMentors = 0;
@@ -27,7 +27,8 @@ class LearnersResource extends JsonResource
             'email' => $this->email,
             'no_of_courses' => $this->lessons->count(),
             'no_of_mentors' => $numberOfMentors,
-            'created_at' => $this->created_at
+            'created_at' => $this->created_at,
+            'image' => $this->image
         ];
 }
 }
