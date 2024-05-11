@@ -50,7 +50,8 @@ class RegisterRequest extends FormRequest
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:6|confirmed',
             'institute_slug' => 'nullable',
-            'admin' => 'required'
+            'admin' => 'required',
+            'image' => 'nullable',
     ];
 
     public static $_creatorRules = [
