@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\AuthManager as AdminAuth;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\InstituteController;
 use App\Http\Controllers\Admin\MentorController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TransactionController;
 
 /*
@@ -78,6 +79,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user']);
 
         Route::group(['prefix' => 'admin', 'middleware' => ['auth:user', 'auth.administrator.access']], function () {
+            // Settings
+            Route::post('settings/profile/update', [SettingsController::class, 'update']);
+            Route::post('settings/password/update', [SettingsController::class, 'changePassword']);
+
+            Route::get('settings/features', [SettingsController::class, 'features']);
+            Route::post('settings/features', [SettingsController::class, 'createOrUpdateFeatures']);
+
             // Users
             Route::get('/users', [InstituteController::class, 'users']);
             Route::get('/users/recent', [InstituteController::class, 'recentUsers']);

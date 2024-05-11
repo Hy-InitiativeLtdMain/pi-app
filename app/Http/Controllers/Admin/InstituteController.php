@@ -21,7 +21,13 @@ class InstituteController extends Controller
 {
     use ApiResponser;
 
-
+    // public function __construct()
+    // {
+    //     // 'mentorship', 'course', 'analytics', 'transaction'
+    //     $this->middleware('feature:course')->only('courses');
+    //     $this->middleware('feature:mentorship')->only(['mentors', 'updateMentorStatus']);
+    //     $this->middleware('feature:transaction')->only('transactions');
+    // }
     // Get all users based on the institute_slug of the authenticated user
     public function users(Request $request)
     {
@@ -153,9 +159,6 @@ class InstituteController extends Controller
             'mentees' => $mentees,
         ]);
     }
-
-
-
 
     // add/create creator
     public function createCreator(Request $request)

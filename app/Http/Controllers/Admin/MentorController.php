@@ -13,6 +13,14 @@ use Illuminate\Http\Request;
 class MentorController extends Controller
 {
     use ApiResponser;
+
+    // public function __construct()
+    // {
+    //     // 'mentorship', 'course', 'analytics', 'transaction'
+    //     // $this->middleware('feature:course')->only('courses');
+    //     // $this->middleware('feature:mentorship');
+    //     // $this->middleware('feature:transaction')->only('transactions');
+    // }
     // get mentor list
     public function getMentors()
     {
