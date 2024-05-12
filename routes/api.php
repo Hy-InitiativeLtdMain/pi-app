@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Admin\AnalyticsController;
 use Illuminate\Http\Request;
-use App\Models\MentorAvailability;
+// use App\Models\MentorAvailability;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SessionsManager;
 use App\Http\Controllers\WebhooksManager;
