@@ -175,11 +175,13 @@
                         <h3 style="margin-bottom: 0;color: #000000">Hello {{$user['first_name'] . ' '. $user['last_name']}}</h3>
                         <p style="line-height: 25px;color: #667585; font-weight: 500">
                             Welcome to {{ config('app.name') }}. Your login information<br>
-                            Email: {{$user['email']}}
-                            Password: qwerty12345
+                            <b>Email:</b> {{$user['email']}} <br>
+                            <b>Password:</b> qwerty12345
                             <br>
+                            <br>
+                            <hr>
                             Please use the token below to verify your account. <br>
-                            Token: {{ $user->verifications()->latest()->first()->token }}
+                            <b>Token:</b> {{ $user->verifications()->latest()->first()->token }}
                         </p>
                     </td>
 
@@ -188,7 +190,7 @@
                 <tr>
                     <td align="center"
                         style="color: #979797; font-size: 16px; line-height: 25px;">
-                        <p>Login into WESOnline Professional Institute to verify your account.</p>
+                        <p>Click the button below to verify your account.</p>
                     </td>
                 </tr>
                 @isset($url[0])
@@ -197,9 +199,9 @@
                 <tr>
                     <td align="center"
                         style="color: #979797; font-size: 16px; line-height: 25px;">
-                        <a href="{{ $url[0] .'/login'}}" role="button" style="font-size:14px; font-weight:400;webkit-appearance: button;-moz-appearance: button;appearance: button;
+                        <a href="{{ $url[0] }}" role="button" style="font-size:14px; font-weight:400;webkit-appearance: button;-moz-appearance: button;appearance: button;
 								text-decoration: none;color: #FFFFFF; padding: 10px 30px; background: #0BBF23;border-radius: 20px;">
-                            Login to your dashboard
+                            Verify your account
                         </a>
                     </td>
                 </tr>

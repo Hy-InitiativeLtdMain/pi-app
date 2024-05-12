@@ -187,7 +187,7 @@ class InstituteController extends Controller
 
         $user->save();
 
-        $emailJob = (new AuthJobManager($user, "new_user_admin"))->delay(Carbon::now()->addSeconds(5));
+        $emailJob = (new AuthJobManager($user, "new_user_admin", $request->url))->delay(Carbon::now()->addSeconds(5));
         dispatch($emailJob);
 
         return response()->json([
@@ -218,7 +218,7 @@ class InstituteController extends Controller
 
         $user->save();
 
-        $emailJob = (new AuthJobManager($user, "new_user_admin"))->delay(Carbon::now()->addSeconds(2));
+        $emailJob = (new AuthJobManager($user, "new_user_admin", $request->url))->delay(Carbon::now()->addSeconds(2));
         dispatch($emailJob);
 
         return response()->json([
