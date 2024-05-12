@@ -302,4 +302,14 @@ class InstituteController extends Controller
         ];
         return response()->json($count);
     }
+
+    // Approve all mentors where status is pending
+    public function approveMentors(){
+        $mentors = Mentor::where('status', 'pending')->get();
+        foreach ($mentors as $mentor) {
+            $mentor->status = 'approved';
+            $mentor->save();
+        }
+        return response()->json(['message' => 'All mentors approved successfully']);
+    }
 }
