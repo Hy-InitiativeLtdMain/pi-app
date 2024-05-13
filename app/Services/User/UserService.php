@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use App\Jobs\User\AuthJobManager;
+use App\Models\AdminFeature;
 use Illuminate\Support\Facades\Hash;
 use App\Services\Query\FilteringService;
 use App\Services\Media\CloudinaryService;
@@ -54,6 +55,9 @@ class UserService
         } else {
             $data['is_mentor'] = false;
             $data['is_mentee'] = false;
+        }
+        if ($user->admin){
+            $data['admin_features'] = AdminFeature::where('user_id', $user->id)->get();
         }
 
         $data['available_balance'] = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
