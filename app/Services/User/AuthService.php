@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Jobs\User\AuthJobManager;
+use App\Models\AdminFeature;
 use App\Models\FcmToken;
 use App\Models\User;
 use App\Models\VerificationToken;
@@ -18,22 +19,60 @@ class AuthService
     if ($user && Hash::check($input['password'], $user->password)) {
         // Check if user is admin or learner
         $userType = $user->is_admin ? 'Creator' : 'Learner';
-        // check if user->admin is true
+            // check if user->admin is true
 
-        if ($user->admin) {
-            $userType = 'Admin';
-        }
+            if ($user->admin) {
+                $userType = 'Admin';
+
+                // Fetch admin features
+                $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
+
+                // Check if there is another admin with the same institute_slug
+                $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
+                ->where('admin', true)
+                    ->first();
+
+                // If another admin with the same institute_slug exists, get their features
+                if ($adminWithSameInstitute) {
+                    $adminFeatures = AdminFeature::where('user_id', $adminWithSameInstitute->id)->get();
+                }
+
+                // If admin features are empty, create default features
+                if ($adminFeatures->isEmpty()) {
+                    $features = ['mentorship', 'course', 'analytics', 'transaction'];
+
+                    foreach ($features as $feature) {
+                        AdminFeature::create([
+                            'user_id' => $user->id,
+                            'feature' => $feature,
+                            'enabled' => true, // All features are initially enabled
+                        ]);
+                    }
+
+                    // Fetch admin features again after creating defaults
+                    $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
+                }
+            }
 
 
         // Include institute slug in token payload
         $token = $user->createToken('user_auth_token', ['server:user'])
             ->plainTextToken;
+        if ($userType == "Admin"){
+            $tokenPayload = [
+                'token' => $token,
+                'tokenType' => 'admin',
+                'user' => $userType,
+                'adminFeatures' => $adminFeatures,
+                'institute_slug' => $user->institute_slug,
+            ];
+        } else {
         $tokenPayload = [
             'token' => $token,
             'tokenType' => 'user',
             'user' => $userType,
             'institute_slug' => $user->institute_slug,
-        ];
+        ];}
 
         // Check if user is mentor or mentee
         if ($user->is_admin && $user->mentor) {
