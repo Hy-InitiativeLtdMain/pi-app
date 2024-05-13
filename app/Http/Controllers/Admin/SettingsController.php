@@ -104,31 +104,36 @@ class SettingsController extends Controller
     public function createOrUpdateFeatures(Request $request)
     {
         $adminId = auth()->user()->id;
+
         // Validate the request data
         $request->validate([
-            'feature' => 'required|in:mentorship,course,analytics,transaction',
-            'enabled' => 'required|boolean', // Assuming enabled is boolean
+            '*.feature' => 'required|in:mentorship,course,analytics,transaction',
+            '*.enabled' => 'required|boolean',
         ]);
-        // dd($request);
 
-        // Check if the admin already has features defined
-        $adminFeature = AdminFeature::where('user_id', $adminId)->where('feature', $request->feature)->first();
+        // Process each feature object in the request array
+        foreach ($request->all() as $featureData) {
+            // Check if the admin already has features defined
+            $adminFeature = AdminFeature::where('user_id', $adminId)
+                ->where('feature', $featureData['feature'])
+                ->first();
 
-        if ($adminFeature) {
-            // Update existing features
-            $adminFeature->update([
-                'enabled' => $request->enabled,
-            ]);
-        } else {
-            // Create new features if none exist
-            $adminFeature = AdminFeature::create([
-                'user_id' => $adminId,
-                'feature' => $request->feature,
-                'enabled' => $request->enabled,
-            ]);
+            if ($adminFeature) {
+                // Update existing features
+                $adminFeature->update([
+                    'enabled' => $featureData['enabled'],
+                ]);
+            } else {
+                // Create new features if none exist
+                AdminFeature::create([
+                    'user_id' => $adminId,
+                    'feature' => $featureData['feature'],
+                    'enabled' => $featureData['enabled'],
+                ]);
+            }
         }
 
-        return response()->json($adminFeature, 200);
+        return response()->json('Features updated successfully', 200);
     }
 
 
