@@ -39,6 +39,15 @@ class CourseController extends Controller
 
     }
 
+    // get a course
+    public function getCourse($course) {
+        $course = Course::with('lessons')->findOrFail($course);
+
+        return response()->json($course, 200);
+    }
+
+
+
 
 
 }

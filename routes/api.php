@@ -121,13 +121,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             // Courses/Lessons
             Route::get('/courses/{category}', [CourseController::class, 'getCourses']);
             Route::post('lessons/{lesson}/status', [CourseController::class, 'flagCourse']);
+            Route::get('/course/{course}', [CourseController::class, 'getCourse']);
 
             // Mentor
             Route::get('/mentors', [MentorController::class, 'getMentorSearch']);
             Route::get('/mentors/pending', [MentorController::class, 'getPendingMentors']);
             Route::get('/mentors/mentor/{id}', [MentorController::class, 'getMentor']);
 
-            Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
+            // Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
         });
 
         // Availability
