@@ -10,10 +10,10 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('feature:course');
-    // }
+    public function __construct()
+    {
+        $this->middleware('feature:course');
+    }
 
     // get courses based on the param filter category id
     public function getCourses(Category $category)

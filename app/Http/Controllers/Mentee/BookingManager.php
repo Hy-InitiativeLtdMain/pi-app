@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\DB;
 class BookingManager extends Controller
 {
     use ApiResponser;
+    public function __construct()
+    {
+        // 'mentorship', 'course', 'analytics', 'transaction'
+        $this->middleware('feature:mentorship');
+    }
 
     public function store(BookingRequest $request)
     {

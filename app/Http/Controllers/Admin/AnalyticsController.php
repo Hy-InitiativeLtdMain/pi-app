@@ -15,6 +15,12 @@ class AnalyticsController extends Controller
 {
     use ApiResponser;
 
+    public function __construct()
+    {
+        // 'mentorship', 'course', '', 'transaction'course
+        $this->middleware('feature:analytics');
+    }
+
     public function userCount()
     {
         $institute_slug = auth()->user()->institute_slug;
@@ -234,5 +240,26 @@ class AnalyticsController extends Controller
         $institute_slug = auth()->user()->institute_slug;
         $users = User::where('institute_slug', $institute_slug)->get();
         return $users;
+    }
+
+    // get the demography of the users in the institute
+    public function demography()
+    {
+        // get the percentage of males and females users
+        $users = $this->users();
+        $males = $users->where('gender', 'male')->count();
+        $females = $users->where('gender', 'female')->count();
+        $total = $users->count();
+        $malePercentage = ($males / $total) * 100;
+        $femalePercentage = ($females / $total) * 100;
+        return response()->json([
+            'male_percent' => $malePercentage,
+            'female_percent' => $femalePercentage,
+            'total_users' => $total,
+            'males' => $males,
+            'females' => $females,
+        ]);
+
+
     }
 }

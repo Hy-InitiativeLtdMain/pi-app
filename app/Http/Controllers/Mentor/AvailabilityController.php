@@ -16,6 +16,11 @@ class AvailabilityController extends Controller
 {
     use ApiResponser, TraitsProcessAvailability;
 
+    public function __construct()
+    {
+        // 'mentorship', 'course', 'analytics', 'transaction'
+        $this->middleware('feature:mentorship');
+    }
 
     public function index()
     {

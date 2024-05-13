@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Auth;
 class MentorManager extends Controller
 {
     use ApiResponser;
+    public function __construct()
+    {
+        // 'mentorship', 'course', 'analytics', 'transaction'
+        $this->middleware('feature:mentorship');
+    }
 
 
     /**

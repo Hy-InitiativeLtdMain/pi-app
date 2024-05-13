@@ -16,6 +16,7 @@ class BankAccountManager extends Controller
     function __construct(BankAccountService $bankAccountService )
     {
         $this->bankAccountService = $bankAccountService;
+        $this->middleware('feature:transaction');
     }
 
     public function index(Request $request)

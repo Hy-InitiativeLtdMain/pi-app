@@ -16,6 +16,7 @@ class QuizManager extends Controller
     function __construct(QuizService $quizService )
     {
         $this->quizService = $quizService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)

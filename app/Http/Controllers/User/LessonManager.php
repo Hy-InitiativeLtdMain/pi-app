@@ -17,6 +17,7 @@ class LessonManager extends Controller
     function __construct(LessonService $lessonService )
     {
         $this->lessonService = $lessonService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)
@@ -54,7 +55,7 @@ class LessonManager extends Controller
         foreach ($validatedArr['list'] as $input) {
             $_data[] = $this->lessonService->store($course, $input);
         }
-        
+
         return response($_data, 200);
     }
 

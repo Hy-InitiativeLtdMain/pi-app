@@ -19,6 +19,7 @@ class MenteeManager extends Controller
     function __construct(Request $request)
     {
         $this->instituteSlug = $request->institute_slug;
+        $this->middleware('feature:mentorship');
     }
     /**
      * Display a listing of the resource.

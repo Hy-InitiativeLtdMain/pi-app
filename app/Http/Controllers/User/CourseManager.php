@@ -17,6 +17,7 @@ class CourseManager extends Controller
     function __construct(CourseService $courseService)
     {
         $this->courseService = $courseService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)

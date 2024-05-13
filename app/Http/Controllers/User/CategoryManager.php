@@ -16,8 +16,9 @@ class CategoryManager extends Controller
     function __construct(CategoryService $categoryService )
     {
         $this->categoryService = $categoryService;
+        $this->middleware('feature:course');
     }
-
+    
     public function index(Request $request)
     {
         $_data = $this->categoryService->index();
