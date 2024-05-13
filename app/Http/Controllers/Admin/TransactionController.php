@@ -12,6 +12,12 @@ use Illuminate\Http\Request;
 class TransactionController extends Controller
 {
     use ApiResponser;
+
+    public function __construct()
+    {
+        // 'mentorship', 'course', 'analytics', 'transaction'
+        $this->middleware('feature:transaction');
+    }
     /**
      * Display a listing of the resource in order of recency
      */

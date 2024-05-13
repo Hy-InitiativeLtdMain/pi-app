@@ -16,6 +16,7 @@ class QuestionManager extends Controller
     function __construct(QuestionService $questionService )
     {
         $this->questionService = $questionService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)

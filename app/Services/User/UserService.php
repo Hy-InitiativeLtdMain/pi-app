@@ -56,8 +56,27 @@ class UserService
             $data['is_mentor'] = false;
             $data['is_mentee'] = false;
         }
-        if ($user->admin){
-            $data['admin_features'] = AdminFeature::where('user_id', $user->id)->get();
+        if ($user->admin) {
+
+            // Fetch admin features
+            $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
+            // dd($adminFeatures);
+
+            // If admin features are empty, create default features
+            if ($adminFeatures->isEmpty()) {
+                // Check if there is another admin with the same institute_slug
+                $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
+                    ->where('admin', true)
+                    ->get()->pluck('id')->toArray();
+
+                // dd($adminWithSameInstitute);
+                // If another admin with the same institute_slug exists, get their features
+                if ($adminWithSameInstitute) {
+                    $adminFeatures = AdminFeature::whereIn('user_id', $adminWithSameInstitute)->get();
+                    // dd($adminFeatures);
+                }
+                
+            }
         }
 
         $data['available_balance'] = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')

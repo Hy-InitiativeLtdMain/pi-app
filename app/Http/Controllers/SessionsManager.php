@@ -10,6 +10,11 @@ class SessionsManager extends Controller
 {
     use ApiResponser;
 
+    public function __construct()
+    {
+        $this->middleware('feature:mentorship');
+    }
+
     public function checkUser($authUser){
         if ($authUser->mentee){
             $user = 'mentee';

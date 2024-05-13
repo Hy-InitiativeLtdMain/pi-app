@@ -16,6 +16,7 @@ class ReviewManager extends Controller
     function __construct(ReviewService $reviewService)
     {
         $this->reviewService = $reviewService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)

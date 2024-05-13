@@ -16,6 +16,8 @@ class AssignmentManager extends Controller
     function __construct(AssignmentService $assignmentService )
     {
         $this->assignmentService = $assignmentService;
+        $this->middleware('feature:course');
+
     }
 
     public function index(Request $request)

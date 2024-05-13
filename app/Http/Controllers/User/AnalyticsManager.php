@@ -14,6 +14,7 @@ class AnalyticsManager extends Controller
     function __construct(AnalyticsService $analyticsService)
     {
         $this->analyticsService = $analyticsService;
+        $this->middleware('feature:analytics');
     }
 
     public function stats(Request $request)

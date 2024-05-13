@@ -33,11 +33,13 @@ class AuthService
                     // Check if there is another admin with the same institute_slug
                     $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
                         ->where('admin', true)
-                        ->first();
+                        ->get()->pluck('id')->toArray();
 
+                    // dd($adminWithSameInstitute);
                     // If another admin with the same institute_slug exists, get their features
                     if ($adminWithSameInstitute) {
-                        $adminFeatures = AdminFeature::where('user_id', $adminWithSameInstitute->id)->get();
+                        $adminFeatures = AdminFeature::whereIn('user_id', $adminWithSameInstitute)->get();
+                        // dd($adminFeatures);
                     }
                     if ($adminFeatures->isEmpty()){
                     $features = ['mentorship', 'course', 'analytics', 'transaction'];

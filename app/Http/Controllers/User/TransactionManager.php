@@ -18,6 +18,7 @@ class TransactionManager extends Controller
     function __construct(TransactionService $transactionService)
     {
         $this->transactionService = $transactionService;
+        $this->middleware('feature:transaction');
     }
 
     public function index(Request $request)

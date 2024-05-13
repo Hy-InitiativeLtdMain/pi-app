@@ -16,6 +16,7 @@ class AttachmentManager extends Controller
     function __construct(AttachmentService $attachmentService )
     {
         $this->attachmentService = $attachmentService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)

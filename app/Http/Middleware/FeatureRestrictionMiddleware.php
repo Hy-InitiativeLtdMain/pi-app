@@ -20,12 +20,15 @@ class FeatureRestrictionMiddleware
     public function handle(Request $request, Closure $next, ...$features): Response
     {
         $user = Auth::user();
+        // dd($user);
 
         if (!$user || !$user->admin) {
             // If the user is not authenticated or not an admin, deny access
             return response()->json(['error' => 'Unauthorized.'], 401);
         }
 
+
+        // dd($userAdminIds);
         // Get the admin user for the user's institute
         $adminUser = User::where('institute_slug', $user->institute_slug)
             ->where('admin', 1)
@@ -36,16 +39,19 @@ class FeatureRestrictionMiddleware
             return response()->json(['error' => 'Admin not found for this institute.'], 403);
         }
 
-        // Get the admin user ID
-        $adminUserId = $adminUser->id;
+        $featureAdminIds = AdminFeature::get()->pluck('user_id')->toArray();
+        // dd($featureAdminIds);
+        $userAdminIds = User::where('institute_slug', $user->institute_slug)->where('admin', true)->whereIn('id', $featureAdminIds)->first();
+
 
         // Check each feature
         foreach ($features as $feature) {
             // Check if the feature is enabled for the admin's institute
-            $featureEnabled = AdminFeature::where('user_id', $adminUserId)
+            $featureEnabled = AdminFeature::where('user_id', $userAdminIds->id)
                 ->where('feature', $feature)
                 ->where('enabled', true)
                 ->exists();
+                // dd($featureEnabled, $feature);
 
             if (!$featureEnabled) {
                 // If the feature is not enabled for the admin's institute, deny access
