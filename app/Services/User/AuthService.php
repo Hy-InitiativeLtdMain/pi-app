@@ -26,19 +26,20 @@ class AuthService
 
                 // Fetch admin features
                 $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
-
-                // Check if there is another admin with the same institute_slug
-                $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
-                ->where('admin', true)
-                    ->first();
-
-                // If another admin with the same institute_slug exists, get their features
-                if ($adminWithSameInstitute) {
-                    $adminFeatures = AdminFeature::where('user_id', $adminWithSameInstitute->id)->get();
-                }
+                // dd($adminFeatures);
 
                 // If admin features are empty, create default features
                 if ($adminFeatures->isEmpty()) {
+                    // Check if there is another admin with the same institute_slug
+                    $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
+                        ->where('admin', true)
+                        ->first();
+
+                    // If another admin with the same institute_slug exists, get their features
+                    if ($adminWithSameInstitute) {
+                        $adminFeatures = AdminFeature::where('user_id', $adminWithSameInstitute->id)->get();
+                    }
+                    if ($adminFeatures->isEmpty()){
                     $features = ['mentorship', 'course', 'analytics', 'transaction'];
 
                     foreach ($features as $feature) {
@@ -51,6 +52,7 @@ class AuthService
 
                     // Fetch admin features again after creating defaults
                     $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
+                    }
                 }
             }
 
