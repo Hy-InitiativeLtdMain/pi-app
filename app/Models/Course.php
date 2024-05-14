@@ -26,6 +26,8 @@ class Course extends Model
 
         'category_id',
         'user_id',
+        'status',
+        'feedback',
     ];
 
     protected $hidden = [

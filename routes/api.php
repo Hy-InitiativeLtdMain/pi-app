@@ -99,7 +99,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('users/create/learner', [InstituteController::class, 'createLearner']);
             Route::post('users/create/creator', [InstituteController::class, 'createCreator']);
 
-            Route::get('/courses', [InstituteController::class, 'courses']);
             Route::get('/transactions', [TransactionController::class, 'index']);
             Route::get('/mentors', [InstituteController::class, 'mentors']);
 
@@ -120,9 +119,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('analytics/demography/gender', [AnalyticsController::class, 'demography']);
 
             // Courses/Lessons
+            Route::get('/category', [CourseController::class, 'getCategories']);
+            Route::get('/courses', [InstituteController::class, 'courses']);
             Route::get('/courses/{category}', [CourseController::class, 'getCourses']);
-            Route::post('lessons/{lesson}/status', [CourseController::class, 'flagCourse']);
+            Route::post('courses/{course}/status', [CourseController::class, 'flagCourse']);
             Route::get('/course/{course}', [CourseController::class, 'getCourse']);
+            Route::post('lessons/{lesson}/status', [CourseController::class, 'flagLesson']);
 
             // Mentor
             Route::get('/mentors', [MentorController::class, 'getMentorSearch']);

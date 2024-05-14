@@ -15,15 +15,35 @@ class CourseController extends Controller
         $this->middleware('feature:course');
     }
 
-    // get courses based on the param filter category id
-    public function getCourses(Category $category)
+
+    // get categories
+    public function getCategories()
     {
-        $courses = Course::where('category_id', $category->id)->get();
+        $categories = Category::paginate();
+        return response()->json($categories);
+    }
+    // get courses based on the param filter category id
+    public function getCourses(Request $request, Category $category)
+    {
+        // add search functionality
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+
+            // Search mentors by first name or last name
+            $courses = Course::where('category_id', $category->id)
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('title', 'like', '%' . $searchTerm . '%')
+                ->orWhere('description', 'like', '%' . $searchTerm . '%');
+            })
+            ->paginate();
+        } else {
+            $courses = Course::where('category_id', $category->id)->paginate();
+        }
         return response()->json($courses);
     }
 
     // flag or approve courses
-    public function flagCourse(Request $request, Lesson $lesson)
+    public function flagLesson(Request $request, Lesson $lesson)
     {
         if ($lesson->course->user->institute_slug !== auth()->user()->institute_slug)
         {
@@ -39,6 +59,20 @@ class CourseController extends Controller
 
     }
 
+    public function flagCourse(Request $request, Course $course)
+    {
+        if ($course->user->institute_slug !== auth()->user()->institute_slug) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:approved,declined',
+            'feedback' => 'nullable'
+        ]);
+
+        $course->update($validated);
+        return response()->json(['message' => 'Course status updated successfully']);
+    }
     // get a course
     public function getCourse($course) {
         $course = Course::with('lessons')->findOrFail($course);
