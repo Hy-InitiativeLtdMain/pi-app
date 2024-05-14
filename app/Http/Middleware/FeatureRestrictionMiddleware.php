@@ -21,8 +21,9 @@ class FeatureRestrictionMiddleware
     {
         $user = Auth::user();
         // dd($user);
+        // dd($user);
 
-        if (!$user || !$user->admin) {
+        if (!$user) {
             // If the user is not authenticated or not an admin, deny access
             return response()->json(['error' => 'Unauthorized.'], 401);
         }
