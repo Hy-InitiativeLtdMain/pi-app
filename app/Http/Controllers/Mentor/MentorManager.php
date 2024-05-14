@@ -9,6 +9,7 @@ use App\Http\Requests\Mentors\ExperienceRequest;
 use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
+use App\Models\MentorExperience;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -112,31 +113,48 @@ class MentorManager extends Controller
     // create/update mentor experience
     public function createExperience(Request $request)
     {
-
+        // Check if the user is a mentor
         if (!auth()->user()->mentor) {
             return response()->json('Please fill your mentor details', 404);
         }
-        if (auth()->user()->mentor->status == 'pending') {
+
+        // Check the mentor's status
+        $mentorStatus = auth()->user()->mentor->status;
+        if ($mentorStatus == 'pending') {
             return $this->errorResponse('Your account is pending', 404);
-        } else if (auth()->user()->mentor->status == 'declined') {
+        } elseif ($mentorStatus == 'declined') {
             return $this->errorResponse('Your account is rejected', 404);
         }
+
         $mentor = auth()->user()->mentor;
+        $experiencesData = $request->validate([
+            '*.id' => 'nullable|integer',
+            '*.employment_type' => 'string|nullable',
+            '*.company_name' => 'string|nullable',
+            '*.job_title' => 'string|nullable',
+            '*.location' => 'string|nullable',
+            '*.location_type' => 'string|nullable',
+            '*.current_job' => 'boolean|nullable',
+            '*.start_date' => 'string|nullable',
+            '*.end_date' => 'string|nullable',
+        ]);
 
-        $validate = $request->validate(ExperienceRequest::$_updateRules);
-        // check if mentor has experience
-        if ($mentor->experience) {
-            // update experience
-            $mentor->experience->update($validate);
-
-            return $this->successResponse(new MentorResource($mentor), 200);
-        } else {
-            // create experience
-            $mentor->experience()->create($validate);
-
-            return $this->successResponse(new MentorResource($mentor), 200);
+        // Loop through each experience data
+        foreach ($experiencesData as $experienceDatum) {
+            if (isset($experienceDatum['id'])) {
+                // If an ID is provided, update the existing experience
+                $existingExperience = MentorExperience::findOrFail($experienceDatum['id']);
+                $existingExperience->update($experienceDatum);
+            } else {
+                // If no ID is provided, create a new experience
+                $experience = new MentorExperience($experienceDatum);
+                $mentor->experience()->save($experience);
+            }
         }
+
+        return $this->successResponse(new MentorResource($mentor), 200);
     }
+
 
     public function createSkills(Request $request)
     {
