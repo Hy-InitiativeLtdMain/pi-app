@@ -32,7 +32,7 @@ class Mentor extends Model
     }
 
     public function experience(){
-        return $this->hasOne(MentorExperience::class);
+        return $this->hasMany(MentorExperience::class);
     }
 
     public function skills(){
