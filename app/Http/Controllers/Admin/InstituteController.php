@@ -28,6 +28,8 @@ class InstituteController extends Controller
         $this->middleware('feature:mentorship')->only(['mentors', 'updateMentorStatus']);
         $this->middleware('feature:transaction')->only('transactions');
     }
+
+    // USERS
     // Get all users based on the institute_slug of the authenticated user
     public function users(Request $request)
     {
@@ -57,6 +59,7 @@ class InstituteController extends Controller
         return $this->showAll(UserResource::collection($users));
     }
 
+    // USERS - Learners
     // learners
     public function learners(Request $request)
     {
@@ -97,6 +100,7 @@ class InstituteController extends Controller
         return $this->showAll(LearnersResource::collection($learners));
     }
 
+    // USERS - Creators
     // creators
     public function creators(Request $request)
     {
@@ -230,13 +234,26 @@ class InstituteController extends Controller
 
 
     //  Get all courses based on the institute_slug of the authenticated user
-    public function courses()
+    public function courses(Request $request)
     {
         $institute_slug = auth()->user()->institute_slug;
         $users = User::where('institute_slug', $institute_slug)->get();
         // convert the users_id to array
         $users_id = $users->pluck('id')->toArray();
-        $courses = Course::whereIn('user_id', $users_id)->get();
+
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+
+            // Search mentors by first name or last name
+            $courses = Course::whereIn('user_id', $users_id)
+                ->where(function ($query) use ($searchTerm) {
+                    $query->where('title', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('description', 'like', '%' . $searchTerm . '%');
+                })
+                ->paginate();
+        } else {
+            $courses = Course::whereIn('user_id', $users_id)->paginate();
+        }
         // count the courses
         $count = $courses->count();
         return response()->json(['courses' => $courses, 'count' => $count]);
