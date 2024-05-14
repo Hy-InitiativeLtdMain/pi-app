@@ -151,8 +151,11 @@ class MentorManager extends Controller
                 $mentor->experience()->save($experience);
             }
         }
+        $data = [
+            'message' => "Experience successfully created/updated",
+        ];
 
-        return $this->successResponse(new MentorResource($mentor), 200);
+        return $this->successResponse($data, 200);
     }
 
 
@@ -175,12 +178,12 @@ class MentorManager extends Controller
             // update experience
             $mentor->skills->update($validate);
 
-            return $this->successResponse(new MentorResource($mentor), 200);
+            return $this->successResponse('Skills successfully updated', 200);
         } else {
             // create experience
             $mentor->skills()->create($validate);
 
-            return $this->successResponse(new MentorResource($mentor), 200);
+            return $this->successResponse('Skills successfully created', 200);
         }
     }
 
