@@ -97,6 +97,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('users/export-csv',[InstituteController::class, 'usersExportCSV']);
             Route::get('users/learners/export-csv', [InstituteController::class, 'learnersExportCSV']);
             Route::get('users/creators/export-csv', [InstituteController::class, 'creatorsExportCSV']);
+            Route::patch('users/{user}', [UserManager::class, 'update']);
+            Route::delete('users/{user}', [UserManager::class, 'delete']);
 
             // CREATE USERS
             Route::post('users/create/learner', [InstituteController::class, 'createLearner']);
