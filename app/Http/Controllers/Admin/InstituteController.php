@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\RegisterRequest;
+use App\Http\Resources\Admin\CourseResource;
 use App\Http\Resources\Admin\CreatorsResource;
 use App\Http\Resources\Admin\LearnersResource;
 use App\Http\Resources\Admin\UserResource;
@@ -256,7 +257,7 @@ class InstituteController extends Controller
         }
         // count the courses
         $count = $courses->count();
-        return response()->json(['courses' => $courses, 'count' => $count]);
+        return response()->json(['courses' => CourseResource::collection($courses), 'count' => $count]);
     }
 
 
