@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\CourseResource;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    use ApiResponser;
     public function __construct()
     {
         $this->middleware('feature:course');
@@ -39,7 +42,7 @@ class CourseController extends Controller
         } else {
             $courses = Course::where('category_id', $category->id)->paginate();
         }
-        return response()->json($courses);
+        return $this->showAll(CourseResource::collection($courses));
     }
 
     // flag or approve courses
@@ -77,7 +80,7 @@ class CourseController extends Controller
     public function getCourse($course) {
         $course = Course::with('lessons')->findOrFail($course);
 
-        return response()->json($course, 200);
+        return $this->successResponse(new CourseResource($course), 200);
     }
 
 
