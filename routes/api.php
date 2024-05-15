@@ -94,6 +94,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('users/learners/recent', [InstituteController::class, 'recentLearners']);
             Route::get('users/creators', [InstituteController::class, 'creators']);
             Route::get('users/creators/recent', [InstituteController::class, 'recentCreators']);
+            Route::get('users/export-csv',[InstituteController::class, 'usersExportCSV']);
+            Route::get('users/learners/export-csv', [InstituteController::class, 'learnersExportCSV']);
+            Route::get('users/creators/export-csv', [InstituteController::class, 'creatorsExportCSV']);
 
             // CREATE USERS
             Route::post('users/create/learner', [InstituteController::class, 'createLearner']);
@@ -130,6 +133,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/mentors', [MentorController::class, 'getMentorSearch']);
             Route::get('/mentors/pending', [MentorController::class, 'getPendingMentors']);
             Route::get('/mentors/mentor/{id}', [MentorController::class, 'getMentor']);
+            Route::get('mentors/export-csv', [MentorController::class, 'mentorsExportCSV']);
 
             // Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
         });

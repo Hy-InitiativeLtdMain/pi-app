@@ -9,6 +9,7 @@ use App\Models\Mentor;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class MentorController extends Controller
 {
@@ -28,6 +29,50 @@ class MentorController extends Controller
         $user_ids = $users->pluck('id')->toArray();
         $mentors = Mentor::whereIn('user_id', $user_ids)->get();
         return $this->showAll(MentorsResource::collection($mentors));
+    }
+
+    public function mentorsExportCSV()
+    {
+        $users = $this->users()->where('admin', 0);
+        $user_ids = $users->pluck('id')->toArray();
+        $mentors = Mentor::whereIn('user_id', $user_ids)->get();
+        $csvFileName = 'mentors.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
+        ];
+
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, [
+            'First Name',
+            'Last Name',
+            'Email',
+            'Phone Number',
+            'Company',
+            'Job Title',
+            'Bio',
+            'Status',
+        ]); // Add more headers as needed
+
+        foreach ($mentors as $mentor) {
+            $data = [
+                $mentor->firstname ?? '',
+                $mentor->lastname ?? '',
+                $mentor->email ?? '',
+                $mentor->phone ?? '',
+                $mentor->company ?? '',
+                $mentor->job_title ?? '',
+                $mentor->bio ?? '',
+                $mentor->status ?? '',
+            ];
+
+            fputcsv($handle, $data);
+        }
+
+        fclose($handle);
+
+        return Response::make('', 200, $headers);
     }
 
     public function getMentorSearch(Request $request)
