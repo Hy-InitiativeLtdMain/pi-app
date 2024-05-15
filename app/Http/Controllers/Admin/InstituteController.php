@@ -17,6 +17,7 @@ use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class InstituteController extends Controller
 {
@@ -51,6 +52,51 @@ class InstituteController extends Controller
         }
         return $this->showAll(UserResource::collection($users));
     }
+
+    public function usersExportCSV()
+    {
+        $institute_slug = auth()->user()->institute_slug;
+
+        // Fetch all users for the institute
+        $users = User::where('institute_slug', $institute_slug)->get();
+        $csvFileName = 'users.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
+        ];
+
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, [
+            'First Name',
+            'Last Name',
+            'Email',
+            'Phone Number',
+            'Gender',
+            'Location',
+        ]); // Add more headers as needed
+
+        foreach ($users as $user) {
+            $data = [
+                $user->first_name ?? '',
+                $user->last_name ?? '',
+                $user->email ?? '',
+                $user->phone ?? '',
+                $user->gender ?? '',
+                $user->location ?? '',
+            ];
+
+            fputcsv($handle, $data);
+        }
+
+        fclose($handle);
+
+        return Response::make('', 200, $headers);
+    }
+
+
+
+
 
     // get recent users
     public function recentUsers()
@@ -87,6 +133,50 @@ class InstituteController extends Controller
         return $this->showAll(LearnersResource::collection($learners));
     }
 
+    public function learnersExportCSV()
+    {
+        $institute_slug = auth()->user()->institute_slug;
+
+        // Fetch all users for the institute
+        $users =
+        User::where('institute_slug', $institute_slug)
+        ->where('is_admin', 0)
+            ->where('admin', 0)
+            ->get();
+        $csvFileName = 'users.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
+        ];
+
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, [
+            'First Name',
+            'Last Name',
+            'Email',
+            'Phone Number',
+            'Gender',
+            'Location',
+        ]); // Add more headers as needed
+
+        foreach ($users as $user) {
+            $data = [
+                $user->first_name ?? '',
+                $user->last_name ?? '',
+                $user->email ?? '',
+                $user->phone ?? '',
+                $user->gender ?? '',
+                $user->location ?? '',
+            ];
+
+            fputcsv($handle, $data);
+        }
+
+        fclose($handle);
+
+        return Response::make('', 200, $headers);
+    }
     // get recent learners
     public function recentLearners()
     {
@@ -140,7 +230,51 @@ class InstituteController extends Controller
 
         return $this->showAll(CreatorsResource::collection($creators));
     }
+    
+    public function creatorsExportCSV()
+    {
+        $institute_slug = auth()->user()->institute_slug;
 
+        // Fetch all users for the institute
+        $users =
+            User::where('institute_slug', $institute_slug)
+            ->where('is_admin', 0)
+            ->where('admin', 0)
+            ->get();
+        $csvFileName = 'users.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
+        ];
+
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, [
+            'First Name',
+            'Last Name',
+            'Email',
+            'Phone Number',
+            'Gender',
+            'Location',
+        ]); // Add more headers as needed
+
+        foreach ($users as $user) {
+            $data = [
+                $user->first_name ?? '',
+                $user->last_name ?? '',
+                $user->email ?? '',
+                $user->phone ?? '',
+                $user->gender ?? '',
+                $user->location ?? '',
+            ];
+
+            fputcsv($handle, $data);
+        }
+
+        fclose($handle);
+
+        return Response::make('', 200, $headers);
+    }
     // get creator by id return no of courses , no of mentees
     public function creatorById($id)
     {
