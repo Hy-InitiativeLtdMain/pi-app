@@ -56,7 +56,11 @@ class MentorManager extends Controller
         // dd($request->all());
 
         $mentor = Mentor::create($request->all());
-        return $this->successResponse(new MentorResource($mentor), 201);
+        $data = [
+            'message' => 'Profile Created Successfully.',
+            'data' => new MentorResource($mentor)
+        ];
+        return $this->successResponse($data, 201);
     }
 
     /**
@@ -90,7 +94,11 @@ class MentorManager extends Controller
             return $this->errorResponse('Your account is rejected', 404);
         }
         $mentor->update($request->validated());
-        return $this->successResponse(new MentorResource($mentor), 200);
+        $data = [
+            'message' => 'Profile Updated Successfully.',
+            'data' => new MentorResource($mentor)
+        ];
+        return $this->successResponse($data, 200);
     }
 
     /**
@@ -153,6 +161,7 @@ class MentorManager extends Controller
         }
         $data = [
             'message' => "Experience successfully created/updated",
+            'data' => new MentorResource($mentor)
         ];
 
         return $this->successResponse($data, 200);
@@ -177,13 +186,19 @@ class MentorManager extends Controller
         if ($mentor->skills) {
             // update experience
             $mentor->skills->update($validate);
-
-            return $this->successResponse('Skills successfully updated', 200);
+            $data = [
+                'message' => 'Skills successfully updated',
+                'data' => new MentorResource($mentor)
+            ];
+            return $this->successResponse($data, 200);
         } else {
             // create experience
             $mentor->skills()->create($validate);
-
-            return $this->successResponse('Skills successfully created', 200);
+            $data = [
+                'message' => 'Your Skills have been added successfully',
+                'data' => new MentorResource($mentor)
+            ];
+            return $this->successResponse($data, 200);
         }
     }
 
@@ -204,13 +219,19 @@ class MentorManager extends Controller
         if ($mentor->accessability) {
             // update experience
             $mentor->accessability->update($validate);
-
-            return $this->successResponse(new MentorResource($mentor), 200);
+            $data = [
+                'message' => 'Availability updated successfully.',
+                'data' => new MentorResource($mentor)
+            ];
+            return $this->successResponse($data, 200);
         } else {
             // create experience
             $mentor->accessability()->create($validate);
-
-            return $this->successResponse(new MentorResource($mentor), 200);
+            $data = [
+                'message' => 'Availablity added successfully.',
+                'data' => new MentorResource($mentor)
+            ];
+            return $this->successResponse($data, 200);
         }
     }
 }
