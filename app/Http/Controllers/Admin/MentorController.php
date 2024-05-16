@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\MentorExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\MentorsResource;
 use App\Http\Resources\Mentor\MentorResource;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MentorController extends Controller
 {
@@ -73,6 +75,16 @@ class MentorController extends Controller
         fclose($handle);
 
         return Response::make('', 200, $headers);
+    }
+
+    public function mentorsExport()
+    {
+        $users = $this->users()->where('admin', 0);
+        $user_ids = $users->pluck('id')->toArray();
+        $mentors = Mentor::whereIn('user_id', $user_ids)->get(['firstname', 'lastname', 'email', 'phone', 'company', 'job_title','bio', 'status']);
+
+        // Pass the users to the UsersExport class
+        return Excel::download(new MentorExport($mentors), 'mentors.xlsx');
     }
 
     public function getMentorSearch(Request $request)

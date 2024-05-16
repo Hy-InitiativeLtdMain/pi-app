@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\CreatorExport;
+use App\Exports\LearnerExport;
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\RegisterRequest;
 use App\Http\Resources\Admin\CourseResource;
@@ -18,6 +21,7 @@ use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InstituteController extends Controller
 {
@@ -53,50 +57,15 @@ class InstituteController extends Controller
         return $this->showAll(UserResource::collection($users));
     }
 
-    public function usersExportCSV()
-    {
+    public function usersExport(){
         $institute_slug = auth()->user()->institute_slug;
 
         // Fetch all users for the institute
-        $users = User::where('institute_slug', $institute_slug)->get();
-        $csvFileName = 'users.csv';
+        $users = User::where('institute_slug', $institute_slug)->get(['first_name', 'last_name', 'email', 'phone', 'gender', 'location']);
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
-        ];
-
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, [
-            'First Name',
-            'Last Name',
-            'Email',
-            'Phone Number',
-            'Gender',
-            'Location',
-        ]); // Add more headers as needed
-
-        foreach ($users as $user) {
-            $data = [
-                $user->first_name ?? '',
-                $user->last_name ?? '',
-                $user->email ?? '',
-                $user->phone ?? '',
-                $user->gender ?? '',
-                $user->location ?? '',
-            ];
-
-            fputcsv($handle, $data);
-        }
-
-        fclose($handle);
-
-        return Response::make('', 200, $headers);
+        // Pass the users to the UsersExport class
+        return Excel::download(new UsersExport($users), 'users.xlsx');
     }
-
-
-
-
 
     // get recent users
     public function recentUsers()
@@ -133,7 +102,8 @@ class InstituteController extends Controller
         return $this->showAll(LearnersResource::collection($learners));
     }
 
-    public function learnersExportCSV()
+
+    public function learnersExport()
     {
         $institute_slug = auth()->user()->institute_slug;
 
@@ -141,42 +111,13 @@ class InstituteController extends Controller
         $users =
         User::where('institute_slug', $institute_slug)
         ->where('is_admin', 0)
-            ->where('admin', 0)
-            ->get();
-        $csvFileName = 'users.csv';
+        ->where('admin', 0)
+        ->get(['first_name', 'last_name', 'email', 'phone', 'gender', 'location']);
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
-        ];
-
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, [
-            'First Name',
-            'Last Name',
-            'Email',
-            'Phone Number',
-            'Gender',
-            'Location',
-        ]); // Add more headers as needed
-
-        foreach ($users as $user) {
-            $data = [
-                $user->first_name ?? '',
-                $user->last_name ?? '',
-                $user->email ?? '',
-                $user->phone ?? '',
-                $user->gender ?? '',
-                $user->location ?? '',
-            ];
-
-            fputcsv($handle, $data);
-        }
-
-        fclose($handle);
-
-        return Response::make('', 200, $headers);
+        // Pass the users to the UsersExport class
+        return Excel::download(new LearnerExport($users), 'learners.xlsx');
     }
+
     // get recent learners
     public function recentLearners()
     {
@@ -230,51 +171,23 @@ class InstituteController extends Controller
 
         return $this->showAll(CreatorsResource::collection($creators));
     }
-    
-    public function creatorsExportCSV()
+
+    public function creatorsExport()
     {
         $institute_slug = auth()->user()->institute_slug;
 
         // Fetch all users for the institute
         $users =
             User::where('institute_slug', $institute_slug)
-            ->where('is_admin', 0)
+            ->where('is_admin', 1)
             ->where('admin', 0)
-            ->get();
-        $csvFileName = 'users.csv';
+            ->get(['first_name', 'last_name', 'email', 'phone', 'gender', 'location']);
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
-        ];
-
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, [
-            'First Name',
-            'Last Name',
-            'Email',
-            'Phone Number',
-            'Gender',
-            'Location',
-        ]); // Add more headers as needed
-
-        foreach ($users as $user) {
-            $data = [
-                $user->first_name ?? '',
-                $user->last_name ?? '',
-                $user->email ?? '',
-                $user->phone ?? '',
-                $user->gender ?? '',
-                $user->location ?? '',
-            ];
-
-            fputcsv($handle, $data);
-        }
-
-        fclose($handle);
-
-        return Response::make('', 200, $headers);
+        // Pass the users to the UsersExport class
+        return Excel::download(new CreatorExport($users), 'creators.xlsx');
     }
+
+
     // get creator by id return no of courses , no of mentees
     public function creatorById($id)
     {
