@@ -39,7 +39,11 @@ class UserRequest extends FormRequest
         'gender' => 'max:255',
         'phone' => 'max:255',
         'email' => 'max:255|unique:users,email',
-
+        'institute' => 'max:255',
+        'location' => 'max:255',
+        'signature' => 'nullable',
+        'image' => 'nullable',
+        'signature' => 'nullable'
     ];
 
 }
