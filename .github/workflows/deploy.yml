@@ -19,6 +19,7 @@ jobs:
             cd /var/www/piapp
             git pull origin develop
             composer install
+            composer update
             php artisan migrate --force
             php artisan cache:clear
-            
+
