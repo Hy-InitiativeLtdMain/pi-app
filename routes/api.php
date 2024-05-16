@@ -94,9 +94,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('users/learners/recent', [InstituteController::class, 'recentLearners']);
             Route::get('users/creators', [InstituteController::class, 'creators']);
             Route::get('users/creators/recent', [InstituteController::class, 'recentCreators']);
-            Route::get('users/export-csv',[InstituteController::class, 'usersExportCSV']);
-            Route::get('users/learners/export-csv', [InstituteController::class, 'learnersExportCSV']);
-            Route::get('users/creators/export-csv', [InstituteController::class, 'creatorsExportCSV']);
+            Route::get('users/export',[InstituteController::class, 'usersExport']);
+            Route::get('users/learners/export', [InstituteController::class, 'learnersExport']);
+            Route::get('users/creators/export', [InstituteController::class, 'creatorsExport']);
             Route::patch('users/{user}', [UserManager::class, 'update']);
             Route::delete('users/{user}', [UserManager::class, 'delete']);
             Route::get('users/{user}', [UserManager::class, 'view']);
@@ -136,7 +136,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/mentors', [MentorController::class, 'getMentorSearch']);
             Route::get('/mentors/pending', [MentorController::class, 'getPendingMentors']);
             Route::get('/mentors/mentor/{id}', [MentorController::class, 'getMentor']);
-            Route::get('mentors/export-csv', [MentorController::class, 'mentorsExportCSV']);
+            Route::get('mentors/export', [MentorController::class, 'mentorsExport']);
 
             // Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
         });
