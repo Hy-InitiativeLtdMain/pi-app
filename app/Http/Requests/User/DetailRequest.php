@@ -34,6 +34,7 @@ class DetailRequest extends FormRequest
             'password' => 'min:6|confirmed',
             'current_password' => 'min:6',
             'image' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg',
+            'interest' => 'string|nullable'
         ];
         return $rules;
     }

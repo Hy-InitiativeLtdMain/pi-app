@@ -17,7 +17,7 @@ class DetailManager extends Controller
     {
         $this->userService = $userService;
     }
-    
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -25,7 +25,7 @@ class DetailManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    
+
 
     public function update(DetailRequest $request)
     {
