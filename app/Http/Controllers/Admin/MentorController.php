@@ -6,7 +6,9 @@ use App\Exports\MentorExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\MentorsResource;
 use App\Http\Resources\Mentor\MentorResource;
+use App\Models\Booking;
 use App\Models\Mentor;
+use App\Models\MentorAvailability;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
@@ -33,7 +35,7 @@ class MentorController extends Controller
         return $this->showAll(MentorsResource::collection($mentors));
     }
 
-  
+
 
     public function mentorsExport()
     {
@@ -94,5 +96,30 @@ class MentorController extends Controller
         $institute_slug = auth()->user()->institute_slug;
         $users = User::where('institute_slug', $institute_slug)->get();
         return $users;
+    }
+
+    public function deleteMentors(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:mentors,id',
+        ]);
+
+        // Retrieve the list of IDs from the request
+        $ids = $request->input('ids');
+
+        MentorAvailability::whereIn('mentor_id', $ids)->delete();
+        // Delete related bookings
+        Booking::whereIn('mentor_id', $ids)->delete();
+
+        // Delete the mentors with the given IDs
+        $deleted = Mentor::whereIn('id', $ids)->delete();
+
+
+        return response()->json([
+            'message' => 'Mentors deleted successfully',
+            'deleted_count' => $deleted
+        ], 200);
     }
 }

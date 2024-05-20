@@ -138,6 +138,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/mentors/pending', [MentorController::class, 'getPendingMentors']);
             Route::get('/mentors/mentor/{id}', [MentorController::class, 'getMentor']);
             Route::get('mentors/export', [MentorController::class, 'mentorsExport']);
+            Route::delete('/mentors/delete', [MentorController::class, 'deleteMentors']);
 
             // Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
         });
