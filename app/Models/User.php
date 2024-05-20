@@ -35,7 +35,8 @@ class User extends Authenticatable
         'location',
         'signature',
         'institute_slug',
-        'admin'
+        'admin',
+        'interest'
     ];
 
     /**
