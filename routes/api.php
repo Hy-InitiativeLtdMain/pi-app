@@ -131,6 +131,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('courses/{course}/status', [CourseController::class, 'flagCourse']);
             Route::get('/course/{course}', [CourseController::class, 'getCourse']);
             Route::post('lessons/{lesson}/status', [CourseController::class, 'flagLesson']);
+            Route::get('/courses/{course}/lessons', [CourseController::class, 'getLessons']);
 
             // Mentor
             Route::get('/mentors', [MentorController::class, 'getMentorSearch']);

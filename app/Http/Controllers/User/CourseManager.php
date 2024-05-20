@@ -51,6 +51,7 @@ class CourseManager extends Controller
         $validated = $request->validated();
 
         $validated['user_id'] = $request->user()->id;
+        $validated['institute_slug'] = $request->user()->institute_slug;
         $_data = $this->courseService->store($validated);
         return response($_data['data'], $_data['code']);
     }
