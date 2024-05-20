@@ -7,6 +7,7 @@ use App\Http\Resources\Admin\CourseResource;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,10 @@ class CourseController extends Controller
     // get categories
     public function getCategories()
     {
-        $categories = Category::paginate();
+        $institute_slug = auth()->user()->institute_slug;
+        $users = User::where('institute_slug', $institute_slug)->get();
+        $userIds = $users->pluck('id')->toArray();
+        $categories = Category::whereIn('user_id', $userIds)->paginate();
         return response()->json($categories);
     }
     // get courses based on the param filter category id
@@ -81,6 +85,12 @@ class CourseController extends Controller
         $course = Course::with('lessons')->findOrFail($course);
 
         return $this->successResponse(new CourseResource($course), 200);
+    }
+
+    public function getLessons(Course $course){
+        $lessons = Lesson::where('course_id', $course)->get();
+        return response()->json($lessons);
+
     }
 
 

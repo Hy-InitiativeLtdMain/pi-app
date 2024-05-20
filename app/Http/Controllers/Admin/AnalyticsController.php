@@ -63,10 +63,7 @@ class AnalyticsController extends Controller
     public function coursesCount()
     {
         $institute_slug = auth()->user()->institute_slug;
-        $users = User::where('institute_slug', $institute_slug)->get();
-        // convert the users_id to array
-        $users_id = $users->pluck('id')->toArray();
-        $courses = Course::whereIn('user_id', $users_id)->get();
+        $courses = Course::whereIn('institute_slug', $institute_slug)->get();
         // count the courses
         $count = $courses->count();
         return response()->json(['number_of_courses' => $count]);
