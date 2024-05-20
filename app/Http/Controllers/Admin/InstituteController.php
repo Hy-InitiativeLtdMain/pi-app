@@ -293,14 +293,14 @@ class InstituteController extends Controller
             $searchTerm = $request->input('search');
 
             // Search mentors by first name or last name
-            $courses = Course::whereIn('user_id', $users_id)
+            $courses = Course::where('institute_slug', $institute_slug)
                 ->where(function ($query) use ($searchTerm) {
                     $query->where('title', 'like', '%' . $searchTerm . '%')
                         ->orWhere('description', 'like', '%' . $searchTerm . '%');
                 })
                 ->paginate();
         } else {
-            $courses = Course::whereIn('user_id', $users_id)->paginate();
+            $courses = Course::where('institute_slug', $institute_slug)->paginate();
         }
         // count the courses
         $count = $courses->count();
@@ -347,6 +347,8 @@ class InstituteController extends Controller
             'status' => 'required|in:approved,declined'
         ]);
         $mentor->update($validated);
+        // send notification to the mentor
+        
         return response()->json(['message' => 'Mentor status updated successfully']);
     }
 

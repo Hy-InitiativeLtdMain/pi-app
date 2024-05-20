@@ -88,7 +88,7 @@ class CourseController extends Controller
     }
 
     public function getLessons(Course $course){
-        $lessons = Lesson::where('course_id', $course)->get();
+        $lessons = Lesson::where('course_id', $course->id)->get();
         return response()->json($lessons);
 
     }
