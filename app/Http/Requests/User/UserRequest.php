@@ -43,7 +43,9 @@ class UserRequest extends FormRequest
         'location' => 'max:255',
         'signature' => 'nullable',
         'image' => 'nullable',
-        'signature' => 'nullable'
+        'signature' => 'nullable',
+        'interest' => 'string|nullable',
+        'institute_slug' => 'string|nullable',
     ];
 
 }

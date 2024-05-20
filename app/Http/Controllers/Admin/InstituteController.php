@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Admin\MentorApproval;
 use App\Exports\CreatorExport;
 use App\Exports\LearnerExport;
 use App\Exports\UsersExport;
@@ -344,11 +345,11 @@ class InstituteController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         $validated = $request->validate([
-            'status' => 'required|in:approved,declined'
+            'status' => 'required|in:approved,pending,declined'
         ]);
         $mentor->update($validated);
         // send notification to the mentor
-        
+        event(new MentorApproval($mentor));
         return response()->json(['message' => 'Mentor status updated successfully']);
     }
 
