@@ -34,6 +34,7 @@ class UserManager extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate(UserRequest::$_updateRules);
+        // dd($validated);
         $_data = $this->userService->update($user, $validated);
         return response($_data['data'], $_data['code']);
     }
