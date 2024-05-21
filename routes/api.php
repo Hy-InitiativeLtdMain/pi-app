@@ -28,6 +28,7 @@ use App\Http\Controllers\User\BankAccountManager;
 use App\Http\Controllers\User\TransactionManager;
 use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Admin\AuthManager as AdminAuth;
+use App\Http\Controllers\Admin\AuthManager as AdminAuthManager;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\InstituteController;
 use App\Http\Controllers\Admin\MentorController;
@@ -100,6 +101,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::patch('users/{user}', [UserManager::class, 'update']);
             Route::delete('users/{user}', [UserManager::class, 'delete']);
             Route::get('users/{user}', [UserManager::class, 'view']);
+            Route::post('users/{user}/role-update', [AdminAuthManager::class, 'updateUserRole']);
+            Route::post('users/role-update', [AdminAuthManager::class, 'updateUsersRoles']);
 
             // CREATE USERS
             Route::post('users/create/learner', [InstituteController::class, 'createLearner']);
