@@ -30,6 +30,7 @@ class RegisterRequest extends FormRequest
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:6|confirmed',
             'institute_slug' => 'required',
+            'is_admin' => 'nullable|boolean',
         ];
         return $rules;
     }
@@ -59,7 +60,8 @@ class RegisterRequest extends FormRequest
         'last_name' => 'required|max:255',
         'phone' => 'required|max:255',
         'gender' => 'nullable|max:255',
-        'email' => 'required|email|max:255|unique:users,email'
+        'email' => 'required|email|max:255|unique:users,email',
+        'is_admin' => 'nullable|boolean',
     ];
 
     public static $_learnerRules = [
@@ -67,6 +69,7 @@ class RegisterRequest extends FormRequest
         'last_name' => 'required|max:255',
         'phone' => 'required|max:255',
         'gender' => 'nullable|max:255',
-        'email' => 'required|email|max:255|unique:users,email'
+        'email' => 'required|email|max:255|unique:users,email',
+        'is_admin' => 'nullable|boolean',
     ];
 }
