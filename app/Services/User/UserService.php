@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Services\Query\FilteringService;
 use App\Services\Media\CloudinaryService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -139,7 +138,7 @@ class UserService
             $data['message'] = 'Password Updated';
             // return with current password
             // $data['user'] = $user;
-            // event(new PasswordChange($user));
+            event(new PasswordChange($user));
 
         }
         if (isset($input['image'])) {
@@ -170,28 +169,8 @@ class UserService
 
     public function deleteAccount(User $user)
     {
-        DB::transaction(function () use ($user) {
-            // List all related models that should be deleted when the user is deleted
-            $relatedModels = [
-                'bankAccounts',
-                'courses',
-                'mentor',
-                'mentee',
-                'lessons',
-                // Add any other related models here
-            ];
 
-            // Iterate through the related models and delete them
-            foreach ($relatedModels as $relation) {
-                if ($user->$relation()->exists()) {
-                    $user->$relation()->delete();
-                }
-            }
-
-            // Now delete the user
-            $user->delete();
-        });
-
+        $user->delete();
         $data['user'] = $user;
         $data['message'] = "Account Deleted";
         return [
