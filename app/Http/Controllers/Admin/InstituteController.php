@@ -20,7 +20,9 @@ use App\Models\User;
 use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -74,6 +76,43 @@ class InstituteController extends Controller
         $institute_slug = auth()->user()->institute_slug;
         $users = User::where('institute_slug', $institute_slug)->orderBy('created_at', 'desc')->take(10)->get();
         return $this->showAll(UserResource::collection($users));
+    }
+
+    // Mass users delete
+    public function usersDelete(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        // Retrieve the list of IDs from the request
+        $ids = $request->input('ids');
+
+        // Initialize a counter for deleted users
+        $deletedCount = 0;
+
+        // Use a transaction to ensure all deletions are successful or none
+        DB::transaction(function () use ($ids, &$deletedCount) {
+            foreach ($ids as $id) {
+                try {
+                    // Attempt to find and delete the user
+                    $user = User::findOrFail($id);
+                    $user->delete();
+                    $deletedCount++;
+                } catch (ModelNotFoundException $e) {
+                    // If user not found, continue to next user
+                    continue;
+                }
+            }
+        });
+
+        // Return a success response
+        return response()->json([
+            'message' => 'Users deleted successfully',
+            'deleted_count' => $deletedCount
+        ], 200);
     }
 
     // USERS - Learners

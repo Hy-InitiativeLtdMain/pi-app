@@ -53,8 +53,9 @@ class AnalyticsService
 
     public function usersLineGraphYear($inputs)
     {
-        $instituteSlug = Auth::user()->institute_slug;
-        $data['data'] = User::where('institute_slug', $instituteSlug)->query()
+        $instituteSlug = auth()->user()->institute_slug;
+        $data['data'] = User::query()
+            ->where('institute_slug', $instituteSlug)
             ->selectRaw("count(id) as number, CONCAT(YEAR(created_at),'-',MONTHNAME(created_at)) as m_date")
             ->whereBetween('users.created_at', [$inputs['start_date'], $inputs['end_date']])
             ->groupBy('m_date')->get();
