@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Events\PasswordChange;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Transaction;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Services\Query\FilteringService;
 use App\Services\Media\CloudinaryService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -75,7 +77,7 @@ class UserService
                     $adminFeatures = AdminFeature::whereIn('user_id', $adminWithSameInstitute)->get();
                     // dd($adminFeatures);
                 }
-                
+
             }
         }
 
@@ -137,6 +139,7 @@ class UserService
             $data['message'] = 'Password Updated';
             // return with current password
             // $data['user'] = $user;
+            // event(new PasswordChange($user));
 
         }
         if (isset($input['image'])) {
@@ -167,8 +170,28 @@ class UserService
 
     public function deleteAccount(User $user)
     {
+        DB::transaction(function () use ($user) {
+            // List all related models that should be deleted when the user is deleted
+            $relatedModels = [
+                'bankAccounts',
+                'courses',
+                'mentor',
+                'mentee',
+                'lessons',
+                // Add any other related models here
+            ];
 
-        $user->delete();
+            // Iterate through the related models and delete them
+            foreach ($relatedModels as $relation) {
+                if ($user->$relation()->exists()) {
+                    $user->$relation()->delete();
+                }
+            }
+
+            // Now delete the user
+            $user->delete();
+        });
+
         $data['user'] = $user;
         $data['message'] = "Account Deleted";
         return [
