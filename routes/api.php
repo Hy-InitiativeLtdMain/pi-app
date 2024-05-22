@@ -73,6 +73,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
+        Route::get('notifications', 'NotificationController@index');
+        Route::post('notifications/mark-as-read', 'NotificationController@markNotification');
+
+
         Route::resource('mentor', MentorManager::class)->middleware(['auth:user'])->except('index');
         Route::resource('mentee', MenteeManager::class)->middleware(['auth:user'])->except(['index', 'show']);
         Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:user']);
@@ -103,6 +107,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('users/{user}', [UserManager::class, 'view']);
             Route::post('users/{user}/role-update', [AdminAuthManager::class, 'updateUserRole']);
             Route::post('users/role-update', [AdminAuthManager::class, 'updateUsersRoles']);
+            Route::delete('users-delete', [InstituteController::class, 'usersDelete']);
 
             // CREATE USERS
             Route::post('users/create/learner', [InstituteController::class, 'createLearner']);
