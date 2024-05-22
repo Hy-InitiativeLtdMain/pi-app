@@ -14,22 +14,23 @@ class AnalyticsService
     {
         $instituteSlug = Auth::user()->institute_slug;
 
-        $data['user_count'] = User::where('institute_slug', $instituteSlug)->query()
+        $data['user_count'] = User::query()
+            ->where('institute_slug', $instituteSlug)
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->count();
-        $data['course_count'] = Course::whereHas('user', function ($query) use ($instituteSlug) {
+        $data['course_count'] = Course::query()->whereHas('user', function ($query) use ($instituteSlug) {
             $query->where('institute_slug', $instituteSlug);
-        })->query()
+        })
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->count();
-        $data['transaction_count'] = Transaction::whereHas('user', function ($query) use ($instituteSlug) {
+        $data['transaction_count'] = Transaction::query()->whereHas('user', function ($query) use ($instituteSlug) {
             $query->where('institute_slug', $instituteSlug);
-        })->query()
+        })
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->count();
-        $data['transaction_total'] = Transaction::whereHas('user', function ($query) use ($instituteSlug) {
+        $data['transaction_total'] = Transaction::query()->whereHas('user', function ($query) use ($instituteSlug) {
             $query->where('institute_slug', $instituteSlug);
-        })->query()
+        })
             ->whereBetween('created_at', [$inputs['start_date'], $inputs['end_date']])
             ->paid()
             ->sum('amount');
