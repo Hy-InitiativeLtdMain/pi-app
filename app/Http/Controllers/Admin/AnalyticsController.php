@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\LessonUser;
+use App\Models\Mentor;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
@@ -94,10 +95,11 @@ class AnalyticsController extends Controller
             $year = $currentDate->format('Y');
             $month = $currentDate->format('m');
             $monthName = $currentDate->format('F');
-
+            $institute_slug = auth()->user()->institute_slug;
             // Get the total number of enrolled users within the current month
             $enrolledCount = User::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->where('institute_slug', $institute_slug)
                 ->where('is_admin', 0)
                 ->where('admin', 0)
                 ->count();
@@ -139,10 +141,11 @@ class AnalyticsController extends Controller
             $year = $currentDate->format('Y');
             $month = $currentDate->format('m');
             $monthName = $currentDate->format('F');
-
+            $institute_slug = auth()->user()->institute_slug;
             // Get the total number of enrolled users within the current month
             $enrolledCount = User::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->where('institute_slug', $institute_slug)
                 ->where('is_admin', 1)
                 ->where('admin', 0)
                 ->count();
@@ -160,6 +163,102 @@ class AnalyticsController extends Controller
         // Return the enrollment counts for each month from the start date to the end date
         return response()->json($enrollmentCounts, 200);
     }
+
+    public function userEnrollmentCountPerMonth(Request $request)
+    {
+        // Validate the request inputs
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        // Get the start and end dates from the request
+        $startDate = Carbon::parse($request->input('start_date'))->startOfMonth();
+        $endDate = Carbon::parse($request->input('end_date'))->endOfMonth();
+
+        // Initialize an array to store enrollment counts for each month
+        $enrollmentCounts = [];
+
+        // Loop through each month from the start date to the end date
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            // Get the year and month of the current date
+            $year = $currentDate->format('Y');
+            $month = $currentDate->format('m');
+            $monthName = $currentDate->format('F');
+            $institute_slug = auth()->user()->institute_slug;
+            // Get the total number of enrolled users within the current month
+            $enrolledCount = User::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->where('institute_slug', $institute_slug)
+                ->where('admin', 0)
+                ->count();
+
+            // Store the enrollment count for the current month
+            $enrollmentCounts[] = [
+                'number' => $enrolledCount,
+                'm_date' => "{$year}-{$monthName}",
+            ];
+
+            // Move to the next month
+            $currentDate->addMonth();
+        }
+
+        // Return the enrollment counts for each month from the start date to the end date
+        return response()->json($enrollmentCounts, 200);
+    }
+
+    public function mentorEnrollmentCountPerMonth(Request $request)
+    {
+        // Validate the request inputs
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        // Get the start and end dates from the request
+        $startDate = Carbon::parse($request->input('start_date'))->startOfMonth();
+        $endDate = Carbon::parse($request->input('end_date'))->endOfMonth();
+
+        // Initialize an array to store enrollment counts for each month
+        $enrollmentCounts = [];
+
+        $institute_slug = auth()->user()->institute_slug;
+
+        $users = User::where('institute_slug', $institute_slug)
+        ->where('admin', 0)
+        ->get();
+
+        $userIds = $users->pluck('id')->toArray();
+        // Loop through each month from the start date to the end date
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            // Get the year and month of the current date
+            $year = $currentDate->format('Y');
+            $month = $currentDate->format('m');
+            $monthName = $currentDate->format('F');
+
+            // Get the total number of enrolled users within the current month
+            $enrolledCount= Mentor::whereYear('created_at', $year)
+                            ->whereMonth('created_at', $month)
+                            ->whereIn('user_id', $userIds)
+                            ->where('status', 'approved')
+                            ->count();
+
+            // Store the enrollment count for the current month
+            $enrollmentCounts[] = [
+                'number' => $enrolledCount,
+                'm_date' => "{$year}-{$monthName}",
+            ];
+
+            // Move to the next month
+            $currentDate->addMonth();
+        }
+
+        // Return the enrollment counts for each month from the start date to the end date
+        return response()->json($enrollmentCounts, 200);
+    }
+
 
 
 
