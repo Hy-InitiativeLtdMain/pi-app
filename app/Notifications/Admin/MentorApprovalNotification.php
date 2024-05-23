@@ -41,13 +41,10 @@ class MentorApprovalNotification extends Notification
 
         if ($status == 'approved') {
             $message->subject('Mentor Approval Status: Approved')
-            ->line('Congratulations! Your mentor application has been approved.')
-            ->line('Thank you for becoming a mentor!');
+            ->view('vendor.notifications.mentor.approval.approved', ['user' => $notifiable]);
         } elseif ($status == 'declined') {
             $message->subject('Mentor Approval Status: Declined')
-            ->line('We regret to inform you that your mentor application has been declined.')
-            ->line('Please contact support for more information.')
-            ->line('Thank you for your interest in becoming a mentor.');
+            ->view('vendor.notifications.mentor.approval.declined', ['user' => $notifiable]);
         } else {
             $message->subject('Mentor Approval Status: Pending')
             ->line('Your mentor application is currently under review.')
