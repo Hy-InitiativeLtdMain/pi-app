@@ -129,6 +129,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('analytics/courses/count', [AnalyticsController::class, 'coursesCount']);
             Route::get('analytics/enrollment/learners', [AnalyticsController::class, 'enrollmentCountPerMonth']);
             Route::get('analytics/enrollment/creators', [AnalyticsController::class, 'creatorsEnrollmentCountPerMonth']);
+            Route::get('analytics/enrollment/users', [AnalyticsController::class, 'userEnrollmentCountPerMonth']);
+            Route::get('analytics/enrollment/mentors', [AnalyticsController::class, 'mentorEnrollmentCountPerMonth']);
             Route::get('analytics/top-students', [AnalyticsController::class, 'usersByLessonsTaken']);
             Route::get('analytics/top-creators', [AnalyticsController::class, 'usersByCoursesCreated']);
             Route::get('analytics/demography/gender', [AnalyticsController::class, 'demography']);
