@@ -8,6 +8,7 @@ use App\Models\Lesson;
 use App\Models\LessonUser;
 use App\Models\User;
 use App\Traits\ApiResponser;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 
@@ -69,105 +70,106 @@ class AnalyticsController extends Controller
         return response()->json(['number_of_courses' => $count]);
     }
 
-    public function enrollmentCountPerMonth()
+
+
+    public function enrollmentCountPerMonth(Request $request)
     {
-        // Get the current year and month
-        $currentYear = date('Y');
-        $currentMonth = date('m');
+        // Validate the request inputs
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
 
-        // Define the start date as one year before the current month
-        $startYear = $currentYear - 1;
-        $startDate = "{$startYear}-{$currentMonth}-01 00:00:00";
+        // Get the start and end dates from the request
+        $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+        $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
 
-        // Define the end date as the current date and time
-        $endDate = date('Y-m-d H:i:s');
+        // Get the institute slug from the authenticated user
+        $instituteSlug = auth()->user()->institute_slug;
 
-        $studentUsers = $this->users()->where('is_admin', 0);
-        $studentUsers = $studentUsers->where('admin', 0);
-        // dd($studentUsers);
-        // Get id of $studentUsers
-        $studentUsers = $studentUsers->pluck('id')->toArray();
-        // dd($studentUsers);
-        // Initialize an array to store enrollment counts for each month
-        $enrollmentCounts = [];
+        // Fetch user registration counts per month within the specified date range
+        $registrationCounts = User::query()
+            ->where('institute_slug', $instituteSlug)
+            ->where('is_admin', 0)
+            ->where('admin', 0)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("COUNT(id) as number, CONCAT(YEAR(created_at), '-', MONTHNAME(created_at)) as m_date")
+            ->groupBy('m_date')
+            ->orderBy('created_at')
+            ->get();
 
-        // Loop through each month from the start date to the end date
-        $currentDate = new DateTime($startDate);
-        while ($currentDate <= new DateTime($endDate)) {
-            // Get the year and month of the current date
-            $year = $currentDate->format('Y');
-            $month = $currentDate->format('m');
+        // Initialize an array for all months within the date range with zero registrations
+        $results = [];
+        $currentDate = clone $startDate;
 
-            // Get the total number of enrolled users within the current month
-            $enrolledCount = LessonUser::whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->whereIn('user_id', $studentUsers)
-                ->count();
-
-            // Store the enrollment count for the current month
-            $enrollmentCounts[$month] = $enrolledCount;
-
-            // Move to the next month
+        while ($currentDate <= $endDate) {
+            $yearMonth = $currentDate->format('Y-F');
+            $results[$yearMonth] = ['number' => 0, 'm_date' => $yearMonth];
             $currentDate->modify('+1 month');
         }
 
-        // Return the enrollment counts for each month from the start date to the end date
-        return response()->json([
-            'enrollment_counts' => $enrollmentCounts,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-        ]);
+        // Merge actual registration counts with the initialized array
+        foreach ($registrationCounts as $count) {
+            $results[$count->m_date] = ['number' => $count->number, 'm_date' => $count->m_date];
+        }
+
+        // Re-index the results array to ensure it is a list
+        $results = array_values($results);
+
+        // Return the registration counts for each month from the start date to the end date
+        return response()->json($results, 200);
     }
 
-    public function creatorsEnrollmentCountPerMonth()
+
+    public function creatorsEnrollmentCountPerMonth(Request $request)
     {
-        // Get the current year and month
-        $currentYear = date('Y');
-        $currentMonth = date('m');
+        // Validate the request inputs
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
 
-        // Define the start date as one year before the current month
-        $startYear = $currentYear - 1;
-        $startDate = "{$startYear}-{$currentMonth}-01 00:00:00";
+        // Get the start and end dates from the request
+        $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+        $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
 
-        // Define the end date as the current date and time
-        $endDate = date('Y-m-d H:i:s');
+        // Get the institute slug from the authenticated user
+        $instituteSlug = auth()->user()->institute_slug;
 
-        $creatorsUsers = $this->users()->where('is_admin', 1);
-        $creatorsUsers = $creatorsUsers->where('admin', 0);
-        // dd($creatorsUsers);
-        // Get id of $creatorsUsers
-        $creatorsUsers = $creatorsUsers->pluck('id')->toArray();
-        // dd($creatorsUsers);
-        // Initialize an array to store enrollment counts for each month
-        $enrollmentCounts = [];
+        // Fetch user registration counts per month within the specified date range
+        $registrationCounts = User::query()
+            ->where('institute_slug', $instituteSlug)
+            ->where('is_admin', 1)
+            ->where('admin', 0)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("COUNT(id) as number, CONCAT(YEAR(created_at), '-', MONTHNAME(created_at)) as m_date")
+            ->groupBy('m_date')
+            ->orderBy('created_at')
+            ->get();
 
-        // Loop through each month from the start date to the end date
-        $currentDate = new DateTime($startDate);
-        while ($currentDate <= new DateTime($endDate)) {
-            // Get the year and month of the current date
-            $year = $currentDate->format('Y');
-            $month = $currentDate->format('m');
+        // Initialize an array for all months within the date range with zero registrations
+        $results = [];
+        $currentDate = clone $startDate;
 
-            // Get the total number of enrolled users within the current month
-            $enrolledCount = LessonUser::whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->whereIn('user_id', $creatorsUsers)
-                ->count();
-
-            // Store the enrollment count for the current month
-            $enrollmentCounts[$month] = $enrolledCount;
-
-            // Move to the next month
+        while ($currentDate <= $endDate) {
+            $yearMonth = $currentDate->format('Y-F');
+            $results[$yearMonth] = ['number' => 0, 'm_date' => $yearMonth];
             $currentDate->modify('+1 month');
         }
 
-        // Return the enrollment counts for each month from the start date to the end date
-        return response()->json([
-            'enrollment_counts' => $enrollmentCounts,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-        ]);
+        // Merge actual registration counts with the initialized array
+        foreach ($registrationCounts as $count) {
+            $results[$count->m_date] = ['number' => $count->number, 'm_date' => $count->m_date];
+        }
+
+        // Re-index the results array to ensure it is a list
+        $results = array_values($results);
+
+        // Return the registration counts for each month from the start date to the end date
+        return response()->json($results, 200);
     }
+
+
 
     // get the users in order of number of lessons taken\
     public function usersByLessonsTaken()
@@ -259,4 +261,107 @@ class AnalyticsController extends Controller
 
 
     }
+
+
+    /* ======================Some stuff to look at later====================== */
+
+    public function creatorsEnrollmentLessonCountPerMonth(Request $request)
+    {
+        // Validate the request inputs
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        // Get the start and end dates from the request
+        $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+        $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
+
+        // Get ids of creator users
+        $creatorUserIds = $this->users()->where('is_admin', 1)
+        ->where('admin', 0)
+        ->pluck('id')
+            ->toArray();
+
+        // Fetch enrollment counts per month within the specified date range
+        $enrollmentCounts = LessonUser::query()
+            ->whereIn('user_id', $creatorUserIds)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("COUNT(id) as number, CONCAT(YEAR(created_at), '-', MONTHNAME(created_at)) as m_date")
+            ->groupBy('m_date')
+            ->orderBy('m_date')
+            ->get();
+
+        // Initialize an array for all months within the date range with zero enrollments
+        $results = [];
+        $currentDate = clone $startDate;
+
+        while ($currentDate <= $endDate) {
+            $yearMonth = $currentDate->format('Y-F');
+            $results[$yearMonth] = ['number' => 0, 'm_date' => $yearMonth];
+            $currentDate->modify('+1 month');
+        }
+
+        // Merge actual enrollment counts with the initialized array
+        foreach ($enrollmentCounts as $count) {
+            $results[$count->m_date] = ['number' => $count->number, 'm_date' => $count->m_date];
+        }
+
+        // Re-index the results array to ensure it is a list
+        $results = array_values($results);
+
+        // Return the enrollment counts for each month from the start date to the end date
+        return response()->json($results, 200);
+    }
+
+    public function enrollmentLessonCountPerMonth()
+    {
+        // Get the current year and month
+        $currentYear = date('Y');
+        $currentMonth = date('m');
+
+        // Define the start date as one year before the current month
+        $startYear = $currentYear - 1;
+        $startDate = "{$startYear}-{$currentMonth}-01 00:00:00";
+
+        // Define the end date as the current date and time
+        $endDate = date('Y-m-d H:i:s');
+
+        $studentUsers = $this->users()->where('is_admin', 0);
+        $studentUsers = $studentUsers->where('admin', 0);
+        // dd($studentUsers);
+        // Get id of $studentUsers
+        $studentUsers = $studentUsers->pluck('id')->toArray();
+        // dd($studentUsers);
+        // Initialize an array to store enrollment counts for each month
+        $enrollmentCounts = [];
+
+        // Loop through each month from the start date to the end date
+        $currentDate = new DateTime($startDate);
+        while ($currentDate <= new DateTime($endDate)) {
+            // Get the year and month of the current date
+            $year = $currentDate->format('Y');
+            $month = $currentDate->format('m');
+
+            // Get the total number of enrolled users within the current month
+            $enrolledCount = LessonUser::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('user_id', $studentUsers)
+                ->count();
+
+            // Store the enrollment count for the current month
+            $enrollmentCounts[$month] = $enrolledCount;
+
+            // Move to the next month
+            $currentDate->modify('+1 month');
+        }
+
+        // Return the enrollment counts for each month from the start date to the end date
+        return response()->json([
+            'enrollment_counts' => $enrollmentCounts,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ]);
+    }
+
 }
