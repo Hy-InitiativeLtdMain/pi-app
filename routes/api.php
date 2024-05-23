@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\InstituteController;
 use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,8 +74,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::get('notifications', 'NotificationController@index');
-        Route::post('notifications/mark-as-read', 'NotificationController@markNotification');
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification']);
 
 
         Route::resource('mentor', MentorManager::class)->middleware(['auth:user'])->except('index');

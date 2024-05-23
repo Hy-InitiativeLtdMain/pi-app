@@ -10,6 +10,7 @@ use App\Http\Resources\Mentee\AvailableMentorsResource;
 use App\Http\Resources\Mentee\BookingResource;
 use App\Http\Resources\Mentor\AvailabilityResource;
 use App\Http\Resources\Mentor\MentorResource;
+use App\Jobs\SendBookingReminder;
 use App\Models\Booking;
 use App\Models\MentorAvailability;
 use App\Traits\ApiResponser;
@@ -166,6 +167,19 @@ class BookingManager extends Controller
 
 
         $booking->update(['status' => $request->input('status')]);
+
+        // if the booking status is approved
+        if ($booking->status == 'Approved'){
+            // Schedule the reminder notification
+            $bookingDate = Carbon::parse($booking->date); // Assume booking->date holds the booking date
+            $delay = $bookingDate->addHour(1); // Adjust the delay as needed
+
+            $mentor = $booking->mentor->user; // Retrieve the mentor user
+            SendBookingReminder::dispatch($booking, $mentor)->delay($delay);
+
+            $mentee = $booking->mentee->user; // Retrieve the mentee user
+            SendBookingReminder::dispatch($booking, $mentee)->delay($delay);
+        }
 
         event(new BookingApproval($booking));
         return response()->json(['message' => 'Booking status updated successfully'], 200);
