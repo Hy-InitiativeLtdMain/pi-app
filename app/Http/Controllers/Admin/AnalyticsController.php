@@ -95,7 +95,7 @@ class AnalyticsController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw("COUNT(id) as number, CONCAT(YEAR(created_at), '-', MONTHNAME(created_at)) as m_date")
             ->groupBy('m_date')
-            ->orderBy('created_at')
+            ->orderByRaw("YEAR(created_at), MONTH(created_at)")
             ->get();
 
         // Initialize an array for all months within the date range with zero registrations
@@ -123,7 +123,7 @@ class AnalyticsController extends Controller
 
     public function creatorsEnrollmentCountPerMonth(Request $request)
     {
-        // Validate the request inputs
+        /// Validate the request inputs
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -144,7 +144,7 @@ class AnalyticsController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw("COUNT(id) as number, CONCAT(YEAR(created_at), '-', MONTHNAME(created_at)) as m_date")
             ->groupBy('m_date')
-            ->orderBy('created_at')
+            ->orderByRaw("YEAR(created_at), MONTH(created_at)")
             ->get();
 
         // Initialize an array for all months within the date range with zero registrations
