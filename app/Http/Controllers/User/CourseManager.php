@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Events\Admin\NewCourse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CourseRequest;
 use App\Http\Requests\User\TransactionRequest;
@@ -53,6 +54,10 @@ class CourseManager extends Controller
         $validated['user_id'] = $request->user()->id;
         $validated['institute_slug'] = $request->user()->institute_slug;
         $_data = $this->courseService->store($validated);
+
+        // Admin Notification
+        event(new NewCourse($_data['data']['course']));
+        
         return response($_data['data'], $_data['code']);
     }
 

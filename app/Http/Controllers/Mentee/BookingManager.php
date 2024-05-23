@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Mentee;
 
+use App\Events\Mentee\BookingApproval;
+use App\Events\Mentor\MentorshipBooking;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
 use App\Http\Resources\Mentee\AvailableMentorsResource;
@@ -50,6 +52,7 @@ class BookingManager extends Controller
 
         $request->merge(['mentee_id' => $mentee_id, 'date' => $nextDayDate]);
         $booking = Booking::create($request->all());
+        event(new MentorshipBooking($booking));
         return response()->json(['data' => new BookingResource($booking), 'message' => 'Booking created successfully'], 201);
     }
 
@@ -163,6 +166,8 @@ class BookingManager extends Controller
 
 
         $booking->update(['status' => $request->input('status')]);
+
+        event(new BookingApproval($booking));
         return response()->json(['message' => 'Booking status updated successfully'], 200);
     }
 

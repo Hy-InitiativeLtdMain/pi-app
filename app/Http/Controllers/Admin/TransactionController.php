@@ -72,7 +72,7 @@ class TransactionController extends Controller
         return $this->showOne($amount);
     }
 
-    private function userByInstitute()
+    private function userByInstitute(): array
     {
         $institute_slug = auth()->user()->institute_slug;
         // Get users with the same institute_slug
