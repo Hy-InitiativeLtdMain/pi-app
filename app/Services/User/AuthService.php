@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Events\Admin\NewUser;
 use App\Jobs\User\AuthJobManager;
 use App\Models\AdminFeature;
 use App\Models\FcmToken;
@@ -56,39 +57,52 @@ class AuthService
                     $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
                     }
                 }
+            } else {
+                // If user is not admin, send admin features of admin that shares the same institute
+                $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
+                ->where('admin', true)
+                ->get();
+
+                $adminIds = $adminWithSameInstitute->pluck('id')->toArray();
+
+                if ($adminIds) {
+                    $adminFeatures = AdminFeature::whereIn('user_id', $adminIds)->get();
+                } else {
+                    $adminFeatures = collect(); // Return an empty collection if no admin found
+                }
             }
+
+            // If user is not admin send adminfeature of admin that shares the same institute
 
 
         // Include institute slug in token payload
         $token = $user->createToken('user_auth_token', ['server:user'])
             ->plainTextToken;
-        if ($userType == "Admin"){
+
+            // Build token payload
             $tokenPayload = [
-                'token' => $token,
-                'tokenType' => 'admin',
-                'user' => $userType,
-                'adminFeatures' => $adminFeatures,
-                'institute_slug' => $user->institute_slug,
+                    'token' => $token,
+                    'tokenType' => $userType == 'Admin' ? 'admin' : 'user',
+                    'user' => $userType,
+                    'institute_slug' => $user->institute_slug,
+                ];
+
+            // Add admin features if user is admin or learner
+            if ($userType == 'Admin' || !$user->admin) {
+                $tokenPayload['adminFeatures'] = $adminFeatures;
+            }
+
+            // Check if user is mentor or mentee
+            if ($user->is_admin && $user->mentor) {
+                $tokenPayload['is_mentor'] = true;
+            } elseif (!$user->is_admin && $user->mentee) {
+                $tokenPayload['is_mentee'] = true;
+            }
+
+            return [
+                'data' => $tokenPayload,
+                'code' => 200
             ];
-        } else {
-        $tokenPayload = [
-            'token' => $token,
-            'tokenType' => 'user',
-            'user' => $userType,
-            'institute_slug' => $user->institute_slug,
-        ];}
-
-        // Check if user is mentor or mentee
-        if ($user->is_admin && $user->mentor) {
-            $tokenPayload['is_mentor'] = true;
-        } elseif (!$user->is_admin && $user->mentee) {
-            $tokenPayload['is_mentee'] = true;
-        }
-
-        return [
-            'data' => $tokenPayload,
-            'code' => 200
-        ];
     } else {
         $response = ['message' => 'Invalid email or password'];
         return [
@@ -187,6 +201,7 @@ class AuthService
         $data = ['token' => $token, 'tokenType' => 'user',];
 
         $data['message'] = 'Registration was completed successfully';
+        event(new NewUser($user));
         return [
             'data' => $data,
             'code' => 200
