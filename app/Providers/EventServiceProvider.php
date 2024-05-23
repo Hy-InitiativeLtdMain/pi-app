@@ -3,7 +3,17 @@
 namespace App\Providers;
 
 use App\Events\Admin\MentorApproval;
+use App\Events\Admin\NewCourse;
+use App\Events\Admin\NewUser;
+use App\Events\Mentee\BookingApproval;
+use App\Events\Mentor\MentorshipBooking;
+use App\Events\PasswordChange;
 use App\Listeners\Admin\SendMentorApprovalNotification;
+use App\Listeners\Admin\SendNewCourseNotification;
+use App\Listeners\Admin\SendNewUserNotification;
+use App\Listeners\Mentee\SendBookingNotification;
+use App\Listeners\Mentor\SendPendingBookingNotification;
+use App\Listeners\SendPasswordChangeNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -23,6 +33,17 @@ class EventServiceProvider extends ServiceProvider
 
         // Mentorship approved/declined
         MentorApproval::class => [SendMentorApprovalNotification::class],
+        NewCourse::class => [SendNewCourseNotification::class],
+        NewUser::class => [SendNewUserNotification::class],
+
+        // Mentee
+        BookingApproval::class => [SendBookingNotification::class],
+
+        // Mentor
+        MentorshipBooking::class => [SendPendingBookingNotification::class],
+
+        // Users
+        PasswordChange::class => [SendPasswordChangeNotification::class],
     ];
 
     /**
