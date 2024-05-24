@@ -7,6 +7,8 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\LessonUser;
 use App\Models\Mentor;
+use App\Models\Transaction;
+use App\Models\TransactionCourse;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
@@ -455,4 +457,20 @@ class AnalyticsController extends Controller
         ]);
     }
 
+    public function courseUsers(Course $course)
+    {
+        // Fetch the users who have transactions related to the given course
+        $userCount = User::whereIn('id', function ($query) use ($course) {
+            $query->select('user_id')
+            ->from('transactions')
+            ->whereIn('id', function ($subQuery) use ($course) {
+                $subQuery->select('transaction_id')
+                ->from('transaction_course')
+                ->where('course_id', $course->id);
+            });
+        })->count();
+
+        // Return the user count
+        return response()->json(['user_count' => $userCount], 200);
+    }
 }

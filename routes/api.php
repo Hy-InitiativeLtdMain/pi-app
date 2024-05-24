@@ -134,6 +134,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('analytics/top-students', [AnalyticsController::class, 'usersByLessonsTaken']);
             Route::get('analytics/top-creators', [AnalyticsController::class, 'usersByCoursesCreated']);
             Route::get('analytics/demography/gender', [AnalyticsController::class, 'demography']);
+            Route::get('analytics/courses/{course}/user', [AnalyticsController::class, 'courseUsers']);
 
             // Courses/Lessons
             Route::get('/category', [CourseController::class, 'getCategories']);
