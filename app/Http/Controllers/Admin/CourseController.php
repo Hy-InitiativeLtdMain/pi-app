@@ -87,7 +87,9 @@ class CourseController extends Controller
         return $this->successResponse(new CourseResource($course), 200);
     }
 
-    public function getLessons(Course $course){
+    public function getLessons($course){
+        $course = Course::findOrFail($course);
+        // dd($course);
         $lessons = Lesson::where('course_id', $course->id)->get();
         return response()->json($lessons);
 
