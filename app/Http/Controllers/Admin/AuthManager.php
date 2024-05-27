@@ -20,6 +20,7 @@ class AuthManager extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate(RegisterRequest::$_adminRules);
+        $validated['is_admin'] = 1;
         $registerData = $this->authService->register($validated);
         return response($registerData['data'], $registerData['code']);
     }
