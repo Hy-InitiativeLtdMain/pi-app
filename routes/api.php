@@ -203,6 +203,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::group(['prefix' => 'category', 'middleware' => []], function () {
                 Route::get('/', [CategoryManager::class, 'index']);
                 Route::post('/', [CategoryManager::class, 'store'])->middleware(["auth.admin.access"]);
+                Route::post('/bulk', [CategoryManager::class, 'bulkCreate'])->middleware(["auth.admin.access"]);
                 Route::get('/{category}', [CategoryManager::class, 'view']);
                 Route::patch('/{category}', [CategoryManager::class, 'update'])->middleware(["auth.learner.access"]);
                 Route::delete('/{category}', [CategoryManager::class, 'delete'])->middleware(["auth.learner.access"]);
