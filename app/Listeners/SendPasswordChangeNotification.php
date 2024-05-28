@@ -26,6 +26,6 @@ class SendPasswordChangeNotification implements ShouldQueue
     {
         $user = $event->user;
 
-        $user->notify(new ChangedPasswordNotification($event->user));
+        $user->notify(new ChangedPasswordNotification($event->user, $event->institute));
     }
 }

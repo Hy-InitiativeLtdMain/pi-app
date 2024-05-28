@@ -28,6 +28,6 @@ class SendBookingNotification implements ShouldQueue
         $mentee = $event->booking->mentee;
         $user = User::where('id', $mentee->user_id)->first();
 
-        $user->notify(new BookingApprovalNotification($event->booking));
+        $user->notify(new BookingApprovalNotification($event->booking, $event->institute));
     }
 }

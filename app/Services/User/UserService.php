@@ -138,7 +138,7 @@ class UserService
             $data['message'] = 'Password Updated';
             // return with current password
             // $data['user'] = $user;
-            event(new PasswordChange($user));
+            event(new PasswordChange($user, $user->institute_slug));
 
         }
         if (isset($input['image'])) {

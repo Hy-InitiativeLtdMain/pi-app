@@ -201,7 +201,7 @@ class AuthService
         $data = ['token' => $token, 'tokenType' => 'user',];
 
         $data['message'] = 'Registration was completed successfully';
-        event(new NewUser($user));
+        event(new NewUser($user, $user->institute_slug));
         return [
             'data' => $data,
             'code' => 200

@@ -53,7 +53,7 @@ class BookingManager extends Controller
 
         $request->merge(['mentee_id' => $mentee_id, 'date' => $nextDayDate]);
         $booking = Booking::create($request->all());
-        event(new MentorshipBooking($booking));
+        event(new MentorshipBooking($booking, auth()->user()->institute_slug));
         return response()->json(['data' => new BookingResource($booking), 'message' => 'Booking created successfully'], 201);
     }
 
@@ -181,7 +181,7 @@ class BookingManager extends Controller
             SendBookingReminder::dispatch($booking, $mentee)->delay($delay);
         }
 
-        event(new BookingApproval($booking));
+        event(new BookingApproval($booking, auth()->user()->institute_slug));
         return response()->json(['message' => 'Booking status updated successfully'], 200);
     }
 

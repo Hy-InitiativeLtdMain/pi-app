@@ -16,12 +16,14 @@ class NewCourse
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $course;
+    public $institute;
     /**
      * Create a new event instance.
      */
-    public function __construct(Course $course)
+    public function __construct(Course $course, $institute)
     {
         $this->course = $course;
+        $this->institute = $institute;
     }
 
     /**

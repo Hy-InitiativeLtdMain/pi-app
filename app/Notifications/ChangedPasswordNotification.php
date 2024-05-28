@@ -12,13 +12,14 @@ class ChangedPasswordNotification extends Notification
 {
     use Queueable;
 
-    public $user;
+    public $user, $institute;
     /**
      * Create a new notification instance.
      */
-    public function __construct(User $user)
+    public function __construct(User $user, $institute)
     {
         $this->user = $user;
+        $this->institute = $institute;
     }
 
     /**
@@ -37,10 +38,12 @@ class ChangedPasswordNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->from('info@wesonline.ng', strtoupper($this->institute) . ' @ WESOnline')
             ->subject('Password Changed')
             ->view('vendor.notifications.user.password_changed', [
                 'userp' => $this->user,
                 'user' => $notifiable,
+                'institute' => $this->institute,
             ]);
     }
 

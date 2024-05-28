@@ -16,12 +16,14 @@ class NewUser
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
+    public $institute;
     /**
      * Create a new event instance.
      */
-    public function __construct(User $user)
+    public function __construct(User $user, $institute)
     {
         $this->user = $user;
+        $this->institute = $institute;
     }
 
     /**
