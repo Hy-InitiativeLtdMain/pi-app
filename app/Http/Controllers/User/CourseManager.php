@@ -54,9 +54,9 @@ class CourseManager extends Controller
         $validated['user_id'] = $request->user()->id;
         $validated['institute_slug'] = auth()->user()->institute_slug;
         $_data = $this->courseService->store($validated);
-
+        // dd($_data['data']['course']['institute_slug']);
         // Admin Notification
-        event(new NewCourse($_data['data']['course'], $_data['data']['institute_slug']));
+        event(new NewCourse($_data['data']['course'], $_data['data']['course']['institute_slug']));
 
         return response($_data['data'], $_data['code']);
     }
