@@ -31,6 +31,7 @@ class CourseRequest extends FormRequest
             'cover_file' => 'required|file|max:10240|mimes:png,jpg,jpeg,gif,svg,mp4',
             'categories' => 'array',
             'categories.*' => 'exists:categories,id',
+            'institute_slug' => 'string|nullable'
 
         ];
         return $rules;
@@ -46,5 +47,6 @@ class CourseRequest extends FormRequest
         'category_id' => 'exists:categories,id',
         'categories' => 'array',
             'categories.*' => 'exists:categories,id',
+            'institute_slug' => 'string'
     ];
 }

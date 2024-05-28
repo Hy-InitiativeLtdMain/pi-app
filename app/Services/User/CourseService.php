@@ -80,6 +80,7 @@ class CourseService
             $resp = $cloudinary->store($input['cover_file'], "course-images");
             $input['cover_url'] = $resp[0];
             $input['cover_url_id'] = $resp[1];
+            $input['institute_slug'] = Auth::user()->institute_slug;
         }
 
         $course = Course::create($input);
