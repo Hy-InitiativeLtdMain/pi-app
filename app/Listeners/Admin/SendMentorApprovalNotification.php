@@ -29,6 +29,6 @@ class SendMentorApprovalNotification implements ShouldQueue
 
         $user = User::where('id', $user_id)->first();
 
-        $user->notify(new MentorApprovalNotification($event->mentor));
+        $user->notify(new MentorApprovalNotification($event->mentor, $event->institute));
     }
 }

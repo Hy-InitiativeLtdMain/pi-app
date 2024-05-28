@@ -28,7 +28,7 @@ class SendNewCourseNotification implements ShouldQueue
         $userInstitute = $event->course->user->institute_slug;
         $admin = User::where('institute_slug', $userInstitute)->where('admin', 1)->get();
         foreach ($admin as $user) {
-            $user->notify(new NewCourseNotification($event->course));
+            $user->notify(new NewCourseNotification($event->course, $event->institute));
         }
     }
 }

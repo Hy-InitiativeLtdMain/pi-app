@@ -29,6 +29,6 @@ class SendPendingBookingNotification implements ShouldQueue
 
         $user = User::where('id', $mentor->user_id)->first();
 
-        $user->notify(new PendingBookingNotification($event->booking));
+        $user->notify(new PendingBookingNotification($event->booking, $event->institute));
     }
 }

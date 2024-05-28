@@ -13,12 +13,14 @@ class NewUserNotification extends Notification
     use Queueable;
 
     public $user;
+    public $institute;
     /**
      * Create a new notification instance.
      */
-    public function __construct(User $user)
+    public function __construct(User $user, $institute)
     {
         $this->user = $user;
+        $this->institute = $institute;
     }
 
     /**
@@ -37,8 +39,9 @@ class NewUserNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+                    ->from('info@wesonline.ng', strtoupper($this->institute) . ' @ WESOnline')
                     ->subject('New User Registered')
-                    ->view('vendor.notifications.admin.user', ['user' => $notifiable, 'newUser' => $this->user]);
+                    ->view('vendor.notifications.admin.user', ['user' => $notifiable, 'newUser' => $this->user, 'institute' => $this->institute]);
     }
 
     /**

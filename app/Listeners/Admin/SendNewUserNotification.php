@@ -30,7 +30,7 @@ class SendNewUserNotification implements ShouldQueue
         $admin = User::where('institute_slug', $userInstitute)->where('admin', 1)->get();
 
         foreach ($admin as $user){
-            $user->notify(new NewUserNotification($event->user));
+            $user->notify(new NewUserNotification($event->user, $event->institute));
         }
     }
 }

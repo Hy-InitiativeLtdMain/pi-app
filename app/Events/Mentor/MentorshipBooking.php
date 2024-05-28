@@ -16,12 +16,14 @@ class MentorshipBooking
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $booking;
+    public $institute;
     /**
      * Create a new event instance.
      */
-    public function __construct(Booking $booking)
+    public function __construct(Booking $booking, $institute)
     {
         $this->booking = $booking;
+        $this->institute = $institute;
     }
 
     /**

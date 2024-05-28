@@ -13,12 +13,14 @@ class MentorApprovalNotification extends Notification
     use Queueable;
 
     public Mentor $mentor;
+    public $institute;
     /**
      * Create a new notification instance.
      */
-    public function __construct($mentor)
+    public function __construct($mentor, $institute)
     {
         $this->mentor = $mentor;
+        $this->institute = $institute;
     }
 
     /**
@@ -40,11 +42,12 @@ class MentorApprovalNotification extends Notification
         $message = new MailMessage;
 
         if ($status == 'approved') {
-            $message->subject('Mentor Approval Status: Approved')
-            ->view('vendor.notifications.mentor.approval.approved', ['user' => $notifiable]);
+            $message->from('info@wesonline.ng', strtoupper($this->institute). ' @ WESOnline')
+            ->subject('Mentor Approval Status: Approved')
+            ->view('vendor.notifications.mentor.approval.approved', ['user' => $notifiable, 'institute' => $this->institute]);
         } elseif ($status == 'declined') {
             $message->subject('Mentor Approval Status: Declined')
-            ->view('vendor.notifications.mentor.approval.declined', ['user' => $notifiable]);
+            ->view('vendor.notifications.mentor.approval.declined', ['user' =>$notifiable, 'institute' => $this->institute]);
         } else {
             $message->subject('Mentor Approval Status: Pending')
             ->line('Your mentor application is currently under review.')

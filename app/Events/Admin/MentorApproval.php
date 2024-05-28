@@ -16,13 +16,15 @@ class MentorApproval
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Mentor $mentor;
+    public $institute;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($mentor)
+    public function __construct($mentor, $institute)
     {
         $this->mentor = $mentor;
+        $this->institute = $institute;
     }
 
     /**

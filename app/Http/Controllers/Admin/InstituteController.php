@@ -388,7 +388,7 @@ class InstituteController extends Controller
         ]);
         $mentor->update($validated);
         // send notification to the mentor
-        event(new MentorApproval($mentor));
+        event(new MentorApproval($mentor, auth()->user()->institute_slug));
         return response()->json(['message' => 'Mentor status updated successfully']);
     }
 

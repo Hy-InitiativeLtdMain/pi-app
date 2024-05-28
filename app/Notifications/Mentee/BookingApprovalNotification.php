@@ -13,12 +13,14 @@ class BookingApprovalNotification extends Notification
     use Queueable;
 
     public $booking;
+    public $institute;
     /**
      * Create a new notification instance.
      */
-    public function __construct(Booking $booking)
+    public function __construct(Booking $booking, $institute)
     {
         $this->booking = $booking;
+        $this->institute = $institute;
     }
 
     /**
@@ -40,11 +42,13 @@ class BookingApprovalNotification extends Notification
         $statusMessage = $status === 'Approved' ? 'approved' : 'declined';
 
         return (new MailMessage)
+            ->from('info@wesonline.ng', strtoupper($this->institute) . ' @ WESOnline')
             ->subject('Booking ' . ucfirst($statusMessage))
             ->view('vendor.notifications.mentee.booking', [
                 'booking' => $this->booking,
                 'user' => $notifiable,
-                'statusMessage' => $statusMessage
+                'statusMessage' => $statusMessage,
+                'institute' => $this->institute
             ]);
     }
 

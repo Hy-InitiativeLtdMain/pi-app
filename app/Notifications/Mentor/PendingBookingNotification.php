@@ -12,13 +12,14 @@ class PendingBookingNotification extends Notification
 {
     use Queueable;
 
-    public $booking;
+    public $booking, $institute;
     /**
      * Create a new notification instance.
      */
-    public function __construct(Booking $booking)
+    public function __construct(Booking $booking, $institute)
     {
         $this->booking = $booking;
+        $this->institute = $institute;
     }
 
     /**
@@ -37,10 +38,12 @@ class PendingBookingNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->from('info@wesonline.ng', strtoupper($this->institute) . ' @ WESOnline')
             ->subject('New Pending Booking')
             ->view('vendor.notifications.mentor.pending_booking', [
                 'booking' => $this->booking,
                 'user' => $notifiable,
+                'institute' => $this->institute
             ]);
     }
 
