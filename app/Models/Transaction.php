@@ -25,6 +25,9 @@ class Transaction extends Model
         'image',
         'image_id',
 
+        'bank_account_id',
+        'transfer_code'
+
     ];
 
     protected $appends = [
@@ -37,28 +40,28 @@ class Transaction extends Model
         parent::boot();
 
         self::updating(function ($transaction) {
-            
-            
-            if($transaction->isDirty('status') && $transaction->paid()){
-                
-                
+
+
+            if ($transaction->isDirty('status') && $transaction->paid()) {
+
+
                 $_invoiceService = new InvoiceService();
                 $_invoiceService->sendMail($transaction);
 
 
             }
-            
-            
-            
+
+
+
         });
 
-        
+
     }
 
-    
 
 
-    
+
+
     public function scopePaid($query)
     {
         $query->where('status', 1);
@@ -75,8 +78,17 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function totalAmount(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                return $this->amount;
+            },
+        );
+    }
 
-   
+
+
 
     /**
      * The courses that belong to the Transaction
@@ -88,16 +100,38 @@ class Transaction extends Model
         return $this->belongsToMany(Course::class, 'transaction_course');
     }
 
-    
+
 
 
 
     public function paid(): Attribute
     {
         return new Attribute(
-            get: function(){
-                return $this->status == 1 && Carbon::parse($this->paid_at) >= now()->subMonth($this->duration);
+            get: function () {
+                return $this->status == 1 && $this->paid_at != null;
             },
         );
+    }
+
+    /**
+     * Get the bankAccount that owns the Transaction
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
+
+    public function scopeWithDateFilter($query, $data)
+    {
+
+        if (!(isset($data['start_date']) && isset($data['end_date']))) {
+            return $query;
+        }
+        $startDate = $data['start_date'];
+        $endDate = $data['end_date'];
+
+        return $query->whereBetween('transactions.created_at', [$startDate, $endDate]);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -33,7 +34,8 @@ class Forgot extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Forgot',
+            from: new Address('info@wesonline.ng', strtoupper($this->user->institute_slug) . " by WESOnline"),
+            subject: 'Forgot Password',
         );
     }
 

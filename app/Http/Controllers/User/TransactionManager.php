@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\TransactionRequest;
-use App\Http\Requests\Util\ReportRequest;
+
 use App\Models\Transaction;
 use App\Models\TransactionProduct;
 use App\Services\User\TransactionService;
@@ -15,9 +15,10 @@ class TransactionManager extends Controller
 
     private $transactionService;
 
-    function __construct(TransactionService $transactionService )
+    function __construct(TransactionService $transactionService)
     {
         $this->transactionService = $transactionService;
+        $this->middleware('feature:transaction');
     }
 
     public function index(Request $request)
@@ -26,11 +27,7 @@ class TransactionManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    public function indexAll(ReportRequest $request)
-    {
-        $_data = $this->transactionService->indexAll($request->validated());
-        return response($_data['data'], $_data['code']);
-    }
+
 
 
     public function view(Transaction $transaction)
@@ -46,7 +43,7 @@ class TransactionManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    
+
 
 
     public function delete(Transaction $transaction)
@@ -58,6 +55,14 @@ class TransactionManager extends Controller
     public function makePayout(Transaction $transaction)
     {
         $_data = $this->transactionService->makePayout($transaction);
+        return response($_data['data'], $_data['code']);
+    }
+    public function verifyOTPPayout(Request $request, Transaction $transaction)
+    {
+        $validated = $request->validate([
+            'otp'=>'required'
+        ]);
+        $_data = $this->transactionService->verifyOTPPayout($transaction, $validated['otp']);
         return response($_data['data'], $_data['code']);
     }
 }

@@ -25,6 +25,8 @@ return new class extends Migration
 
             $table->timestamp('paid_at')->nullable();
 
+            $table->string('bank_account_id')->nullable();
+
             $table->unsignedBigInteger('user_id');
             $table->timestamps();
         });

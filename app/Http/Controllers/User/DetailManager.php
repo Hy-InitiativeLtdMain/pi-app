@@ -17,7 +17,7 @@ class DetailManager extends Controller
     {
         $this->userService = $userService;
     }
-    
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -25,7 +25,7 @@ class DetailManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-    
+
 
     public function update(DetailRequest $request)
     {
@@ -42,4 +42,14 @@ class DetailManager extends Controller
         $_data = $this->userService->deleteAccount($user);
         return response($_data['data'], $_data['code']);
     }
+
+    public function requestPayout(Request $request)
+    {
+        $user = $request->user();
+        $payoutService = new PayoutService();
+        $validated = $request->validate(DetailRequest::$_requestPayoutRules);
+        $_data = $payoutService->requestPayout($user,  $validated['bank_account_id'] ,$validated['amount']);
+        return response($_data['data'], $_data['code']);
+    }
+
 }

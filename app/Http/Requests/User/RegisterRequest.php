@@ -29,6 +29,8 @@ class RegisterRequest extends FormRequest
             'phone' => 'required|max:15',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:6|confirmed',
+            'institute_slug' => 'required',
+            'is_admin' => 'nullable|boolean',
         ];
         return $rules;
     }
@@ -40,5 +42,34 @@ class RegisterRequest extends FormRequest
 
     public static $_resetRules = [
         'password' => 'required|min:6|confirmed',
+    ];
+
+    public static $_adminRules = [
+        'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'phone' => 'required|max:15',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+            'institute_slug' => 'nullable',
+            'admin' => 'required',
+            'image' => 'nullable',
+    ];
+
+    public static $_creatorRules = [
+        'first_name' => 'required|max:255',
+        'last_name' => 'required|max:255',
+        'phone' => 'required|max:255',
+        'gender' => 'nullable|max:255',
+        'email' => 'required|email|max:255|unique:users,email',
+        'is_admin' => 'nullable|boolean',
+    ];
+
+    public static $_learnerRules = [
+        'first_name' => 'required|max:255',
+        'last_name' => 'required|max:255',
+        'phone' => 'required|max:255',
+        'gender' => 'nullable|max:255',
+        'email' => 'required|email|max:255|unique:users,email',
+        'is_admin' => 'nullable|boolean',
     ];
 }

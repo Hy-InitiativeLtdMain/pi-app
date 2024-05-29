@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\User\RegisterRequest;
-use App\Http\Requests\User\LoginRequest;
-use App\Jobs\User\AuthJobManager;
-use App\Models\FcmToken;
-use App\Models\User;
-use App\Models\VerificationToken;
-use App\Services\User\AuthAppleService;
-use App\Services\User\AuthGoogleService;
-use App\Services\User\AuthService;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\FcmToken;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use App\Jobs\User\AuthJobManager;
+use App\Models\VerificationToken;
+use App\Services\User\AuthService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use App\Services\User\AuthAppleService;
+use App\Http\Requests\User\LoginRequest;
+use App\Services\User\AuthGoogleService;
+use App\Http\Requests\User\RegisterRequest;
 
 class AuthManager extends Controller
 {
@@ -32,7 +32,7 @@ class AuthManager extends Controller
         return response($loginData['data'], $loginData['code']);
     }
 
-    
+
     public function register(RegisterRequest $request)
     {
         $registerData = $this->authService->register($request->validated());
@@ -50,7 +50,7 @@ class AuthManager extends Controller
     public function resetPassword(Request $request, User $user, $token)
     {
         $validated = $request->validate(RegisterRequest::$_resetRules);
-        
+
         $_data = $this->authService->resetPassword($validated, $user, $token);
         return response($_data['data'], $_data['code']);
     }
