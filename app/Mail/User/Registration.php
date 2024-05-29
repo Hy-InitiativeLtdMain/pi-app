@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -33,7 +34,8 @@ class Registration extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Registration',
+            from: new Address('info@wesonline.ng', strtoupper($this->user->institute_slug). " by WESOnline"),
+            subject: 'Registration @ WESOnline',
         );
     }
 
@@ -43,7 +45,12 @@ class Registration extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.user.registration',
+            // markdown: 'emails.user.registration',
+                view: 'email.user.registration',
+                with: [
+                    'user' => $this->user,
+                    'url' => $this->url
+                ]
         );
     }
 

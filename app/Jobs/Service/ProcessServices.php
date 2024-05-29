@@ -45,15 +45,30 @@ class ProcessServices implements ShouldQueue
      */
     public function handle()
     {
-        
-        
+
+
 
         if ($this->name == "new_invoice") {
             $transaction = $this->data;
             $user = $transaction->user;
             Mail::to($user)->send(new Invoice($user, $transaction));
-            
         }
 
+        if ($this->name == "verify_bank_account") {
+            $bankAccount = $this->data;
+            $paystackService = new PaystackService();
+            $resp = $paystackService->fetchRecipient($bankAccount);
+
+            $resp = $resp['data'];
+            $recipientCode = '';
+            try {
+                $recipientCode = $resp['data']['recipient_code'];
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+
+            $bankAccount->recipient_code = $recipientCode;
+            $bankAccount->save();
+        }
     }
 }

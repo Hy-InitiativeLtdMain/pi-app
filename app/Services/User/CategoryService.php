@@ -3,14 +3,18 @@
 namespace App\Services\User;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryService
 {
     public function index()
     {
-        $data['categoriess'] = Category::latest()->paginate();
+        $instituteSlug = Auth::user()->institute_slug;
+        $data['categoriess'] = Category::whereHas('user', function ($query) use ($instituteSlug) {
+            $query->where('institute_slug', $instituteSlug);
+        })->latest()->paginate();
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
@@ -19,20 +23,20 @@ class CategoryService
     {
         $data['category'] = $category;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
 
     public function store( $input)
-    { 
+    {
         $category = Category::create($input);
-        
+
 
         $data['message'] = "Category Created";
         $data['category'] = $category;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 201
         ];
     }
@@ -46,19 +50,19 @@ class CategoryService
         $data['message'] = "Category updated";
         $data['category'] = $category;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }
 
     public function delete(Category $category)
     {
-        
+
         $category->delete();
         $data['message'] = "Deleted Successfully";
         $data['category'] = $category;
         return [
-            'data' => $data, 
+            'data' => $data,
             'code' => 200
         ];
     }

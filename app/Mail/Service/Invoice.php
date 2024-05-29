@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -36,9 +37,10 @@ class Invoice extends Mailable
     public function envelope()
     {
 
-        
+
 
         return new Envelope(
+            from: new Address('info@wesonline.ng', strtoupper($this->user->institute_slug) . " by WESOnline"),
             subject: $this->transaction->amount>0?'':'Widrawal ' .'Invoice for '. $this->transaction->ref ,
         );
     }
@@ -55,7 +57,7 @@ class Invoice extends Mailable
         if(isset($this->transaction->payment_for[0])){
             $type = ucfirst(str_replace ( '_', ' ', $this->transaction->payment_for[0]) );
         }
-        
+
 
 
         return new Content(

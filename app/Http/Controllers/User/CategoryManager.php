@@ -7,6 +7,7 @@ use App\Http\Requests\User\CategoryRequest;
 use App\Models\Category;
 use App\Services\User\CategoryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryManager extends Controller
 {
@@ -16,6 +17,7 @@ class CategoryManager extends Controller
     function __construct(CategoryService $categoryService )
     {
         $this->categoryService = $categoryService;
+        $this->middleware('feature:course');
     }
 
     public function index(Request $request)
@@ -51,5 +53,33 @@ class CategoryManager extends Controller
     {
         $_data = $this->categoryService->delete($category);
         return response($_data['data'], $_data['code']);
+    }
+
+    public function bulkCreate(Request $request)
+    {
+        $userId = auth()->user()->id;
+        $categories = $request->input('categories');
+
+        $created = 0;
+        $errors = [];
+
+        foreach ($categories as $categoryData) {
+            $categoryData['user_id'] = $userId; // Add the user ID to each category
+            $validator = Validator::make($categoryData, [
+                'title' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[] = [
+                    'message' => 'Validation error for category',
+                    'errors' => $validator->errors(),
+                ];
+            } else {
+                Category::create($categoryData);
+                $created++;
+            }
+        }
+
+        return response()->json(['created' => $created, 'errors' => $errors]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,10 +17,12 @@ class Lesson extends Model
         'cover_type',
         'cover_url',
         'cover_url_id',
+        'url',
         'content',
 
 
         'course_id',
+        'status',
     ];
 
     protected $hidden = [
@@ -27,7 +30,11 @@ class Lesson extends Model
         "created_at",
         "updated_at",
     ];
-     /**
+
+    protected $appends = [
+        "seen",
+    ];
+    /**
      * Get the course that owns the Lesson
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -37,7 +44,7 @@ class Lesson extends Model
         return $this->belongsTo(Course::class);
     }
 
-    
+
 
 
     /**
@@ -48,5 +55,30 @@ class Lesson extends Model
     public function lessonSeens(): HasMany
     {
         return $this->hasMany(LessonUser::class);
+    }
+
+
+    /**
+     * Get all of the assignments for the Lesson
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+    public function seen(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $user = auth('user')->user();
+                if ($user == null) return false;
+                $user_id = $user->id;
+                $lessonSeen = $this->lessonSeens()->where('lesson_users.user_id', $user_id)->first();
+                return $lessonSeen ? $lessonSeen->seen == 1 : false;
+            },
+        );
+
     }
 }

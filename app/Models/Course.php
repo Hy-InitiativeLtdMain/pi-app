@@ -26,6 +26,9 @@ class Course extends Model
 
         'category_id',
         'user_id',
+        'status',
+        'feedback',
+        'institute_slug',
     ];
 
     protected $hidden = [
@@ -34,7 +37,8 @@ class Course extends Model
     ];
 
     protected $appends = [
-        
+        "paid",
+        "rating"
     ];
 
     public function scopePublished($query)
@@ -70,7 +74,7 @@ class Course extends Model
      */
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(category::class, 'course_category');
+        return $this->belongsToMany(Category::class, 'course_category');
     }
 
     /**
@@ -83,7 +87,7 @@ class Course extends Model
         return $this->hasMany(Lesson::class);
     }
 
-    
+
 
 
 
@@ -97,21 +101,21 @@ class Course extends Model
         return $this->belongsToMany(Transaction::class, 'transaction_course');
     }
 
-    
+
 
 
     public function userActivePayment(User $user)
     {
         $user_id = $user->id;
-        if($this->is_free){
+        if ($this->is_free) {
             return $user->free_course == null;
         }
-        
+
         $latestTransaction =  $this->transactions()->where('transactions.user_id',  $user_id)->latest('paid_at')->first();
-        if($latestTransaction == null){
+        if ($latestTransaction == null) {
             return false;
         }
-        if($latestTransaction->paid_at == null){
+        if ($latestTransaction->paid_at == null) {
             return false;
         }
 
@@ -121,18 +125,18 @@ class Course extends Model
     public function hasActivePayment(): Attribute
     {
         return new Attribute(
-            get: function(){
+            get: function () {
                 $user = auth('user')->user();
                 $user_id = $user->id;
-                if($this->is_free){
+                if ($this->is_free) {
                     return $user->free_course == null;
                 }
-                
+
                 $latestTransaction =  $this->transactions()->where('transactions.user_id',  $user_id)->latest('paid_at')->first();
-                if($latestTransaction == null){
+                if ($latestTransaction == null) {
                     return false;
                 }
-                if($latestTransaction->paid_at == null){
+                if ($latestTransaction->paid_at == null) {
                     return false;
                 }
 
@@ -141,17 +145,28 @@ class Course extends Model
         );
     }
 
+    public function pendingPayment(): Attribute
+    {
+        return new Attribute(
+            get: function ($month = 1) {
+                $user = auth('user')->user();
+                $user_id = $user->id;
+                return $this->transactions()->where('transactions.user_id',  $user_id)->whereNull('transactions.paid_at')->latest()->first();
+            }
+        );
+    }
+
     public function hasPendingPayment(): Attribute
     {
         return new Attribute(
-            get: function($month=1){
+            get: function ($month = 1) {
                 $user = auth('user')->user();
-                $user_id = $user->id;                
+                $user_id = $user->id;
                 $latestTransaction =  $this->transactions()->where('transactions.user_id',  $user_id)->latest('paid_at')->first();
-                if($latestTransaction == null){
+                if ($latestTransaction == null) {
                     return false;
                 }
-                if($latestTransaction->paid_at == null ){
+                if ($latestTransaction->paid_at == null) {
                     return true;
                 }
                 return false;
@@ -159,23 +174,23 @@ class Course extends Model
         );
     }
 
-    
 
-    
+
+
 
     public function certificate(): Attribute
     {
         return new Attribute(
-            get: function(){
+            get: function () {
                 $batch = $this->myBatch;
-                if($batch != null && ($batch->status == 2 || $batch->status == 3)){
+                if ($batch != null && ($batch->status == 2 || $batch->status == 3)) {
                     $user = auth('user')->user();
                     $coures_id = $this->id;
                     $user_id = $user->id;
-                    $certificateValue = Config::where('key','certificate_base_url')->first();
-                    $certificate_base_url= 'https://iii.app/certificate';
-                    if($certificateValue != null){
-                        $certificate_base_url= $certificateValue->value;
+                    $certificateValue = Config::where('key', 'certificate_base_url')->first();
+                    $certificate_base_url = 'https://iii.app/certificate';
+                    if ($certificateValue != null) {
+                        $certificate_base_url = $certificateValue->value;
                     }
                     return "$certificate_base_url/$coures_id/$user_id";
                 }
@@ -184,11 +199,42 @@ class Course extends Model
         );
     }
 
-    public function seenLesson( Lesson $lesson, User $user)
+    public function seenLesson(Lesson $lesson, User $user)
     {
         # code...
     }
 
+    public function paid(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->hasActivePayment,
+        );
+    }
 
-    
+    /**
+     * Get all of the assignments for the Course
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+    /**
+     * Get all of the reviews for the Course
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function rating(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->reviews()->avg("rate"),
+        );
+    }
 }

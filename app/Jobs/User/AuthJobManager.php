@@ -2,6 +2,7 @@
 
 namespace App\Jobs\User;
 
+use App\Mail\Admin\Registration as AdminRegistration;
 use App\Mail\User\Forgot;
 use App\Mail\User\Registration;
 use App\Models\User;
@@ -39,12 +40,15 @@ class AuthJobManager implements ShouldQueue
      */
     public function handle()
     {
-        
+
         if ($this->name == "forgot_password") {
             Mail::to($this->user)->send(new Forgot($this->user, $this->optional_string));
         }
         if ($this->name == "new_user") {
             Mail::to($this->user)->send(new Registration($this->user, $this->optional_string));
+        }
+        if ($this->name == "new_user_admin") {
+            Mail::to($this->user)->send(new AdminRegistration($this->user, $this->optional_string));
         }
     }
 }

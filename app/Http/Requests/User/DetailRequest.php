@@ -26,10 +26,15 @@ class DetailRequest extends FormRequest
         $rules = [
             'first_name' => 'max:255',
             'last_name' => 'max:255',
+            'signature' => 'max:255',
+            'username' => 'max:255',
             'gender' => 'max:255',
             'phone' => 'max:15',
+            'is_admin' => 'boolean',
             'password' => 'min:6|confirmed',
+            'current_password' => 'min:6',
             'image' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg',
+            'interest' => 'string|nullable'
         ];
         return $rules;
     }
@@ -39,9 +44,7 @@ class DetailRequest extends FormRequest
     ];
 
     public static $_requestPayoutRules = [
-        'amount' => 'required|numeric',
-        'bank_account_id' => 'required|exists:bank_accounts,id', 
+        'amount' => 'required|numeric|min:100',
+        'bank_account_id' => 'required|exists:bank_accounts,id',
     ];
-
-    
 }

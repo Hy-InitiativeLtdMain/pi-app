@@ -26,8 +26,9 @@ class LessonRequest extends FormRequest
         $rules = [
             'title' => 'required|max:255',
             'content' => 'required',
-            'cover_type' => 'required|in:image,video',
-            'cover_file' => 'required|file|max:10240|mimes:png,jpg,jpeg,gif,svg,mp4',
+            'cover_type' => 'in:image,video',
+            'cover_file' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg,mp4',
+            'url' => '',
             
         ];
         return $rules;
@@ -38,6 +39,7 @@ class LessonRequest extends FormRequest
         'content' => '',
         'cover_type' => 'in:image,video',
         'cover_file' => 'file|max:10240|mimes:png,jpg,jpeg,gif,svg,mp4',
+        'url' => '',
 
         // 'meeting_link' => 'max:255',
         // 'recording_link' => 'max:255',
