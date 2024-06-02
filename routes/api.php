@@ -74,8 +74,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::get('notifications', [NotificationController::class, 'index']);
-        Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification']);
+        Route::get('notifications', [NotificationController::class, 'index'])->middleware(['auth:user']);
+        Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification'])->middleware(['auth:user']);
 
 
         Route::resource('mentor', MentorManager::class)->middleware(['auth:user'])->except('index');

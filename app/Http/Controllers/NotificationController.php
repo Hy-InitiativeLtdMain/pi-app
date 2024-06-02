@@ -10,10 +10,12 @@ class NotificationController extends Controller
 {
     use ApiResponser;
 
-    
+
 
     public function index()
     {
+        $user = auth()->user();
+        // dd($user);
         $notifications = auth()->user()->unreadNotifications;
         return $this->successResponse($notifications, Response::HTTP_OK);
 
