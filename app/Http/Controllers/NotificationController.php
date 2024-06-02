@@ -10,10 +10,7 @@ class NotificationController extends Controller
 {
     use ApiResponser;
 
-    public function __construct()
-    {
-        $this->middleware('auth:api');
-    }
+    
 
     public function index()
     {
