@@ -23,7 +23,7 @@ class MenteeRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'phone' => 'required|string',
+            'phone' => 'string|nullable',
             'level' => 'required|string',
             'course' => 'required|string',
         ];
