@@ -24,7 +24,7 @@ class MentorRequest extends FormRequest
         return [
             'firstname' => 'required|string',
             'lastname' => 'required|string',
-            'phone' => 'required|string',
+            'phone' => 'nullable|string',
             'address' => 'nullable|string',
             'job_title' => 'nullable|string',
             'company' => 'nullable|string',
