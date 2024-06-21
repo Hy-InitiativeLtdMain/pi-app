@@ -45,6 +45,7 @@ class MentorManager extends Controller
      */
     public function store(MentorRequest $request)
     {
+
         // get the user_id from the auth user
         $userId = auth()->user()->id;
         $userEmail = auth()->user()->email;
@@ -53,14 +54,24 @@ class MentorManager extends Controller
             'user_id' => $userId,
             'email' => $userEmail,
         ]);
-        // dd($request->all());
 
-        $mentor = Mentor::create($request->all());
-        $data = [
-            'message' => 'Profile Created Successfully.',
-            'data' => new MentorResource($mentor)
-        ];
-        return $this->successResponse($data, 201);
+
+        $existingMentor = Mentor::where('email', $userEmail)->first();
+        if ($existingMentor) {
+            // Handle the case where another user already has this email
+            return response()->json(['message' => 'Mentor profile already created.'], 409); // 409 Conflict
+        } else {
+            // dd($request->all());
+
+            $mentor = Mentor::create($request->all());
+            $data = [
+                'message' => 'Profile Created Successfully.',
+                'data' => new MentorResource($mentor)
+            ];
+            return $this->successResponse($data, 201);
+        }
+
+
     }
 
     /**
