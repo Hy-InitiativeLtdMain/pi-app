@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\FcmToken;
 use Illuminate\Http\Request;
 use App\Jobs\User\AuthJobManager;
+use App\Jobs\User\SendOtpSmsJob;
 use App\Models\VerificationToken;
 use App\Services\User\AuthService;
 use Illuminate\Support\Facades\Log;
