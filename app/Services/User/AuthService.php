@@ -4,6 +4,7 @@ namespace App\Services\User;
 
 use App\Events\Admin\NewUser;
 use App\Jobs\User\AuthJobManager;
+use App\Jobs\User\SendOtpSmsJob;
 use App\Models\AdminFeature;
 use App\Models\FcmToken;
 use App\Models\User;
@@ -114,26 +115,33 @@ class AuthService
 
     public function register($input)
     {
-
-        if(isset($input['referrer_code'] )){
-            $referrer = User::where('referral_code', $input['referrer_code'] )->firstOrFail();
+        if(isset($input['referrer_code'])){
+            $referrer = User::where('referral_code', $input['referrer_code'])->firstOrFail();
             $input['referrer_user_id'] = $referrer->id;
         }
-
+    
         $user = User::create($input);
-
+    
+        // Generate OTP and save it to verifications table
+        $otp = mt_rand(1000, 9999);
         $user->verifications()->create([
-            'token' => mt_rand(1000, 9999)
+            'token' => $otp
         ]);
-
+    
         $user->save();
-
-
+    
+        // Prepare and dispatch the email job
         $emailJob = (new AuthJobManager($user, "new_user"))->delay(Carbon::now()->addSeconds(2));
         dispatch($emailJob);
-
-        $data['message'] = 'Check your email for verification code';
+    
+        $phoneNumber = $user->phone; 
+        dispatch(new SendOtpSmsJob($phoneNumber, $otp));
+    
+        // Prepare the response data
+        $data['message'] = 'Check your email and phone for verification code';
         $data['email'] = $user->email;
+        $data['phone'] = $phoneNumber;
+    
         return [
             'data' => $data,
             'code' => 201
