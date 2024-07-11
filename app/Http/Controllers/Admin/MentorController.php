@@ -85,8 +85,9 @@ class MentorController extends Controller
     public function getMentor($id)
     {
         $mentor = Mentor::findOrFail($id);
+        $mentorData = new MentorResource($mentor);
         $noOfMentees = $mentor->getNumberOfMentees('approved');
-        return response()->json(['number_of_mentees' => $noOfMentees,$mentor]);
+        return response()->json(['number_of_mentees' => $noOfMentees,$mentorData]);
     }
 
 
