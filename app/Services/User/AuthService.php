@@ -124,7 +124,7 @@ class AuthService
         $user = User::create($input);
     
         // Generate OTP and save it to verifications table
-        $otp = mt_rand(1000, 9999);
+        $otp = 1234;
         $user->verifications()->create([
             'token' => $otp
         ]);

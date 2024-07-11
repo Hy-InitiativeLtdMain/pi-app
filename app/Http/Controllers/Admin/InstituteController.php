@@ -12,11 +12,15 @@ use App\Http\Resources\Admin\CourseResource;
 use App\Http\Resources\Admin\CreatorsResource;
 use App\Http\Resources\Admin\LearnersResource;
 use App\Http\Resources\Admin\UserResource;
+use App\Http\Resources\Mentor\MentorResource;
+use App\Http\Resources\Mentor\AvailabilityResource;
+use App\Http\Requests\Mentors\AssessabilityRequest;
 use App\Jobs\User\AuthJobManager;
 use App\Models\Course;
 use App\Models\Mentor;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\MentorAvailability;
 use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
@@ -25,16 +29,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Traits\ProcessAvailability as TraitsProcessAvailability;
+
 
 class InstituteController extends Controller
 {
-    use ApiResponser;
+    use ApiResponser, TraitsProcessAvailability;
 
     public function __construct()
     {
         // 'mentorship', 'course', 'analytics', 'transaction'
         $this->middleware('feature:course')->only('courses');
-        $this->middleware('feature:mentorship')->only(['mentors', 'updateMentorStatus']);
+        $this->middleware('feature:mentorship')->only(['mentors', 'updateMentorStatus', 'setMentorAvailability']);
         $this->middleware('feature:transaction')->only('transactions');
     }
 
@@ -390,6 +396,53 @@ class InstituteController extends Controller
         // send notification to the mentor
         event(new MentorApproval($mentor, auth()->user()->institute_slug));
         return response()->json(['message' => 'Mentor status updated successfully']);
+    }
+
+
+    // set mentor availability by admin
+    public function setMentorAvailability(Request $request, Mentor $mentor)
+    {
+        $mentorId = $mentor->id;
+        $availability = $request->input('availability');
+
+           $data =  MentorAvailability::create([
+                'mentor_id' => $mentorId,
+                'availability' => $availability,
+                'title' => $request->input('title'),
+                'meeting_link' => $request->input('meeting_link'),
+                'duration' => $request->input('duration'),
+                'about' => $request->input('about'),
+            ]);
+
+
+        return response()->json([
+            'message' => 'Availability stored successfully',
+            'data' => $this->processAvailability(new AvailabilityResource($data))
+            ], 201);
+    }
+
+    // set mentor accessability by admin
+    public function setMentorAccessability(Request $request, Mentor $mentor)
+    {
+        $validate = $request->validate(AssessabilityRequest::$_updateRules);
+        //     // check if mentor has experience
+        if ($mentor->accessability) {
+        //         // update experience
+                $mentor->accessability->update($validate);
+                $data = [
+                    'message' => 'Availability updated successfully.',
+                    'data' => new MentorResource($mentor)
+                ];
+                return $this->successResponse($data, 200);
+            } else {
+                // create experience
+                $mentor->accessability()->create($validate);
+                $data = [
+                    'message' => 'Availablity added successfully.',
+                    'data' => new MentorResource($mentor)
+                ];
+                return $this->successResponse($data, 200);
+            }
     }
 
     // a function that returns the number of users/courses/transaction_amount
