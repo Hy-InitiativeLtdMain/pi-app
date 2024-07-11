@@ -118,6 +118,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/mentors', [InstituteController::class, 'mentors']);
 
             Route::post('/mentor/status/{mentor}', [InstituteController::class, 'updateMentorStatus']);
+            Route::post('/mentor/availability/{mentor}', [InstituteController::class, 'setMentorAvailability']);
+            Route::post('/mentor/accessability/{mentor}', [InstituteController::class, 'setMentorAccessability']);
 
             // Transactions
             Route::get('/transactions/recent', [TransactionController::class, 'index']);
