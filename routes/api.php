@@ -215,6 +215,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::get('/', [CourseManager::class, 'index']);
                 Route::get('/buyers', [CourseManager::class, 'buyers']);
                 Route::post('/', [CourseManager::class, 'store'])->middleware(["auth.admin.access"]);
+                Route::post('/create-course-with-ai/{course}', [CourseManager::class, 'createCourseWithAI'])->middleware(["auth.admin.access"]);
+                Route::put('/courses/{course}/modules', [CourseManager::class, 'updateCourseModule'])->middleware(["auth.admin.access"]);
+                Route::put('/courses/{course}/flashcards', [CourseManager::class, 'updateFlashcardModule'])->middleware(["auth.admin.access"]);
+                Route::put('/courses/{course}/quizzes', [CourseManager::class, 'updateQuizModule'])->middleware(["auth.admin.access"]);
+                Route::put('/courses/{course}/lessons', [CourseManager::class, 'updateLessonModule'])->middleware(["auth.admin.access"]);
                 Route::get('/{course}', [CourseManager::class, 'view']);
                 Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);;
                 Route::post('/{course}', [CourseManager::class, 'update'])->middleware(["auth.admin.access"]);
