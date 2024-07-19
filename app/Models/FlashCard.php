@@ -5,19 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Quiz extends Model
+class Flashcard extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'question',
-        'options',
-        'correct_answer',
+        'front',
+        'back',
         'course_id',
-    ];
-
-    protected $casts = [
-        'options' => 'array',
     ];
 
     public function course()

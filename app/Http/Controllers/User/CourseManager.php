@@ -9,6 +9,7 @@ use App\Http\Requests\User\TransactionRequest;
 use App\Models\Course;
 use App\Services\User\CourseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CourseManager extends Controller
 {
@@ -71,11 +72,54 @@ class CourseManager extends Controller
     {
         $validated = $request->validate(TransactionRequest::$_paymentTypeRules);
         $user = $request->user();
-
-
-
-
         $_data = $this->courseService->subscribe($user, $course, $validated['type']);
         return response($_data['data'], $_data['code']);
+    }
+
+    public function createCourseWithAI(Request $request, Course $course)
+    {
+        try{
+            $file = $request->file('file');
+
+            if (!$file){
+                return response()->json(['message'=>'File upload is required'], 400);
+            }
+
+            $response = $this->courseService->createCourseWithAI($file, $course);
+
+            return response()->json($response);
+            
+        } catch (\Exception $e) {
+            Log::error('Error creating course with AI: ', ['error' => $e->getMessage()]);
+            return response()->json(['message' => $e], 500);
+       }
+   }
+
+    public function updateCourseModule(Request $request, Course $course)
+    {
+        $data = $request->all();
+        $result = $this->courseService->updateCourseModule($data, $course);
+        return response()->json($result, $result['code']);
+    }
+
+    public function updateFlashcardModule(Request $request, Course $course)
+    {
+        $data = $request->all();
+        $result = $this->courseService->updateFlashcardModule($data, $course);
+        return response()->json($result, $result['code']);
+    }
+
+    public function updateQuizModule(Request $request, Course $course)
+    {
+        $data = $request->all();
+        $result = $this->courseService->updateQuizModule($data, $course);
+        return response()->json($result, $result['code']);
+    }
+
+    public function updateLessonModule(Request $request, Course $course)
+    {
+        $data = $request->all();
+        $result = $this->courseService->updateLessonModule($data, $course);
+        return response()->json($result, $result['code']);
     }
 }
