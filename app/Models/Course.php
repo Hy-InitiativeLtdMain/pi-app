@@ -237,4 +237,19 @@ class Course extends Model
             get: fn ($value) => $this->reviews()->avg("rate"),
         );
     }
+
+    public function modules()
+{
+    return $this->hasMany(Module::class);
+}
+
+public function quizzes()
+{
+    return $this->hasMany(Quiz::class);
+}
+
+public function flashcards()
+{
+    return $this->hasMany(Flashcard::class);
+}
 }

@@ -9,11 +9,18 @@ use App\Models\CourseSignalPlan;
 use App\Models\Transaction;
 use App\Models\TransactionCourse;
 use App\Models\User;
+use App\Models\Quiz;
+use App\Models\Flashcard;
+use App\Models\Module;
+use App\Models\ModuleLesson;
 use App\Services\Media\CloudinaryService;
 use App\Services\Payment\PaystackService;
 use App\Services\Query\FilteringService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class CourseService
 {
@@ -64,7 +71,7 @@ class CourseService
     public function view(Course $course)
     {
 
-        $data['course'] = $course->fresh(['user', 'categories']);
+        $data['course'] = $course->fresh(['user', 'categories','modules','modules.lessons', 'quizzes', 'flashcards']);
         // $data['course']->users = $data['course']->batches->pluck('users')->collapse();
 
         return [
@@ -178,11 +185,6 @@ class CourseService
             ];
         }
 
-
-
-
-
-
         $ref = 'CRS' . (str_pad((Str::random(3) . mt_rand(0, 9999)), 7, '0', STR_PAD_LEFT));
         $transaction = Transaction::create([
             'ref' => $ref,
@@ -220,5 +222,165 @@ class CourseService
             'data' => $data,
             'code' => 200
         ];
+    }
+
+    public function createCourseWithAI(UploadedFile $file, Course $course)
+{
+    set_time_limit(600); // Set the execution time limit to 600 seconds
+    try {
+        // Prepare the HTTP client request
+        $response = Http::timeout(600)
+            ->connectTimeout(600)
+            ->withHeaders([
+                'X-AUG-KEY' => env('AI_API_TOKEN'),
+                'Authorization' => '••••••',
+            ])
+            ->attach(
+                'files',
+                file_get_contents($file->getPathname()),
+                $file->getClientOriginalName()
+            )
+            ->post(env('AI_API_URL') . '/api/v1/services/create-course/');
+
+        // Handle the response
+        if ($response->successful()) {
+            $data = $response->json()['data'];
+
+            // Save Modules, Lessons, Quizzes, and Flashcards
+            $courseId = $course->id;
+
+            // Save Modules and Lessons
+            foreach ($data['overview']['modules'] as $moduleData) {
+                $module = Module::create([
+                    'module_title' => $moduleData['moduleTitle'],
+                    'module_description' => $moduleData['moduleDescription'],
+                    'course_id' => $courseId,
+                ]);
+
+                foreach ($moduleData['lessons'] as $lessonData) {
+                    ModuleLesson::create([
+                        'module_id' => $module->id,
+                        'lesson_title' => $lessonData['lessonTitle'],
+                        'lesson_content' => $lessonData['lessonContent'],
+                    ]);
+                }
+            }
+
+            // Save Quizzes
+            foreach ($data['quizzes']['quizzes'] as $quizData) {
+                Quiz::create([
+                    'question' => $quizData['question'],
+                    'options' => $quizData['options'],
+                    'correct_answer' => $quizData['correctAnswer'],
+                    'course_id' => $courseId,
+                ]);
+            }
+
+            // Save Flashcards
+            foreach ($data['flashcards']['flashcards'] as $flashcardData) {
+                Flashcard::create([
+                    'front' => $flashcardData['front'],
+                    'back' => $flashcardData['back'],
+                    'course_id' => $courseId,
+                ]);
+            }
+
+            return [
+                'data' => $data,
+                'code' => 200
+            ];
+        } else {
+            $errorMessage = 'Unexpected HTTP status: ' . $response->status() . ' ' . $response->body();
+            Log::error('Error creating course with AI: ' . $errorMessage);
+            return [
+                'message' => $errorMessage,
+                'code' => $response->status()
+            ];
+        }
+    } catch (\Exception $e) {
+        $errorMessage = 'Error creating course with AI: ' . $e->getMessage();
+        Log::error($errorMessage);
+        return [
+            'message' => $errorMessage,
+            'code' => 500
+        ];
+    }
+}
+
+public function updateCourseModule($data, Course $course)
+    {
+        try {
+            foreach ($data['modules'] as $moduleData) {
+                $module = Module::where('id', $moduleData['id'])->where('course_id', $course->id)->first();
+                if ($module) {
+                    $module->update([
+                        'module_title' => $moduleData['module_title'],
+                        'module_description' => $moduleData['module_description'],
+                    ]);
+                }
+            }
+            return ['message' => 'Modules updated successfully', 'code' => 200];
+        } catch (\Exception $e) {
+            Log::error('Error updating course modules: ' . $e->getMessage());
+            return ['message' => 'Error updating course modules', 'code' => 500];
+        }
+    }
+
+    public function updateFlashcardModule($data, Course $course)
+    {
+        try {
+            foreach ($data['flashcards'] as $flashcardData) {
+                $flashcard = Flashcard::where('id', $flashcardData['id'])->where('course_id', $course->id)->first();
+                if ($flashcard) {
+                    $flashcard->update([
+                        'front' => $flashcardData['front'],
+                        'back' => $flashcardData['back'],
+                    ]);
+                }
+            }
+            return ['message' => 'Flashcards updated successfully', 'code' => 200];
+        } catch (\Exception $e) {
+            Log::error('Error updating flashcards: ' . $e->getMessage());
+            return ['message' => 'Error updating flashcards', 'code' => 500];
+        }
+    }
+
+    public function updateQuizModule($data, Course $course)
+    {
+        try {
+            foreach ($data['quizzes'] as $quizData) {
+                $quiz = Quiz::where('id', $quizData['id'])->where('course_id', $course->id)->first();
+                if ($quiz) {
+                    $quiz->update([
+                        'question' => $quizData['question'],
+                        'options' => $quizData['options'],
+                        'correct_answer' => $quizData['correct_answer'],
+                    ]);
+                }
+            }
+            return ['message' => 'Quizzes updated successfully', 'code' => 200];
+        } catch (\Exception $e) {
+            Log::error('Error updating quizzes: ' . $e->getMessage());
+            return ['message' => 'Error updating quizzes', 'code' => 500];
+        }
+    }
+
+    public function updateLessonModule($data, Course $course)
+    {
+        try {
+            foreach ($data['lessons'] as $lessonData) {
+                $lesson = ModuleLesson::where('id', $lessonData['id'])->where('module_id', $lessonData['module_id'])->first();
+                if ($lesson) {
+                    $lesson->update([
+                        'lesson_title' => $lessonData['lesson_title'],
+                        'lesson_content' => $lessonData['lesson_content'],
+                    ]);
+                }
+            }
+            return ['message' => 'Lessons updated successfully', 'code' => 200];
+        } catch (\Exception $e) {
+            Log::error('Error updating lessons: ' . $e->getMessage());
+            return ['message' => 'Error updating lessons', 'code' => 500];
+        }
     }
 }
