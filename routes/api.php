@@ -221,6 +221,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::put('/courses/{course}/quizzes', [CourseManager::class, 'updateQuizModule'])->middleware(["auth.admin.access"]);
                 Route::put('/courses/{course}/lessons', [CourseManager::class, 'updateLessonModule'])->middleware(["auth.admin.access"]);
                 Route::get('/{course}', [CourseManager::class, 'view']);
+                Route::get('/ai/{course}', [CourseManager::class, 'viewAICourse']);
                 Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);;
                 Route::post('/{course}', [CourseManager::class, 'update'])->middleware(["auth.admin.access"]);
                 Route::delete('/{course}', [CourseManager::class, 'delete'])->middleware(["auth.admin.access"]);
