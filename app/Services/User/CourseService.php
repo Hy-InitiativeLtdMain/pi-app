@@ -70,17 +70,20 @@ class CourseService
 
     public function view(Course $course)
     {
-        $course = $course->fresh(['user', 'categories', 'modules', 'modules.lessons', 'quizzes', 'flashcards']);
-        
-        $data['course'] = $course->toArray();
 
-        // Remove empty attributes
-        $attributesToCheck = ['modules', 'modules.lessons', 'quizzes', 'flashcards'];
-        foreach ($attributesToCheck as $attribute) {
-            if (empty($data['course'][$attribute])) {
-                unset($data['course'][$attribute]);
-            }
-        }
+        $data['course'] = $course->fresh(['user', 'categories']);
+        // $data['course']->users = $data['course']->batches->pluck('users')->collapse();
+
+        return [
+            'data' => $data,
+            'code' => 200
+        ];
+    }
+
+    public function viewAiCourse(Course $course)
+    {
+
+        $data['course'] = $course->fresh(['user', 'categories','modules','modules.lessons', 'quizzes', 'flashcards']);
 
         return [
             'data' => $data,
