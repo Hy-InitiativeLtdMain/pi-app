@@ -41,6 +41,13 @@ class CourseManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
+    public function viewAICourse(Course $course)
+    {
+        $_data = $this->courseService->viewAICourse($course);
+        return response($_data['data'], $_data['code']);
+    }
+
+
     public function update(Request $request, Course $course)
     {
         $validated = $request->validate(CourseRequest::$_updateRules);
