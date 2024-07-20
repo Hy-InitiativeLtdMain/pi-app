@@ -243,7 +243,7 @@ class CourseService
         $response = Http::timeout(600)
             ->connectTimeout(600)
             ->withHeaders([
-                'X-AUG-KEY' => env('AI_API_TOKEN'),
+                'X-AUG-KEY' => "fHjrSbk5.VdXuuv4lxnF2acfgIqsEDsMF5g1tvM4z",
                 'Authorization' => '••••••',
             ])
             ->attach(
