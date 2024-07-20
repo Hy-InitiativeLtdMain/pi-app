@@ -251,7 +251,7 @@ class CourseService
                 file_get_contents($file->getPathname()),
                 $file->getClientOriginalName()
             )
-            ->post(env('AI_API_URL') . '/api/v1/services/create-course/');
+            ->post('https://api.autogon.ai/api/v1/services/create-course/');
 
         // Handle the response
         if ($response->successful()) {
