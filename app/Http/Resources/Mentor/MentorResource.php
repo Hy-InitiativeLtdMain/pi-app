@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Mentor;
 
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,6 +15,7 @@ class MentorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $count = Booking::where('mentor_id', $this->id)->where('status', 'Approved')->count();
         // Some checks
         return [
             'id' => $this->id,
@@ -23,7 +25,7 @@ class MentorResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'bio' => $this->bio,
-
+            'no_of_mentees' => $count,
             'company' => $this->company,
             'job_title' => $this->job_title,
             'experience' => $this->experience,

@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UserReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -175,6 +176,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('experience', [MentorManager::class, 'createExperience']);
             Route::post('skills', [MentorManager::class, 'createSkills']);
             Route::post('accessability', [MentorManager::class, 'createAccessability']);
+            Route::get('/number-of-mentees', [BookingManager::class, 'countMentees']);
+            Route::post('/mentee/profile/{id}/review', [UserReviewController::class, 'store']);
+
+            Route::put('mentee/profile/{id}/review/{userReview}', [UserReviewController::class, 'update']);
+            Route::delete('mentee/profile/{id}/review/{userReview}', [UserReviewController::class, 'destroy']);
+            Route::get('/mentor/profile/reviews', [UserReviewController::class, 'fetchMentorReviews']);
+
         });
 
         //Booking
@@ -189,7 +197,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
             Route::get('/my-mentors', [BookingManager::class, 'getMentors']);
             Route::get('/bookings/{bookingId}/mentor', [BookingManager::class, 'getMentor']);
+
             Route::get('/session-data', [SessionsManager::class, 'sessions']);
+            Route::get('/number-of-mentors', [BookingManager::class, 'countMentors']);
+            Route::post('/mentor/profile/{id}/review', [UserReviewController::class, 'store']);
+            Route::put('mentor/profile/{id}/review/{userReview}', [UserReviewController::class, 'update']);
+            Route::delete('mentor/profile/{id}/review/{userReview}', [UserReviewController::class, 'destroy']);
+
+            Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
+
         });
 
         Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
