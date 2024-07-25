@@ -243,5 +243,23 @@ class BookingManager extends Controller
         $bookings = Booking::where('mentor_id', $mentorId)->where('status', 'Approved')->with('mentee')->get();
         return $this->showAll(BookingResource::collection($bookings), 200);
     }
+
+    // Create a function where we count the number of mentees/mentors based on the authenticated user
+
+    public function countMentees()
+    {
+        $mentorId = auth()->user()->mentor->id;
+        $count = Booking::where('mentor_id', $mentorId)->where('status', 'Approved')->count();
+        return response()->json(['no_of_mentees' => $count], 200);
+    }
+
+    // create a count for mentors too
+
+    public function countMentors()
+    {
+        $menteeId = auth()->user()->mentee->id;
+        $count = Booking::where('mentee_id', $menteeId)->where('status', 'Approved')->count();
+        return response()->json(['no_of_mentors' => $count], 200);
+    }
 }
 
