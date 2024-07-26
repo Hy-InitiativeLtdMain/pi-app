@@ -182,6 +182,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::put('mentee/profile/{id}/review/{userReview}', [UserReviewController::class, 'update']);
             Route::delete('mentee/profile/{id}/review/{userReview}', [UserReviewController::class, 'destroy']);
             Route::get('/mentor/profile/reviews', [UserReviewController::class, 'fetchMentorReviews']);
+            Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMentorReview']);
 
         });
 
@@ -204,6 +205,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::put('mentor/profile/{id}/review/{userReview}', [UserReviewController::class, 'update']);
             Route::delete('mentor/profile/{id}/review/{userReview}', [UserReviewController::class, 'destroy']);
 
+            Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMenteeReview']);
             Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
 
         });

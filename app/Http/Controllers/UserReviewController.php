@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserReviewRequest;
 use App\Http\Requests\UpdateUserReviewRequest;
 use App\Http\Resources\ReviewResource;
+use App\Models\Mentee;
+use App\Models\Mentor;
 use App\Models\UserReview;
 use Illuminate\Http\Request;
 
@@ -92,6 +94,24 @@ class UserReviewController extends Controller
     {
         $reviews = UserReview::where('mentee_id', auth()->user()->mentee->id)
             ->where('user_type', 1)->get();
+        return response()->json(ReviewResource::collection($reviews));
+    }
+
+    public function fetchMentorReview(Mentor $id)
+    {
+        $reviews = UserReview::where('mentor_id', $id->id)
+            ->where('user_type', 0)->get();
+    // dd($reviews);
+        return response()->json(ReviewResource::collection($reviews));
+    }
+
+    public function fetchMenteeReview(Mentee $id)
+    {
+        // dd($id->id);
+        $reviews = UserReview::where('mentee_id', $id->id)
+            ->where('user_type', 1)->get();
+    // dd($reviews);
+
         return response()->json(ReviewResource::collection($reviews));
     }
 }
