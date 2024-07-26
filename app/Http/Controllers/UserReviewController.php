@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserReviewRequest;
 use App\Http\Requests\UpdateUserReviewRequest;
+use App\Http\Resources\ReviewResource;
 use App\Models\UserReview;
 use Illuminate\Http\Request;
 
@@ -84,7 +85,7 @@ class UserReviewController extends Controller
     {
         $reviews = UserReview::where('mentor_id', auth()->user()->mentor->id)
                                ->where('user_type', 0)->get();
-        return response()->json($reviews);
+        return response()->json( ReviewResource::collection($reviews));
 
     }
 
@@ -92,6 +93,6 @@ class UserReviewController extends Controller
     {
         $reviews = UserReview::where('mentee_id', auth()->user()->mentee->id)
             ->where('user_type', 1)->get();
-        return response()->json($reviews);
+        return response()->json(ReviewResource::collection($reviews));
     }
 }

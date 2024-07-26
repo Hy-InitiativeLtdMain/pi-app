@@ -16,7 +16,7 @@ class UserReview extends Model
         'rating',
         'session',
         'session_hours',
-        'number_of_session',
+        'number_of_sessions',
         'user_type'
     ];
 
