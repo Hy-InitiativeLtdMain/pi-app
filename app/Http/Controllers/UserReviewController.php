@@ -25,7 +25,7 @@ class UserReviewController extends Controller
      */
     public function store(Request $request, $id)
     {
-        if (auth()->user()->mentor->id) {
+        if (auth()->user()->mentor) {
             $data['user_type'] = 1;
             $data['mentor_id'] = auth()->user()->mentor->id;
             $data['mentee_id'] = $id;
@@ -36,8 +36,7 @@ class UserReviewController extends Controller
             $data['number_of_sessions'] = $request->number_of_sessions;
             UserReview::create($data);
             return response()->json('Review Submitted successfully.', 200);
-        }
-        if (auth()->user()->mentee->id) {
+        }else if (auth()->user()->mentee) {
             $data['user_type'] = 0;
             $data['mentor_id'] = $id;
             $data['mentee_id'] = auth()->user()->mentee->id;
