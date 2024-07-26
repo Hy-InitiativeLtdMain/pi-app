@@ -35,7 +35,7 @@ class UserReviewController extends Controller
             $data['session_hours'] = $request->session_hours;
             $data['number_of_sessions'] = $request->number_of_sessions;
             UserReview::create($data);
-            return response()->json('Review Submitted successfully.', 200);
+            return response()->json(['message' => 'Review Submitted successfully.'], 201);
         }else if (auth()->user()->mentee) {
             $data['user_type'] = 0;
             $data['mentor_id'] = $id;
@@ -46,7 +46,7 @@ class UserReviewController extends Controller
             $data['session_hours'] = $request->session_hours;
             $data['number_of_sessions'] = $request->number_of_sessions;
             UserReview::create($data);
-            return response()->json('Review Submitted successfully.', 200);
+            return response()->json(['message' => 'Review Submitted successfully.'], 201);
         }
 
     }
