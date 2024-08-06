@@ -32,10 +32,10 @@ class UserReviewController extends Controller
             $data['mentor_id'] = auth()->user()->mentor->id;
             $data['mentee_id'] = $id;
             $data['rating'] = $request->rating;
-            $data['review'] = $request->review;
+            $data['review'] = $request->review ? $request->review : null;
             $data['session'] = $request->session;
-            $data['session_hours'] = $request->session_hours;
-            $data['number_of_sessions'] = $request->number_of_sessions;
+            $data['session_hours'] = $request->session_hours ? $request->session_hours : null;
+            $data['number_of_sessions'] = $request->number_of_sessions ? $request->number_of_sessions : null;
             UserReview::create($data);
             return response()->json(['message' => 'Review Submitted successfully.'], 201);
         }else if (auth()->user()->mentee) {
@@ -43,10 +43,10 @@ class UserReviewController extends Controller
             $data['mentor_id'] = $id;
             $data['mentee_id'] = auth()->user()->mentee->id;
             $data['rating'] = $request->rating;
-            $data['review'] = $request->review;
+            $data['review'] = $request->review ? $request->review : null;
             $data['session'] = $request->session;
-            $data['session_hours'] = $request->session_hours;
-            $data['number_of_sessions'] = $request->number_of_sessions;
+            $data['session_hours'] = $request->session_hours ? $request->session_hours : null;
+            $data['number_of_sessions'] = $request->number_of_sessions ? $request->number_of_sessions : null;
             UserReview::create($data);
             return response()->json(['message' => 'Review Submitted successfully.'], 201);
         }
