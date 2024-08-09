@@ -35,10 +35,10 @@ class QuizManager extends Controller
     public function update(Request $request, Quiz $quiz)
     {
         $validated = $request->validate([
-            'question' => 'required|string|max:255',
-            'options' => 'nullable',
-            'correct_answer' => 'required|string|max:255',
-            'course_id' => 'nullable|integer|exists:courses,id'
+            'question' => 'string|max:255',
+            'options' => '',
+            'correct_answer' => 'string|max:255',
+            'course_id' => 'integer|exists:courses,id'
         ]);
         $_data = $this->quizService->update($quiz, $validated);
         return response($_data['data'], $_data['code']);
