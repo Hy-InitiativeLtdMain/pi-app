@@ -34,14 +34,24 @@ class QuizManager extends Controller
 
     public function update(Request $request, Quiz $quiz)
     {
-        $validated = $request->validate(QuizRequest::$_updateRules);
+        $validated = $request->validate([
+            'question' => 'required|string|max:255',
+            'options' => 'nullable',
+            'correct_answer' => 'required|string|max:255',
+            'course_id' => 'nullable|integer|exists:courses,id'
+        ]);
         $_data = $this->quizService->update($quiz, $validated);
         return response($_data['data'], $_data['code']);
     }
 
-    public function store(QuizRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validated = $request->validate([
+            'question' => 'required|string|max:255',
+            'options' => 'nullable',
+            'correct_answer' => 'required|string|max:255',
+            'course_id' => 'nullable|integer|exists:courses,id'
+        ]);
 
         $validated['user_id'] = $request->user()->id;
         $_data = $this->quizService->store($validated);
