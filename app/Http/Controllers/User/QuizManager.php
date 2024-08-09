@@ -38,7 +38,8 @@ class QuizManager extends Controller
             'question' => 'string|max:255',
             'options' => '',
             'correct_answer' => 'string|max:255',
-            'course_id' => 'integer|exists:courses,id'
+            'course_id' => 'integer|exists:courses,id',
+            'lesson_id' => 'integer|exists:lessons,id'
         ]);
         $_data = $this->quizService->update($quiz, $validated);
         return response($_data['data'], $_data['code']);
@@ -50,7 +51,8 @@ class QuizManager extends Controller
             'question' => 'required|string|max:255',
             'options' => 'nullable',
             'correct_answer' => 'required|string|max:255',
-            'course_id' => 'nullable|integer|exists:courses,id'
+            'course_id' => 'nullable|integer|exists:courses,id',
+            'lesson_id' => 'nullable|integer|exists:lessons,id'
         ]);
 
         $validated['user_id'] = $request->user()->id;

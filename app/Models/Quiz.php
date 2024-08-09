@@ -14,6 +14,7 @@ class Quiz extends Model
         'options',
         'correct_answer',
         'course_id',
+        'lesson_id',
     ];
 
     protected $casts = [
