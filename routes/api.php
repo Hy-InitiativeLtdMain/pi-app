@@ -307,6 +307,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::patch('/{quiz}', [QuizManager::class, 'update']);
                 Route::post('/{quiz}/submit', [QuizManager::class, 'submit'])->middleware(["auth.learner.access"]);
                 Route::delete('/{quiz}', [QuizManager::class, 'delete']);
+                Route::delete('/lesson/{lesson}', [QuizManager::class, 'deleteByLessonId']);
             });
 
 

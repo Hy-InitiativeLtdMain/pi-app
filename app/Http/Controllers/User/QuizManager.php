@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\QuizRequest;
+use App\Models\Lesson;
 use App\Models\Quiz;
 use App\Services\User\QuizService;
 use Illuminate\Http\Request;
@@ -72,6 +73,11 @@ class QuizManager extends Controller
     public function delete(Quiz $quiz)
     {
         $_data = $this->quizService->delete($quiz);
+        return response($_data['data'], $_data['code']);
+    }
+
+    public function deleteByLessonId(Lesson $lesson){
+        $_data = $this->quizService->lessonDelete($lesson);
         return response($_data['data'], $_data['code']);
     }
 }
