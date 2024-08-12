@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Models\Lesson;
 use App\Models\Quiz;
 use App\Models\UserQuiz;
 use App\Services\Query\FilteringService;
@@ -75,6 +76,19 @@ class QuizService
         $quiz->delete();
         $data['message'] = "Deleted Successfully";
         $data['quiz'] = $quiz;
+        return [
+            'data' => $data,
+            'code' => 200
+        ];
+    }
+
+    public function lessonDelete(Lesson $lesson) {
+        // delete quiz by lesson_id
+        $quiz = Quiz::where('lesson_id', $lesson->id)->get();
+        foreach ($quiz as $q) {
+            $q->delete();
+        }
+        $data['message'] = 'All Quizzes in the lesson are deleted successfully';
         return [
             'data' => $data,
             'code' => 200
