@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\Admin\MentorApproval;
 use App\Events\Admin\NewCourse;
 use App\Events\Admin\NewUser;
+use App\Events\AICourseCreated;
 use App\Events\Mentee\BookingApproval;
 use App\Events\Mentor\MentorshipBooking;
 use App\Events\PasswordChange;
@@ -14,6 +15,7 @@ use App\Listeners\Admin\SendNewUserNotification;
 use App\Listeners\Mentee\SendBookingNotification;
 use App\Listeners\Mentor\SendPendingBookingNotification;
 use App\Listeners\SendPasswordChangeNotification;
+use App\Notifications\AICourseCreated as NotificationsAICourseCreated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -44,6 +46,7 @@ class EventServiceProvider extends ServiceProvider
 
         // Users
         PasswordChange::class => [SendPasswordChangeNotification::class],
+        AICourseCreated::class => [NotificationsAICourseCreated::class],
     ];
 
     /**

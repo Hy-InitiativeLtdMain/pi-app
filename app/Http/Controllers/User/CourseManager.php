@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Events\Admin\NewCourse;
+use App\Events\AICourseCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CourseRequest;
 use App\Http\Requests\User\TransactionRequest;
@@ -93,9 +94,11 @@ class CourseManager extends Controller
             }
 
             $response = $this->courseService->createCourseWithAI($file, $course);
-
+            $user = auth()->user()->id;
+            event(new AICourseCreated($user, $response['data']));
             return response()->json($response);
-            
+            // Send notification to user that the course has been generated
+
         } catch (\Exception $e) {
             Log::error('Error creating course with AI: ', ['error' => $e->getMessage()]);
             return response()->json(['message' => $e], 500);
