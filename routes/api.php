@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\InstituteController;
 use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\Notification\FeatureController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserReviewController;
@@ -158,6 +159,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::delete('/mentors/delete', [MentorController::class, 'deleteMentors']);
 
             // Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
+
+            Route::apiResource('/events', EventController::class);
+
         });
 
         // Availability
