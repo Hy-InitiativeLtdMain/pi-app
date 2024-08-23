@@ -29,6 +29,7 @@ class EventService
     }
 
     public function store($inputs){
+        // dd($inputs['image']);
         if (isset($inputs['image']) && $inputs['image'] != null) {
             $cloudinary = new CloudinaryService();
             $resp = $cloudinary->store($inputs['image'], "event-images");

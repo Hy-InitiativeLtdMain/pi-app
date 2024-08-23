@@ -29,9 +29,9 @@ class EventRequest extends FormRequest
             'link_password' => 'max:255',
             'date' => '',
             'time' => '',
-            'image' => 'file|max:10240"mimes:png,jpg',
+            'image' => 'file|max:10240|mimes:png,jpg',
             'image_id' => 'max:255',
-            'file' => '',
+            'file' => 'file',
             'file_id' => '',
             'institute' => '',
         ];
