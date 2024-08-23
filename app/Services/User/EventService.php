@@ -29,23 +29,25 @@ class EventService
     }
 
     public function store($inputs){
-        // dd($inputs['image']);
+        // dd($inputs->all());
+        $input=$inputs->all();
         if (isset($inputs['image']) && $inputs['image'] != null) {
             $cloudinary = new CloudinaryService();
             $resp = $cloudinary->store($inputs['image'], "event-images");
-            $inputs['image'] = $resp[0];
-            $inputs['image_id'] = $resp[1];
+            // dd($resp[0]);
+            $input['image'] = $resp[0];
+            $input['image_id'] = $resp[1];
         }
         if (isset($inputs['file']) && $inputs['file'] != null){
             $cloudinary = new CloudinaryService();
             $resp = $cloudinary->store($inputs['file'], "event-files");
-            $inputs['file'] = $resp[0];
-            $inputs['file_id'] = $resp[1];
+            $input['file'] = $resp[0];
+            $input['file_id'] = $resp[1];
         }
-        $inputs['user_id'] = auth()->user()->id;
-        $inputs['institute'] = auth()->user()->institute_slug;
-        // dd($inputs->all());
-        $event = Event::create($inputs->all());
+        $input['user_id'] = auth()->user()->id;
+        $input['institute'] = auth()->user()->institute_slug;
+        // dd($input);
+        $event = Event::create($input);
         $data['message'] = "Event created successfully";
         $data['event'] = $event->fresh(['user']);
         return [
@@ -56,6 +58,7 @@ class EventService
 
     public function update(Event $event, $inputs){
         // dd($inputs);
+            $input=$inputs->all();
         if (isset($inputs['image']) && $inputs['image'] != null) {
             $cloudinary = new CloudinaryService();
             if ($event->image_id != null) {
@@ -63,8 +66,8 @@ class EventService
             }
 
             $resp = $cloudinary->store($inputs['image'], "event-images");
-            $inputs['image'] = $resp[0];
-            $inputs['image_id'] = $resp[1];
+            $input['image'] = $resp[0];
+            $input['image_id'] = $resp[1];
         }
         if (isset($inputs['file']) && $inputs['file'] != null){
             $cloudinary = new CloudinaryService();
@@ -73,11 +76,11 @@ class EventService
             }
 
             $resp = $cloudinary->store($inputs['file'], "event-files");
-            $inputs['file'] = $resp[0];
-            $inputs['file_id'] = $resp[1];
+            $input['file'] = $resp[0];
+            $input['file_id'] = $resp[1];
         }
         // dd($inputs);
-        $event->fill($inputs);
+        $event->fill($input);
         if ($event->isDirty()) {
             $event->save();
         }
