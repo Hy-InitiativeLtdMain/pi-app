@@ -40,7 +40,7 @@ class EventService
         }
         if (isset($inputs['file']) && $inputs['file'] != null){
             $cloudinary = new CloudinaryService();
-            $resp = $cloudinary->store($inputs['file'], "event-files");
+            $resp = $cloudinary->storeFiles($inputs['file'], "event-files");
             $input['file'] = $resp[0];
             $input['file_id'] = $resp[1];
         }
@@ -75,7 +75,7 @@ class EventService
                 $cloudinary->delete($event->file_id);
             }
 
-            $resp = $cloudinary->store($inputs['file'], "event-files");
+            $resp = $cloudinary->storeFiles($inputs['file'], "event-files");
             $input['file'] = $resp[0];
             $input['file_id'] = $resp[1];
         }
