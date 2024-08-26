@@ -58,7 +58,7 @@ class EventService
 
     public function update(Event $event, $inputs){
         // dd($inputs);
-            $input=$inputs->all();
+
         if (isset($inputs['image']) && $inputs['image'] != null) {
             $cloudinary = new CloudinaryService();
             if ($event->image_id != null) {
@@ -66,8 +66,8 @@ class EventService
             }
 
             $resp = $cloudinary->store($inputs['image'], "event-images");
-            $input['image'] = $resp[0];
-            $input['image_id'] = $resp[1];
+            $inputs['image'] = $resp[0];
+            $inputs['image_id'] = $resp[1];
         }
         if (isset($inputs['file']) && $inputs['file'] != null){
             $cloudinary = new CloudinaryService();
@@ -76,11 +76,11 @@ class EventService
             }
 
             $resp = $cloudinary->storeFiles($inputs['file'], "event-files");
-            $input['file'] = $resp[0];
-            $input['file_id'] = $resp[1];
+            $inputs['file'] = $resp[0];
+            $inputs['file_id'] = $resp[1];
         }
         // dd($inputs);
-        $event->fill($input);
+        $event->fill($inputs);
         if ($event->isDirty()) {
             $event->save();
         }
