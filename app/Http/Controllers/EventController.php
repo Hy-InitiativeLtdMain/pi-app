@@ -48,7 +48,7 @@ class EventController extends Controller
      */
     public function update(Event $event, EventRequest $request)
     {
-        // dd($event, $request->all());
+        // dd($request);
         $validate = $request->validate(EventRequest::$_updateRules);
         $_data = $this->eventService->update($event, $validate);
         return response($_data['data'], $_data['code']);
