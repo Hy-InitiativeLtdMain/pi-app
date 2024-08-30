@@ -27,6 +27,7 @@ class Event extends Model
         'file',
         'file_id',
         'institute',
+        'file_type',
     ];
 
     // Define the relationship with the User model

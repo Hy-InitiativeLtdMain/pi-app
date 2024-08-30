@@ -43,6 +43,7 @@ class EventService
             $resp = $cloudinary->storeFiles($inputs['file'], "event-files");
             $input['file'] = $resp[0];
             $input['file_id'] = $resp[1];
+            $input['file_type'] = $inputs['file']->getClientOriginalExtension();
         }
         $input['user_id'] = auth()->user()->id;
         $input['institute'] = auth()->user()->institute_slug;
@@ -74,7 +75,7 @@ class EventService
             if ($event->file_id != null) {
                 $cloudinary->delete($event->file_id);
             }
-
+            $inputs['file_type'] = $inputs['file']->getClientOriginalExtension();
             $resp = $cloudinary->storeFiles($inputs['file'], "event-files");
             $inputs['file'] = $resp[0];
             $inputs['file_id'] = $resp[1];

@@ -50,6 +50,7 @@ class EventController extends Controller
     {
         // dd($request);
         $validate = $request->validate(EventRequest::$_updateRules);
+        // dd($validate);
         $_data = $this->eventService->update($event, $validate);
         return response($_data['data'], $_data['code']);
     }
