@@ -78,36 +78,27 @@ class SettingsController extends Controller
         $adminId = auth()->user()->id;
 
         // Check if admin features already exist
-        $adminFeatures = AdminFeature::where('user_id', $adminId)->get();
+        $adminFeatures = AdminFeature::where('user_id', $adminId)->pluck('feature')->toArray();
 
-        // If admin features are not found, create default features
-        if ($adminFeatures->isEmpty()) {
-            // Check if there is another admin with the same institute_slug
-            $adminWithSameInstitute = User::where('institute_slug', auth()->user()->institute_slug)
-            ->where('admin', true)
-            ->get()->pluck('id')->toArray();
+        // List of all possible features
+        $defaultFeatures = ['mentorship', 'course', 'analytics', 'transaction', 'events', 'topics'];
 
-            // dd($adminWithSameInstitute);
-            // If another admin with the same institute_slug exists, get their features
-            if ($adminWithSameInstitute) {
-                $adminFeatures = AdminFeature::whereIn('user_id', $adminWithSameInstitute)->get();
-                // dd($adminFeatures);
-            }
-            if ($adminFeatures->isEmpty()) {
-                $features = ['mentorship', 'course', 'analytics', 'transaction'];
+        // Find out which features are missing
+        $missingFeatures = array_diff($defaultFeatures, $adminFeatures);
 
-                foreach ($features as $feature) {
-                    AdminFeature::create([
-                        'user_id' => $adminId,
-                        'feature' => $feature,
-                        'enabled' => true, // All features are initially enabled
-                    ]);
-                }
-
-                // Fetch admin features again after creating defaults
-                $adminFeatures = AdminFeature::where('user_id', $adminId)->get();
+        // If there are missing features, add them
+        if (!empty($missingFeatures)) {
+            foreach ($missingFeatures as $feature) {
+                AdminFeature::create([
+                    'user_id' => $adminId,
+                    'feature' => $feature,
+                    'enabled' => true, // All features are initially enabled
+                ]);
             }
         }
+
+        // Fetch admin features again after creating defaults
+        $adminFeatures = AdminFeature::where('user_id', $adminId)->get();
 
         return response()->json($adminFeatures, 200);
     }
@@ -116,7 +107,7 @@ class SettingsController extends Controller
     {
         // Validate the request data
         $request->validate([
-            '*.feature' => 'required|in:mentorship,course,analytics,transaction',
+            '*.feature' => 'required|in:mentorship,course,analytics,transaction,events',
             '*.enabled' => 'required|boolean',
         ]);
 

@@ -15,103 +15,121 @@ use Illuminate\Support\Facades\Hash;
 class AuthService
 {
     public function login($input)
-{
-    $user = User::where('email', $input['email'])->first();
+    {
+        $user = User::where('email', $input['email'])->first();
 
-    if ($user && Hash::check($input['password'], $user->password)) {
-        // Check if user is admin or learner
-        $userType = $user->is_admin ? 'Creator' : 'Learner';
-            // check if user->admin is true
+        if ($user && Hash::check($input['password'], $user->password)) {
+            // Determine user type
+            $userType = $this->determineUserType($user);
 
-            if ($user->admin) {
-                $userType = 'Admin';
+            // Handle admin features if the user is an admin
+            $adminFeatures = $user->admin ? $this->handleAdminFeatures($user) : collect();
 
-                // Fetch admin features
-                $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
-                // dd($adminFeatures);
-
-                // If admin features are empty, create default features
-                if ($adminFeatures->isEmpty()) {
-                    // Check if there is another admin with the same institute_slug
-                    $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
-                        ->where('admin', true)
-                        ->get()->pluck('id')->toArray();
-
-                    // dd($adminWithSameInstitute);
-                    // If another admin with the same institute_slug exists, get their features
-                    if ($adminWithSameInstitute) {
-                        $adminFeatures = AdminFeature::whereIn('user_id', $adminWithSameInstitute)->get();
-                        // dd($adminFeatures);
-                    }
-                    if ($adminFeatures->isEmpty()){
-                    $features = ['mentorship', 'course', 'analytics', 'transaction'];
-
-                    foreach ($features as $feature) {
-                        AdminFeature::create([
-                            'user_id' => $user->id,
-                            'feature' => $feature,
-                            'enabled' => true, // All features are initially enabled
-                        ]);
-                    }
-
-                    // Fetch admin features again after creating defaults
-                    $adminFeatures = AdminFeature::where('user_id', $user->id)->get();
-                    }
-                }
-            } else {
-                // If user is not admin, send admin features of admin that shares the same institute
-                $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
-                ->where('admin', true)
-                ->get();
-
-                $adminIds = $adminWithSameInstitute->pluck('id')->toArray();
-
-                if ($adminIds) {
-                    $adminFeatures = AdminFeature::whereIn('user_id', $adminIds)->get();
-                } else {
-                    $adminFeatures = collect(); // Return an empty collection if no admin found
-                }
-            }
-
-            // If user is not admin send adminfeature of admin that shares the same institute
-
-
-        // Include institute slug in token payload
-        $token = $user->createToken('user_auth_token', ['server:user'])
-            ->plainTextToken;
-
-            // Build token payload
-            $tokenPayload = [
-                    'token' => $token,
-                    'tokenType' => $userType == 'Admin' ? 'admin' : 'user',
-                    'user' => $userType,
-                    'institute_slug' => $user->institute_slug,
-                ];
-
-            // Add admin features if user is admin or learner
-            if ($userType == 'Admin' || !$user->admin) {
-                $tokenPayload['adminFeatures'] = $adminFeatures;
-            }
-
-            // Check if user is mentor or mentee
-            if ($user->is_admin && $user->mentor) {
-                $tokenPayload['is_mentor'] = true;
-            } elseif (!$user->is_admin && $user->mentee) {
-                $tokenPayload['is_mentee'] = true;
-            }
+            // Generate the token and payload
+            $tokenPayload = $this->generateTokenPayload($user, $userType, $adminFeatures);
 
             return [
                 'data' => $tokenPayload,
                 'code' => 200
             ];
-    } else {
-        $response = ['message' => 'Invalid email or password'];
-        return [
-            'data' => $response,
-            'code' => 422
-        ];
+        } else {
+            return [
+                'data' => ['message' => 'Invalid email or password'],
+                'code' => 422
+            ];
+        }
     }
-}
+
+    private function determineUserType($user)
+    {
+        if ($user->admin) {
+            return 'Admin';
+        } elseif ($user->is_admin) {
+            return 'Creator';
+        } else {
+            return 'Learner';
+        }
+    }
+
+    private function handleAdminFeatures($user)
+    {
+        // Fetch existing admin features
+        $adminFeatures = AdminFeature::where('user_id', $user->id)->pluck('feature')->toArray();
+
+        // Define all possible features
+        $defaultFeatures = ['mentorship', 'course', 'analytics', 'transaction', 'events'];
+
+        // Identify missing features
+        $missingFeatures = array_diff($defaultFeatures, $adminFeatures);
+
+        if (empty($adminFeatures)) {
+            // Attempt to fetch features from another admin with the same institute_slug
+            $adminFeatures = $this->fetchFeaturesFromSameInstitute($user);
+
+            if (empty($adminFeatures)) {
+                // Create default features if none exist
+                $this->createAdminFeatures($user->id, $defaultFeatures);
+            }
+        } elseif (!empty($missingFeatures)) {
+            // Add any missing features to the current admin
+            $this->createAdminFeatures($user->id, $missingFeatures);
+        }
+
+        return AdminFeature::where('user_id', $user->id)->get();
+    }
+
+    private function fetchFeaturesFromSameInstitute($user)
+    {
+        $adminWithSameInstitute = User::where('institute_slug', $user->institute_slug)
+            ->where('admin', true)
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($adminWithSameInstitute)) {
+            return AdminFeature::whereIn('user_id', $adminWithSameInstitute)->pluck('feature')->toArray();
+        }
+
+        return [];
+    }
+
+    private function createAdminFeatures($userId, $features)
+    {
+        foreach ($features as $feature) {
+            AdminFeature::create([
+                'user_id' => $userId,
+                'feature' => $feature,
+                'enabled' => true,
+            ]);
+        }
+    }
+
+    private function generateTokenPayload($user, $userType, $adminFeatures)
+    {
+        // Generate the token
+        $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
+
+        // Build token payload
+        $tokenPayload = [
+            'token' => $token,
+            'tokenType' => $userType == 'Admin' ? 'admin' : 'user',
+            'user' => $userType,
+            'institute_slug' => $user->institute_slug,
+        ];
+
+        // Add admin features if user is admin
+        if ($userType == 'Admin') {
+            $tokenPayload['adminFeatures'] = $adminFeatures;
+        }
+
+        // Check if user is mentor or mentee and add to the payload
+        if ($user->is_admin && $user->mentor) {
+            $tokenPayload['is_mentor'] = true;
+        } elseif (!$user->is_admin && $user->mentee) {
+            $tokenPayload['is_mentee'] = true;
+        }
+
+        return $tokenPayload;
+    }
 
     public function register($input)
     {
@@ -120,29 +138,29 @@ class AuthService
             $referrer = User::where('referral_code', $input['referrer_code'])->firstOrFail();
             $input['referrer_user_id'] = $referrer->id;
         }
-    
+
         $user = User::create($input);
-    
+
         // Generate OTP and save it to verifications table
         $otp = 1234;
         $user->verifications()->create([
             'token' => $otp
         ]);
-    
+
         $user->save();
-    
+
         // Prepare and dispatch the email job
         $emailJob = (new AuthJobManager($user, "new_user"))->delay(Carbon::now()->addSeconds(2));
         dispatch($emailJob);
-    
-        $phoneNumber = $user->phone; 
+
+        $phoneNumber = $user->phone;
         dispatch(new SendOtpSmsJob($phoneNumber, $otp));
-    
+
         // Prepare the response data
         $data['message'] = 'Check your email and phone for verification code';
         $data['email'] = $user->email;
         $data['phone'] = $phoneNumber;
-    
+
         return [
             'data' => $data,
             'code' => 201

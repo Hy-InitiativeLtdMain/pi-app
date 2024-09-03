@@ -14,6 +14,7 @@ class EventController extends Controller
     function __construct(EventService $eventService)
     {
         $this->eventService = $eventService;
+        $this->middleware('feature:events');
     }
     /**
      * Display a listing of the resource.
