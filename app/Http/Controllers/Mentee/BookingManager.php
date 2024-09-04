@@ -27,34 +27,60 @@ class BookingManager extends Controller
         $this->middleware('feature:mentorship');
     }
 
-    public function store(BookingRequest $request)
+    public function storeOrUpdate(BookingRequest $request)
     {
-        $request->validated();
+        // Validate the request data
+        $validatedData = $request->validated();
 
+        // Get the authenticated mentee's ID
         $mentee_id = auth()->user()->mentee->id;
 
-        if (!$mentee_id){
-            return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
+        if (!$mentee_id) {
+            return response()->json(['message' => 'Mentee not found OR mentee details not registered'], 404);
         }
 
+        // Find the next occurrence of the requested day
         $day = $request->day;
         $currentDay = Carbon::today()->format('l');
 
-        // Find the next occurrence of $day
-        if ($currentDay !== $day) {
-            $nextDay = Carbon::now()->next($day);
-        } else {
-            $nextDay = Carbon::now()->next($day);
-        }
-
-        // Get the date of the next occurrence
+        // Determine the next occurrence date of the requested day
+        $nextDay = $currentDay !== $day ? Carbon::now()->next($day) : Carbon::now()->next($day);
         $nextDayDate = $nextDay->format('Y-m-d');
 
+        // Check if a booking already exists for the same mentee_id and mentor_id
+        $existingBooking = Booking::where('mentee_id', $mentee_id)
+            ->where('mentor_id', $request->mentor_id)
+            ->first();
 
-        $request->merge(['mentee_id' => $mentee_id, 'date' => $nextDayDate]);
-        $booking = Booking::create($request->all());
-        event(new MentorshipBooking($booking, auth()->user()->institute_slug));
-        return response()->json(['data' => new BookingResource($booking), 'message' => 'Booking created successfully'], 201);
+        if ($existingBooking) {
+            // If booking exists, update it
+            $existingBooking->update([
+                'mentor_availability_id' => $request->mentor_availability_id,
+                'day' => $day,
+                'time' => $request->time,
+                'date' => $nextDayDate,
+                'reason' => $request->reason,
+            ]);
+
+            event(new MentorshipBooking($existingBooking, auth()->user()->institute_slug));
+
+            return response()->json(['data' => new BookingResource($existingBooking), 'message' => 'Booking updated successfully'], 200);
+        } else {
+            // If no booking exists, create a new one
+            $newBooking = Booking::create([
+                'mentee_id' => $mentee_id,
+                'mentor_id' => $request->mentor_id,
+                'mentor_availability_id' => $request->mentor_availability_id,
+                'day' => $day,
+                'time' => $request->time,
+                'date' => $nextDayDate,
+                'reason' => $request->reason,
+            ]);
+
+            event(new MentorshipBooking($newBooking, auth()->user()->institute_slug));
+
+            return response()->json(['data' => new BookingResource($newBooking), 'message' => 'Booking created successfully'], 201);
+        }
     }
 
     public function index()
