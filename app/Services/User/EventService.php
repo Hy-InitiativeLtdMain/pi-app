@@ -9,18 +9,25 @@ use Illuminate\Support\Facades\Auth;
 
 class EventService
 {
-    public function index($inputs){
-        // dd($inputs);
+    public function index($inputs)
+    {
         $institute = Auth::user()->institute_slug;
+
+        // Initialize FilteringService and start query
         $filter = new FilteringService();
-        $events = Event::where('institute', $institute)->query();
-        $filter->filterColumns($events, $inputs);
-        $data['events'] = $events->latest()->paginate();
+        $eventsQuery = Event::where('institute', $institute);
+
+        // Apply filters
+        $filter->filterColumns($eventsQuery, $inputs);
+
+        // Paginate and return the result
+        $data['events'] = $eventsQuery->latest()->paginate();
+
         return [
-            'data'=> $data,
-            'code'=> 200,
+            'data' => $data,
+            'code' => 200,
         ];
-    }
+    }   
 
     public function show(Event $event){
         $data['event'] = $event->fresh(['user']);

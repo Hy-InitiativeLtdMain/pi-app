@@ -87,6 +87,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
         Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user']);
 
+        Route::get('event', [EventController::class, 'index'])->middleware(['auth:user']);
+        Route::get('event/{event}', [EventController::class, 'show'])->middleware(['auth:user']);
+
         Route::group(['prefix' => 'admin', 'middleware' => ['auth:user', 'auth.administrator.access']], function () {
             // Settings
             Route::post('settings/profile/update', [SettingsController::class, 'update']);
