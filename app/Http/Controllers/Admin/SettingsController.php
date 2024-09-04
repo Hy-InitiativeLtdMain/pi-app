@@ -81,7 +81,7 @@ class SettingsController extends Controller
         $adminFeatures = AdminFeature::where('user_id', $adminId)->pluck('feature')->toArray();
 
         // List of all possible features
-        $defaultFeatures = ['mentorship', 'course', 'analytics', 'transaction', 'events', 'topics'];
+        $defaultFeatures = ['mentorship', 'course', 'analytics', 'transaction', 'events'];
 
         // Find out which features are missing
         $missingFeatures = array_diff($defaultFeatures, $adminFeatures);

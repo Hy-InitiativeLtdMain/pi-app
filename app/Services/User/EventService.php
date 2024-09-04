@@ -5,13 +5,15 @@ namespace App\Services\User;
 use App\Models\Event;
 use App\Services\Media\CloudinaryService;
 use App\Services\Query\FilteringService;
+use Illuminate\Support\Facades\Auth;
 
 class EventService
 {
     public function index($inputs){
         // dd($inputs);
+        $institute = Auth::user()->institute_slug;
         $filter = new FilteringService();
-        $events = Event::query();
+        $events = Event::where('institute', $institute)->query();
         $filter->filterColumns($events, $inputs);
         $data['events'] = $events->latest()->paginate();
         return [
