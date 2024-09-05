@@ -53,11 +53,11 @@ class AuthService
 
     private function handleAdminFeatures($user)
     {
+        // Define all possible default features
+        $defaultFeatures = ['mentorship', 'course', 'analytics', 'transaction', 'events'];
+
         // Fetch existing admin features
         $adminFeatures = AdminFeature::where('user_id', $user->id)->pluck('feature')->toArray();
-
-        // Define all possible features
-        $defaultFeatures = ['mentorship', 'course', 'analytics', 'transaction', 'events'];
 
         // Identify missing features
         $missingFeatures = array_diff($defaultFeatures, $adminFeatures);
@@ -75,6 +75,12 @@ class AuthService
             $this->createAdminFeatures($user->id, $missingFeatures);
         }
 
+        // Delete any features not in the default list
+        AdminFeature::where('user_id', $user->id)
+            ->whereNotIn('feature', $defaultFeatures)
+            ->delete();
+
+        // Return the updated list of admin features
         return AdminFeature::where('user_id', $user->id)->get();
     }
 

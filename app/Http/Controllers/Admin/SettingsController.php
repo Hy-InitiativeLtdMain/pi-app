@@ -97,6 +97,11 @@ class SettingsController extends Controller
             }
         }
 
+        // Find and delete any feature that is not in the default features list
+        AdminFeature::where('user_id', $adminId)
+            ->whereNotIn('feature', $defaultFeatures)
+            ->delete();
+
         // Fetch admin features again after creating defaults
         $adminFeatures = AdminFeature::where('user_id', $adminId)->get();
 
