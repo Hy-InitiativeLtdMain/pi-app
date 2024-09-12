@@ -11,6 +11,7 @@ use App\Jobs\User\SendOtpSmsJob;
 use App\Models\VerificationToken;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
@@ -111,8 +112,8 @@ class AuthService
 
     private function generateTokenPayload($user, $userType, $adminFeatures)
     {
-        // Generate the token
-        $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
+        // Generate the JWT token
+        $token = JWTAuth::fromUser($user);
 
         // Build token payload
         $tokenPayload = [
@@ -122,12 +123,12 @@ class AuthService
             'institute_slug' => $user->institute_slug,
         ];
 
-        // Add admin features if user is admin
+        // Add admin features if the user is admin
         if ($userType == 'Admin') {
             $tokenPayload['adminFeatures'] = $adminFeatures;
         }
 
-        // Check if user is mentor or mentee and add to the payload
+        // Check if user is a mentor or mentee and add to the payload
         if ($user->is_admin && $user->mentor) {
             $tokenPayload['is_mentor'] = true;
         } elseif (!$user->is_admin && $user->mentee) {
