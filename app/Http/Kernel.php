@@ -76,7 +76,7 @@ class Kernel extends HttpKernel
 
         'auth.administrator.access' => \App\Http\Middleware\AdminCheck::class,
         'feature' => \App\Http\Middleware\FeatureRestrictionMiddleware::class,
-        'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+        // 'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
 
     ];
 }

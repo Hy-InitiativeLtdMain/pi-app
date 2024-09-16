@@ -84,10 +84,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return new Attribute(
             get: function () {
-                $user = auth('user')->user();
+                $user = auth('api')->user();
                 $user_id = $user->id;
-                return Transaction::
-                    leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+                return Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
                     ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
                     ->whereNotNull('transactions.paid_at')
                     ->where('courses.user_id', $user_id)
