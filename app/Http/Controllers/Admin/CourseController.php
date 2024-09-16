@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Admin\FlagCourse;
+use App\Events\Admin\FlaggedCourse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\CourseResource;
 use App\Models\Category;
@@ -62,6 +64,8 @@ class CourseController extends Controller
         ]);
 
         $lesson->update($validated);
+        event(new FlaggedCourse($lesson));
+
         return response()->json(['message' => 'Lesson status updated successfully']);
 
     }
@@ -78,6 +82,7 @@ class CourseController extends Controller
         ]);
 
         $course->update($validated);
+        event(new FlagCourse($course));
         return response()->json(['message' => 'Course status updated successfully']);
     }
     // get a course

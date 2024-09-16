@@ -54,12 +54,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+
 Route::post('/paystack-hook', [WebhooksManager::class, 'paymentWebhook']);
 Route::post('/flw-hook', [WebhooksManager::class, 'flwWebhook']);
 
 Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], function () {
 
-
+    Route::middleware(['auth:api'])->get('/test-jwt', function () {
+        return response()->json(['message' => 'JWT is working!']);
+    });
 
     Route::group(['prefix' => 'user'], function () {
 
@@ -77,20 +81,20 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::post('/regenerate-token', [AuthManager::class, 'regenerateToken']);
         });
 
-        Route::get('notifications', [NotificationController::class, 'index'])->middleware(['auth:user']);
-        Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification'])->middleware(['auth:user']);
+        Route::get('notifications', [NotificationController::class, 'index'])->middleware(['auth:api']);
+        Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification'])->middleware(['auth:api']);
 
 
-        Route::resource('mentor', MentorManager::class)->middleware(['auth:user'])->except('index');
-        Route::resource('mentee', MenteeManager::class)->middleware(['auth:user'])->except(['index', 'show']);
-        Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:user']);
+        Route::resource('mentor', MentorManager::class)->middleware(['auth:api'])->except('index');
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:api'])->except(['index', 'show']);
+        Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:api']);
 
-        Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:user']);
+        Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:api']);
 
-        Route::get('event', [EventController::class, 'index'])->middleware(['auth:user']);
-        Route::get('event/{event}', [EventController::class, 'show'])->middleware(['auth:user']);
+        Route::get('event', [EventController::class, 'index'])->middleware(['auth:api']);
+        Route::get('event/{event}', [EventController::class, 'show'])->middleware(['auth:api']);
 
-        Route::group(['prefix' => 'admin', 'middleware' => ['auth:user', 'auth.administrator.access']], function () {
+        Route::group(['prefix' => 'admin', 'middleware' => ['auth:api', 'auth.administrator.access']], function () {
             // Settings
             Route::post('settings/profile/update', [SettingsController::class, 'update']);
             Route::post('settings/password/update', [SettingsController::class, 'changePassword']);
@@ -168,7 +172,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         });
 
         // Availability
-        Route::group(['prefix' => 'mentors', 'middleware' => ['auth:user']], function () {
+        Route::group(['prefix' => 'mentors', 'middleware' => ['auth:api']], function () {
             Route::apiResource('availability', AvailabilityController::class)->except('show');
             Route::get('availabilities', function () {
                 return response()->json(['message' => 'Testing availability index endpoint']);
@@ -196,7 +200,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         });
 
         //Booking
-        Route::group(['prefix' => 'mentees', 'middleware' => ['auth:user']], function () {
+        Route::group(['prefix' => 'mentees', 'middleware' => ['auth:api']], function () {
             Route::get('/bookings', [BookingManager::class, 'index']);
             Route::post('/bookings', [BookingManager::class, 'store']);
             Route::get('/bookings/{id}', [BookingManager::class, 'show']);
@@ -219,7 +223,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
         });
 
-        Route::group(['middleware' => ['auth:user', 'auth.user.state']], function () {
+        Route::group(['middleware' => ['auth:api', 'auth.user.state']], function () {
 
             Route::group(['prefix' => 'account', 'excluded_middleware' => []], function () {
                 Route::get('/', [DetailManager::class, 'index']);

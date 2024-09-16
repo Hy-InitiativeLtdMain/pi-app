@@ -72,13 +72,12 @@ class Lesson extends Model
     {
         return new Attribute(
             get: function () {
-                $user = auth('user')->user();
+                $user = auth('api')->user();
                 if ($user == null) return false;
                 $user_id = $user->id;
                 $lessonSeen = $this->lessonSeens()->where('lesson_users.user_id', $user_id)->first();
                 return $lessonSeen ? $lessonSeen->seen == 1 : false;
             },
         );
-
     }
 }

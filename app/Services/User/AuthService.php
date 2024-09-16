@@ -26,8 +26,12 @@ class AuthService
             // Handle admin features if the user is an admin
             $adminFeatures = $user->admin ? $this->handleAdminFeatures($user) : collect();
 
+            if (!$token = auth('api')->attempt(['email' => $input['email'], 'password' => $input['password']])) {
+                return response()->json(['message' => 'Invalid email or password'], 422);
+            }
+
             // Generate the token and payload
-            $tokenPayload = $this->generateTokenPayload($user, $userType, $adminFeatures);
+            $tokenPayload = $this->generateTokenPayload($user, $userType, $adminFeatures, $token);
 
             return [
                 'data' => $tokenPayload,
@@ -110,10 +114,9 @@ class AuthService
         }
     }
 
-    private function generateTokenPayload($user, $userType, $adminFeatures)
+    private function generateTokenPayload($user, $userType, $adminFeatures, $token)
     {
-        // Generate the JWT token
-        $token = JWTAuth::fromUser($user);
+
 
         // Build token payload
         $tokenPayload = [

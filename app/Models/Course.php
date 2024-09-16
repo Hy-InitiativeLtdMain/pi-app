@@ -126,7 +126,7 @@ class Course extends Model
     {
         return new Attribute(
             get: function () {
-                $user = auth('user')->user();
+                $user = auth('api')->user();
                 $user_id = $user->id;
                 if ($this->is_free) {
                     return $user->free_course == null;
@@ -149,7 +149,7 @@ class Course extends Model
     {
         return new Attribute(
             get: function ($month = 1) {
-                $user = auth('user')->user();
+                $user = auth('api')->user();
                 $user_id = $user->id;
                 return $this->transactions()->where('transactions.user_id',  $user_id)->whereNull('transactions.paid_at')->latest()->first();
             }
@@ -160,7 +160,7 @@ class Course extends Model
     {
         return new Attribute(
             get: function ($month = 1) {
-                $user = auth('user')->user();
+                $user = auth('api')->user();
                 $user_id = $user->id;
                 $latestTransaction =  $this->transactions()->where('transactions.user_id',  $user_id)->latest('paid_at')->first();
                 if ($latestTransaction == null) {
@@ -184,7 +184,7 @@ class Course extends Model
             get: function () {
                 $batch = $this->myBatch;
                 if ($batch != null && ($batch->status == 2 || $batch->status == 3)) {
-                    $user = auth('user')->user();
+                    $user = auth('api')->user();
                     $coures_id = $this->id;
                     $user_id = $user->id;
                     $certificateValue = Config::where('key', 'certificate_base_url')->first();
@@ -207,7 +207,7 @@ class Course extends Model
     public function paid(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => $this->hasActivePayment,
+            get: fn($value) => $this->hasActivePayment,
         );
     }
 
@@ -234,22 +234,22 @@ class Course extends Model
     public function rating(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => $this->reviews()->avg("rate"),
+            get: fn($value) => $this->reviews()->avg("rate"),
         );
     }
 
     public function modules()
-{
-    return $this->hasMany(Module::class);
-}
+    {
+        return $this->hasMany(Module::class);
+    }
 
-public function quizzes()
-{
-    return $this->hasMany(Quiz::class);
-}
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
 
-public function flashcards()
-{
-    return $this->hasMany(Flashcard::class);
-}
+    public function flashcards()
+    {
+        return $this->hasMany(Flashcard::class);
+    }
 }
