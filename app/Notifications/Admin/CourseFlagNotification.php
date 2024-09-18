@@ -65,18 +65,24 @@ class CourseFlagNotification extends Notification
     {
         $status = $this->course->status;
         $message = '';
+        $title = '';
+        $heading = $this->course->title;
 
         if ($status == 'approved') {
-            $message = 'Your course course has been approved.';
+            $title = 'Course Approval Status: Approved';
+            $message = "Your course '". $heading . "' has been approved.";
         } elseif ($status == 'declined') {
-            $message = 'Your course course has been declined.';
+            $title = 'Course Approval Status: Declined';
+            $message = "Your course '" . $heading . "' has been declined.";
         } else {
-            $message = 'Your course course is currently under review.';
+            $title = 'Course Approval Status: Pending';
+            $message = "Your course '" . $heading . "' is currently under review.";
         }
         return [
             'user_id' => $this->course->user_id,
-            'status' => $status,
-            'message' => $message,
+            'title' => $title,
+            'description' => $message,
+            'category' => "Course",
         ];
     }
 }

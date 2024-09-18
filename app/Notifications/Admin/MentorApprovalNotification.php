@@ -67,19 +67,24 @@ class MentorApprovalNotification extends Notification
     {
         $status = $this->mentor->status;
         $message = '';
+        $title = '';
 
         if ($status == 'approved') {
+            $title = 'Mentor Approval Status: Approved';
             $message = 'Your mentor application has been approved.';
         } elseif ($status == 'declined') {
+            $title = "Mentor Approval Status: Declined";
             $message = 'Your mentor application has been declined.';
         } else {
+            $title = "Mentor Approval Status: Pending";
             $message = 'Your mentor application is currently under review.';
         }
 
         return [
             'mentor_id' => $this->mentor->id,
-            'status' => $status,
-            'message' => $message,
+            'title' => $title,
+            'description' => $message,
+            'category' => "Mentor"
         ];
     }
 }

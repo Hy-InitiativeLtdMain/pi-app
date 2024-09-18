@@ -65,18 +65,23 @@ class CourseFlaggedNotification extends Notification
     {
         $status = $this->lesson->status;
         $message = '';
+        $title = '';
 
         if ($status == 'approved') {
+            $title = 'Course Lesson Approval Status: Approved';
             $message = 'Your course lesson has been approved.';
         } elseif ($status == 'declined') {
+            $title = 'Course Lesson Approval Status: Declined';
             $message = 'Your course lesson has been declined.';
         } else {
+            $title = 'Course Lesson Approval Status: Pending';
             $message = 'Your course lesson is currently under review.';
         }
         return [
             'user_id' => $this->lesson->course->user_id,
-            'status' => $status,
-            'message' => $message,
+            'title' => $title,
+            'description' => $message,
+            'category' => "Course"
         ];
     }
 }
