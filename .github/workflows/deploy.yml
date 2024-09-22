@@ -17,6 +17,26 @@ jobs:
           script: |
             cp env/.env /var/www/piapp/.env
             cd /var/www/piapp
+
+            # Check for any changes and commit them
+            if [[ `git status --porcelain` ]]; then
+              git add .
+              git commit -m "Commit hard-coded changes from server"
+
+              # Try to push changes
+              if ! git push origin develop; then
+                echo "Merge conflict detected. Attempting to pull changes."
+                git pull origin develop
+                # Resolve conflicts (if any), manually intervene or use a strategy
+                if [[ `git status --porcelain` ]]; then
+                  echo "Merge conflicts occurred. Manual resolution required."
+                  exit 1
+                fi
+                git push origin develop
+              fi
+            fi
+
+            # Deploy to production
             git pull origin develop
             composer install
             php artisan migrate --force
