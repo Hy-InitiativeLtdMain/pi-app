@@ -94,7 +94,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::get('event', [EventController::class, 'index'])->middleware(['auth:api']);
         Route::get('event/{event}', [EventController::class, 'show'])->middleware(['auth:api']);
 
-        Route::group(['prefix' => 'admin', 'middleware' => ['auth:api', 'auth.administrator.access']], function () {
+        Route::group(['prefix' => 'admin', 'middleware' => ['auth:api', 'auth.admin.access']], function () {
             // Settings
             Route::post('settings/profile/update', [SettingsController::class, 'update']);
             Route::post('settings/password/update', [SettingsController::class, 'changePassword']);
