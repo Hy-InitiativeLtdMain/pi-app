@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Tymon\JWTAuth\Contracts\JWTSubject;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -83,10 +84,9 @@ class User extends Authenticatable
     {
         return new Attribute(
             get: function () {
-                $user = auth('user')->user();
+                $user = auth('api')->user();
                 $user_id = $user->id;
-                return Transaction::
-                    leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
+                return Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
                     ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
                     ->whereNotNull('transactions.paid_at')
                     ->where('courses.user_id', $user_id)
@@ -119,5 +119,15 @@ class User extends Authenticatable
     public function lessons()
     {
         return $this->belongsToMany(Lesson::class, 'lesson_users', 'user_id', 'lesson_id')->withTimestamps();
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

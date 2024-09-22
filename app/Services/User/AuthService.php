@@ -11,6 +11,7 @@ use App\Jobs\User\SendOtpSmsJob;
 use App\Models\VerificationToken;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
@@ -25,8 +26,12 @@ class AuthService
             // Handle admin features if the user is an admin
             $adminFeatures = $user->admin ? $this->handleAdminFeatures($user) : collect();
 
+            if (!$token = auth('api')->attempt(['email' => $input['email'], 'password' => $input['password']])) {
+                return response()->json(['message' => 'Invalid email or password'], 422);
+            }
+
             // Generate the token and payload
-            $tokenPayload = $this->generateTokenPayload($user, $userType, $adminFeatures);
+            $tokenPayload = $this->generateTokenPayload($user, $userType, $adminFeatures, $token);
 
             return [
                 'data' => $tokenPayload,
@@ -109,10 +114,9 @@ class AuthService
         }
     }
 
-    private function generateTokenPayload($user, $userType, $adminFeatures)
+    private function generateTokenPayload($user, $userType, $adminFeatures, $token)
     {
-        // Generate the token
-        $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
+
 
         // Build token payload
         $tokenPayload = [
@@ -122,12 +126,12 @@ class AuthService
             'institute_slug' => $user->institute_slug,
         ];
 
-        // Add admin features if user is admin
+        // Add admin features if the user is admin
         if ($userType == 'Admin') {
             $tokenPayload['adminFeatures'] = $adminFeatures;
         }
 
-        // Check if user is mentor or mentee and add to the payload
+        // Check if user is a mentor or mentee and add to the payload
         if ($user->is_admin && $user->mentor) {
             $tokenPayload['is_mentor'] = true;
         } elseif (!$user->is_admin && $user->mentee) {
