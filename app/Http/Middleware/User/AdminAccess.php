@@ -16,7 +16,7 @@ class AdminAccess
     public function handle(Request $request, Closure $next): Response
     {
         // Check if the middleware is being triggered
-        dd('AdminAccess Middleware Triggered');
+        // dd('AdminAccess Middleware Triggered');
 
         // Check if the user is authenticated
         if (!auth()->check()) {
