@@ -20,13 +20,13 @@ class AdminAccess
 
         // Check if the user is authenticated
         if (!auth()->check()) {
-            dd('Unauthenticated request');
+            // dd('Unauthenticated request');
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Check if the user is an admin
         if (!auth()->user()->admin) {
-            dd('Unauthorized access attempt by user: ' . auth()->user()->id);
+            // dd('Unauthorized access attempt by user: ' . auth()->user()->id);
             return response(['message' => 'This resource is only available for admins'], 403);
         }
 
