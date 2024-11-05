@@ -15,13 +15,22 @@ class AdminAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Check if the middleware is being triggered
+        dd('AdminAccess Middleware Triggered');
+
+        // Check if the user is authenticated
         if (!auth()->check()) {
+            dd('Unauthenticated request');
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
+
+        // Check if the user is an admin
         if (!auth()->user()->is_admin) {
-            $reponse = ['message' => 'This resource is only available for admins'];
-            return response($reponse, 403);
+            dd('Unauthorized access attempt by user: ' . auth()->user()->id);
+            return response(['message' => 'This resource is only available for admins'], 403);
         }
+
+        // If all checks pass, proceed with the request
         return $next($request);
     }
 }
