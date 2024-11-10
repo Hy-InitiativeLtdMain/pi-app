@@ -7,8 +7,6 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\LessonUser;
 use App\Models\Mentor;
-use App\Models\Transaction;
-use App\Models\TransactionCourse;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
@@ -73,8 +71,6 @@ class AnalyticsController extends Controller
         return response()->json(['number_of_courses' => $count]);
     }
 
-
-
     public function enrollmentCountPerMonth(Request $request)
     {
         // Validate the request inputs
@@ -119,7 +115,6 @@ class AnalyticsController extends Controller
         // Return the enrollment counts for each month from the start date to the end date
         return response()->json($enrollmentCounts, 200);
     }
-
 
     public function creatorsEnrollmentCountPerMonth(Request $request)
     {
@@ -228,8 +223,8 @@ class AnalyticsController extends Controller
         $institute_slug = auth()->user()->institute_slug;
 
         $users = User::where('institute_slug', $institute_slug)
-        ->where('admin', 0)
-        ->get();
+            ->where('admin', 0)
+            ->get();
 
         $userIds = $users->pluck('id')->toArray();
         // Loop through each month from the start date to the end date
@@ -241,11 +236,11 @@ class AnalyticsController extends Controller
             $monthName = $currentDate->format('F');
 
             // Get the total number of enrolled users within the current month
-            $enrolledCount= Mentor::whereYear('created_at', $year)
-                            ->whereMonth('created_at', $month)
-                            ->whereIn('user_id', $userIds)
-                            ->where('status', 'approved')
-                            ->count();
+            $enrolledCount = Mentor::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('user_id', $userIds)
+                ->where('status', 'approved')
+                ->count();
 
             // Store the enrollment count for the current month
             $enrollmentCounts[] = [
@@ -260,9 +255,6 @@ class AnalyticsController extends Controller
         // Return the enrollment counts for each month from the start date to the end date
         return response()->json($enrollmentCounts, 200);
     }
-
-
-
 
     // get the users in order of number of lessons taken\
     public function usersByLessonsTaken()
@@ -294,6 +286,25 @@ class AnalyticsController extends Controller
 
         // Return the users in order of the number of lessons taken
         return response()->json($usersByLessonsTaken);
+    }
+
+    public function topCoursesByUsers()
+    {
+        // Get the courses with the most users
+        $courses = Course::withCount('lessons.users')->orderBy('lessons_users_count', 'desc')->take(4)->get();
+
+        // Transform each course into an array with course details and user count
+        $topCoursesByUsers = $courses->map(function ($course) {
+            return [
+                'id' => $course->id,
+                'name' => $course->name,
+                'description' => $course->description,
+                'users_count' => $course->lessons_users_count,
+            ];
+        });
+
+        // Return the top 4 courses with the most users
+        return response()->json($topCoursesByUsers);
     }
 
     public function usersByCoursesCreated()
@@ -352,9 +363,7 @@ class AnalyticsController extends Controller
             'females' => $females,
         ]);
 
-
     }
-
 
     /* ======================Some stuff to look at later====================== */
 
@@ -372,8 +381,8 @@ class AnalyticsController extends Controller
 
         // Get ids of creator users
         $creatorUserIds = $this->users()->where('is_admin', 1)
-        ->where('admin', 0)
-        ->pluck('id')
+            ->where('admin', 0)
+            ->pluck('id')
             ->toArray();
 
         // Fetch enrollment counts per month within the specified date range
@@ -462,15 +471,22 @@ class AnalyticsController extends Controller
         // Fetch the users who have transactions related to the given course
         $userCount = User::whereIn('id', function ($query) use ($course) {
             $query->select('user_id')
-            ->from('transactions')
-            ->whereIn('id', function ($subQuery) use ($course) {
-                $subQuery->select('transaction_id')
-                ->from('transaction_course')
-                ->where('course_id', $course->id);
-            });
+                ->from('transactions')
+                ->whereIn('id', function ($subQuery) use ($course) {
+                    $subQuery->select('transaction_id')
+                        ->from('transaction_course')
+                        ->where('course_id', $course->id);
+                });
         })->count();
 
         // Return the user count
         return response()->json(['user_count' => $userCount], 200);
+    }
+
+    public function showTopCourses()
+    {
+        $topCourses = Course::getTopCoursesByUserCount();
+
+        return response()->json($topCourses);
     }
 }

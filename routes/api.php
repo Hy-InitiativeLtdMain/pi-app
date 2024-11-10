@@ -1,33 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AnalyticsController;
-use Illuminate\Http\Request;
-// use App\Models\MentorAvailability;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SessionsManager;
-use App\Http\Controllers\WebhooksManager;
-use App\Http\Controllers\Media\AwsManager;
-use App\Http\Controllers\User\AuthManager;
-use App\Http\Controllers\User\QuizManager;
-use App\Http\Controllers\User\UserManager;
-use App\Http\Controllers\Media\VimeoManager;
-use App\Http\Controllers\User\CourseManager;
-use App\Http\Controllers\User\DetailManager;
-use App\Http\Controllers\User\LessonManager;
-use App\Http\Controllers\User\ReviewManager;
-use App\Http\Controllers\Mentee\MenteeManager;
-use App\Http\Controllers\Mentor\MentorManager;
-use App\Http\Controllers\User\CategoryManager;
-use App\Http\Controllers\User\PaystackManager;
-use App\Http\Controllers\User\QuestionManager;
-use App\Http\Controllers\Mentee\BookingManager;
-use App\Http\Controllers\User\AnalyticsManager;
-use App\Http\Controllers\User\AssignmentManager;
-use App\Http\Controllers\User\AttachmentManager;
-use App\Http\Controllers\User\BankAccountManager;
-use App\Http\Controllers\User\TransactionManager;
-use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Admin\AuthManager as AdminAuth;
+// use App\Models\MentorAvailability;
 use App\Http\Controllers\Admin\AuthManager as AdminAuthManager;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\InstituteController;
@@ -35,9 +10,34 @@ use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\Notification\FeatureController;
+use App\Http\Controllers\Media\AwsManager;
+use App\Http\Controllers\Media\VimeoManager;
+use App\Http\Controllers\Mentee\BookingManager;
+use App\Http\Controllers\Mentee\MenteeManager;
+use App\Http\Controllers\Mentor\AvailabilityController;
+use App\Http\Controllers\Mentor\MentorManager;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Notification\FeatureController;
+use App\Http\Controllers\SessionsManager;
 use App\Http\Controllers\UserReviewController;
+use App\Http\Controllers\User\AnalyticsManager;
+use App\Http\Controllers\User\AssignmentManager;
+use App\Http\Controllers\User\AttachmentManager;
+use App\Http\Controllers\User\AuthManager;
+use App\Http\Controllers\User\BankAccountManager;
+use App\Http\Controllers\User\CategoryManager;
+use App\Http\Controllers\User\CourseManager;
+use App\Http\Controllers\User\DetailManager;
+use App\Http\Controllers\User\LessonManager;
+use App\Http\Controllers\User\PaystackManager;
+use App\Http\Controllers\User\QuestionManager;
+use App\Http\Controllers\User\QuizManager;
+use App\Http\Controllers\User\ReviewManager;
+use App\Http\Controllers\User\TransactionManager;
+use App\Http\Controllers\User\UserManager;
+use App\Http\Controllers\WebhooksManager;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,13 +48,11 @@ use App\Http\Controllers\UserReviewController;
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "api" middleware group. Make something great!
 |
-*/
+ */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-
 
 Route::post('/paystack-hook', [WebhooksManager::class, 'paymentWebhook']);
 Route::post('/flw-hook', [WebhooksManager::class, 'flwWebhook']);
@@ -67,9 +65,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
     Route::group(['prefix' => 'user'], function () {
 
-
         Route::group(['prefix' => 'auth'], function () {
-
 
             Route::post('/login', [AuthManager::class, 'login']);
             Route::post('/register', [AuthManager::class, 'register']);
@@ -83,7 +79,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
         Route::get('notifications', [NotificationController::class, 'index'])->middleware(['auth:api']);
         Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification'])->middleware(['auth:api']);
-
 
         Route::resource('mentor', MentorManager::class)->middleware(['auth:api'])->except('index');
         Route::resource('mentee', MenteeManager::class)->middleware(['auth:api'])->except(['index', 'show']);
@@ -111,7 +106,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('users/learners/recent', [InstituteController::class, 'recentLearners']);
             Route::get('users/creators', [InstituteController::class, 'creators']);
             Route::get('users/creators/recent', [InstituteController::class, 'recentCreators']);
-            Route::get('users/export',[InstituteController::class, 'usersExport']);
+            Route::get('users/export', [InstituteController::class, 'usersExport']);
             Route::get('users/learners/export', [InstituteController::class, 'learnersExport']);
             Route::get('users/creators/export', [InstituteController::class, 'creatorsExport']);
             Route::patch('users/{user}', [UserManager::class, 'update']);
@@ -148,6 +143,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('analytics/top-creators', [AnalyticsController::class, 'usersByCoursesCreated']);
             Route::get('analytics/demography/gender', [AnalyticsController::class, 'demography']);
             Route::get('analytics/courses/{course}/user', [AnalyticsController::class, 'courseUsers']);
+            Route::get('analytics/top-courses', [AnalyticsController::class, 'showTopCourses']);
 
             // Courses/Lessons
             Route::get('/category', [CourseController::class, 'getCategories']);
@@ -321,7 +317,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::delete('/lesson/{lesson}', [QuizManager::class, 'deleteByLessonId']);
             });
 
-
             Route::group(['prefix' => 'review', 'middleware' => []], function () {
                 Route::get('/', [ReviewManager::class, 'index']);
                 Route::post('/', [ReviewManager::class, 'store']);
@@ -345,16 +340,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
                 Route::delete('/{question}', [QuestionManager::class, 'delete']);
             });
 
-
             Route::group(['prefix' => 'analytics', 'middleware' => []], function () {
                 Route::get('/stats', [AnalyticsManager::class, 'stats']);
                 Route::get('/users-enrollment', [AnalyticsManager::class, 'usersLineGraph']);
                 Route::get('/users-enrollment-year', [AnalyticsManager::class, 'usersLineGraphYear']);
             });
-
-
-
-
 
             Route::get('/logout', [AuthManager::class, 'logout']);
         });
