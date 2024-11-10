@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 class Course extends Model
 {
@@ -251,5 +252,23 @@ class Course extends Model
     public function flashcards()
     {
         return $this->hasMany(Flashcard::class);
+    }
+
+    /**
+     * Get the top courses based on unique user count
+     *
+     * @param int $limit
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getTopCoursesByUserCount(int $limit = 4)
+    {
+        return DB::table('courses')
+            ->join('lessons', 'courses.id', '=', 'lessons.course_id')
+            ->join('lesson_user', 'lessons.id', '=', 'lesson_user.lesson_id')
+            ->select('courses.id', 'courses.name', DB::raw('COUNT(DISTINCT lesson_user.user_id) as user_count'))
+            ->groupBy('courses.id', 'courses.name')
+            ->orderByDesc('user_count')
+            ->limit($limit)
+            ->get();
     }
 }

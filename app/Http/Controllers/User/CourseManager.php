@@ -132,4 +132,5 @@ class CourseManager extends Controller
         $result = $this->courseService->updateLessonModule($data, $course);
         return response()->json($result, $result['code']);
     }
+
 }
