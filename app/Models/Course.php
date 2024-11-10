@@ -264,8 +264,8 @@ class Course extends Model
     {
         return DB::table('courses')
             ->join('lessons', 'courses.id', '=', 'lessons.course_id')
-            ->join('lesson_user', 'lessons.id', '=', 'lesson_user.lesson_id')
-            ->select('courses.id', 'courses.name', DB::raw('COUNT(DISTINCT lesson_user.user_id) as user_count'))
+            ->join('lesson_users', 'lessons.id', '=', 'lesson_users.lesson_id')
+            ->select('courses.id', 'courses.name', DB::raw('COUNT(DISTINCT lesson_users.user_id) as user_count'))
             ->groupBy('courses.id', 'courses.name')
             ->orderByDesc('user_count')
             ->limit($limit)
