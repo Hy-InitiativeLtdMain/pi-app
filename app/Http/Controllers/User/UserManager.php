@@ -39,10 +39,6 @@ class UserManager extends Controller
         return response($_data['data'], $_data['code']);
     }
 
-
-
-
-
     public function delete(User $user)
     {
         $_data = $this->userService->deleteAccount($user);
