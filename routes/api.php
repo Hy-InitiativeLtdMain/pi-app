@@ -59,9 +59,7 @@ Route::post('/flw-hook', [WebhooksManager::class, 'flwWebhook']);
 
 Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], function () {
 
-    Route::middleware(['auth:api'])->get('/test-jwt', function () {
-        return response()->json(['message' => 'JWT is working!']);
-    });
+   
 
     Route::group(['prefix' => 'user'], function () {
 

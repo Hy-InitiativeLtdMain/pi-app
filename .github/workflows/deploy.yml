@@ -3,6 +3,7 @@ name: Build and deploy
 on:
   push:
     branches: [develop]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,7 +16,17 @@ jobs:
           password: ${{ secrets.SSH_PASS }}
 
           script: |
-            cp env/.env /var/www/piapp/.env
+            # Path to the new and existing .env files
+            NEW_ENV_FILE="env/.env"
+            CURRENT_ENV_FILE="/var/www/piapp/.env"
+
+            # Merge new .env settings into the current .env file
+            while IFS= read -r line; do
+              key=$(echo "$line" | cut -d '=' -f 1)
+              sed -i "/^$key=/d" "$CURRENT_ENV_FILE"  # Remove existing key (if present)
+              echo "$line" >> "$CURRENT_ENV_FILE"     # Append new key-value pair
+            done < "$NEW_ENV_FILE"
+
             cd /var/www/piapp
 
             # Check for any changes and commit them
@@ -43,4 +54,3 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan cache:clear
-
