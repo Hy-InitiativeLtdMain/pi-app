@@ -231,8 +231,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
             Route::group(['prefix' => 'category', 'middleware' => []], function () {
                 Route::get('/', [CategoryManager::class, 'index']);
-                Route::post('/', [CategoryManager::class, 'store'])->middleware(["auth.admin.access"]);
-                Route::post('/bulk', [CategoryManager::class, 'bulkCreate'])->middleware(["auth.admin.access"]);
+                Route::post('/', [CategoryManager::class, 'store']);
+                Route::post('/bulk', [CategoryManager::class, 'bulkCreate']);
                 Route::get('/{category}', [CategoryManager::class, 'view']);
                 Route::patch('/{category}', [CategoryManager::class, 'update'])->middleware(["auth.learner.access"]);
                 Route::delete('/{category}', [CategoryManager::class, 'delete'])->middleware(["auth.learner.access"]);
@@ -241,46 +241,46 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::group(['prefix' => 'course', 'middleware' => []], function () {
                 Route::get('/', [CourseManager::class, 'index']);
                 Route::get('/buyers', [CourseManager::class, 'buyers']);
-                Route::post('/', [CourseManager::class, 'store'])->middleware(["auth.admin.access"]);
-                Route::post('/create-course-with-ai/{course}', [CourseManager::class, 'createCourseWithAI'])->middleware(["auth.admin.access"]);
-                Route::put('/courses/{course}/modules', [CourseManager::class, 'updateCourseModule'])->middleware(["auth.admin.access"]);
-                Route::put('/courses/{course}/flashcards', [CourseManager::class, 'updateFlashcardModule'])->middleware(["auth.admin.access"]);
-                Route::put('/courses/{course}/quizzes', [CourseManager::class, 'updateQuizModule'])->middleware(["auth.admin.access"]);
-                Route::put('/courses/{course}/lessons', [CourseManager::class, 'updateLessonModule'])->middleware(["auth.admin.access"]);
+                Route::post('/', [CourseManager::class, 'store']);
+                Route::post('/create-course-with-ai/{course}', [CourseManager::class, 'createCourseWithAI']);
+                Route::put('/courses/{course}/modules', [CourseManager::class, 'updateCourseModule']);
+                Route::put('/courses/{course}/flashcards', [CourseManager::class, 'updateFlashcardModule']);
+                Route::put('/courses/{course}/quizzes', [CourseManager::class, 'updateQuizModule']);
+                Route::put('/courses/{course}/lessons', [CourseManager::class, 'updateLessonModule']);
                 Route::get('/{course}', [CourseManager::class, 'view']);
                 Route::get('/ai/{course}', [CourseManager::class, 'viewAICourse']);
                 Route::get('/{course}/subscribe', [CourseManager::class, 'subscribe'])->middleware(["auth.learner.access"]);;
-                Route::post('/{course}', [CourseManager::class, 'update'])->middleware(["auth.admin.access"]);
-                Route::delete('/{course}', [CourseManager::class, 'delete'])->middleware(["auth.admin.access"]);
+                Route::post('/{course}', [CourseManager::class, 'update']);
+                Route::delete('/{course}', [CourseManager::class, 'delete']);
             });
 
             Route::group(['prefix' => 'lesson', 'middleware' => []], function () {
                 Route::get('/', [LessonManager::class, 'index']);
-                Route::post('/{course}', [LessonManager::class, 'store'])->middleware(["auth.admin.access"]);
+                Route::post('/{course}', [LessonManager::class, 'store']);
                 Route::post('/{course}/list', [LessonManager::class, 'storeList']);
                 Route::get('/{lesson}', [LessonManager::class, 'view']);
                 Route::get('/{lesson}/seen', [LessonManager::class, 'seen'])->middleware(["auth.learner.access"]);
-                Route::post('/{lesson}/update', [LessonManager::class, 'update'])->middleware(["auth.admin.access"]);
-                Route::delete('/{lesson}', [LessonManager::class, 'delete'])->middleware(["auth.admin.access"]);
+                Route::post('/{lesson}/update', [LessonManager::class, 'update']);
+                Route::delete('/{lesson}', [LessonManager::class, 'delete']);
             });
 
             Route::group(['prefix' => 'transaction', 'middleware' => []], function () {
                 Route::get('/', [TransactionManager::class, 'index']);
                 Route::get('/all', [TransactionManager::class, 'indexAll']);
                 Route::get('/{transaction}', [TransactionManager::class, 'view']);
-                Route::post('/{transaction}', [TransactionManager::class, 'update'])->middleware(["auth.admin.access"]);
-                Route::delete('/{transaction}', [TransactionManager::class, 'delete'])->middleware(["auth.admin.access"]);
-                Route::get('/{transaction}/payout', [TransactionManager::class, 'makePayout'])->middleware(["auth.admin.access"]);
-                Route::get('/{transaction}/verify-payout-otp', [TransactionManager::class, 'verifyOTPPayout'])->middleware(["auth.admin.access"]);
+                Route::post('/{transaction}', [TransactionManager::class, 'update']);
+                Route::delete('/{transaction}', [TransactionManager::class, 'delete']);
+                Route::get('/{transaction}/payout', [TransactionManager::class, 'makePayout']);
+                Route::get('/{transaction}/verify-payout-otp', [TransactionManager::class, 'verifyOTPPayout']);
             });
 
             Route::group(['prefix' => 'assignment', 'middleware' => []], function () {
                 Route::get('/', [AssignmentManager::class, 'index']);
-                Route::post('/', [AssignmentManager::class, 'store'])->middleware(["auth.admin.access"]);
+                Route::post('/', [AssignmentManager::class, 'store']);
                 Route::get('/{assignment}', [AssignmentManager::class, 'view']);
                 Route::post('/{assignment}/submit', [AssignmentManager::class, 'submit'])->middleware(["auth.learner.access"]);
-                Route::patch('/{assignment}', [AssignmentManager::class, 'update'])->middleware(["auth.admin.access"]);
-                Route::delete('/{assignment}', [AssignmentManager::class, 'delete'])->middleware(["auth.admin.access"]);
+                Route::patch('/{assignment}', [AssignmentManager::class, 'update']);
+                Route::delete('/{assignment}', [AssignmentManager::class, 'delete']);
             });
 
             Route::group(['prefix' => 'attachment', 'middleware' => []], function () {
