@@ -28,7 +28,7 @@ class PaystackService
         // dd(getenv('PAYSTACK_SECRET_KEY'), getenv('PAYSTACK_HOST'));
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST') . 'bank');
+        ])->get(getenv('PAYSTACK_HOST') . '/bank');
         return [
             'data' => $resp->json(),
             'code' => $resp->status()
