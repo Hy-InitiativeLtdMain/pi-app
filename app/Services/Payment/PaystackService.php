@@ -14,6 +14,7 @@ class PaystackService
     {
         $host = "https://api.paystack.co/";
         $secretKey ='sk_test_e2ee377980275f8cbb12b662a4802ff098edfe5b';
+        dd(getenv('PAYSTACK_SECRET_KEY'), getenv('PAYSTACK_HOST'));
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . trim($secretKey)
         ])->get($host . 'bank/resolve', [

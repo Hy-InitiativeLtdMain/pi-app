@@ -28,6 +28,7 @@ jobs:
             done < "$NEW_ENV_FILE"
 
             cd /var/www/piapp
+            php artisan config:cache
 
             # Check for any changes and commit them
             if [[ `git status --porcelain` ]]; then
