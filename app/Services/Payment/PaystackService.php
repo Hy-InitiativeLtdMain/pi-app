@@ -14,7 +14,7 @@ class PaystackService
     {
         $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->get($host . 'bank/resolve', [
             'account_number' => $account_number,
             'bank_code' => $bank_code,
@@ -80,7 +80,7 @@ class PaystackService
     {
         $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post($host . 'transferrecipient', [
             'type' => "nuban",
             'name' => $bankAccount->account_name,
@@ -138,7 +138,7 @@ class PaystackService
         $amount = abs($transaction->amount) * 100;
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post($host . 'transfer', [
             'source' => 'balance',
             'amount' => $amount,
@@ -203,7 +203,7 @@ class PaystackService
         $amount = abs($transaction->amount) * 100;
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post($host . 'transfer/finalize_transfer', [
             'transfer_code' => $transaction->transfer_code,
             'otp' => $otp,
