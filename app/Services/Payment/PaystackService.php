@@ -27,10 +27,10 @@ class PaystackService
     public function allBanks()
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
-    $host = getenv('PAYSTACK_HOST');
+    $host = "https://api.paystack.co/";
 
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $secretKey,
+            'Authorization' => 'Bearer' . $secretKey,
         ])->retry(3, 2000, function ($exception) {
             // Retry only if the response is available and it's a 429 or 503
             return $exception instanceof ConnectionException ||
