@@ -14,7 +14,7 @@ class PaystackService
     {
         $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'), // Add space after 'Bearer'
+            'Authorization' => 'Bearer' . ' ' . getenv('PAYSTACK_SECRET_KEY'), // Add space after 'Bearer'
         ])->get($host . 'bank/resolve', [
             'account_number' => $account_number,
             'bank_code' => $bank_code,
