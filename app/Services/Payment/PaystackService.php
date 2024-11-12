@@ -27,14 +27,19 @@ class PaystackService
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
         $host = getenv('PAYSTACK_HOST');
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer' . $secretKey,
-        ])->get($host . 'bank');
+         $response = Http::withHeaders(['Authorization' => 'Bearer' . $secretKey])
+            ->retry(3, 2000, function ($exception, $request) {
+                // Only retry on 429 (Too Many Requests) or 503 (Service Unavailable)
+                return $exception->response->status() === 429 || $exception->response->status() === 503;
+            })
+            ->get($host . 'bank');
 
-        return [
-            'data' => $response->json(),
-            'code' => $response->status()
-        ];
+        if ($response->successful()) {
+            return [
+                'data' => $response->json(),
+                'code' => $response->status(),
+            ];
+        }
     }
 
     public function initializeTransaction($input)
@@ -42,7 +47,7 @@ class PaystackService
 
         $input['amount'] = intval($input['amount']) * 100;
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post(getenv('PAYSTACK_HOST') . 'transaction/initialize', $input);
         return [
             'data' => $resp->json(),
@@ -54,7 +59,7 @@ class PaystackService
     {
 
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->get(getenv('PAYSTACK_HOST') . 'transaction/verify/' . $transaction->ref);
         return [
             'data' => $resp->json(),
