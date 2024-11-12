@@ -12,9 +12,8 @@ class PaystackService
 {
     public function verifyAccount($account_number, $bank_code)
     {
-        $host = "https://api.paystack.co/";
-        $secretKey ='sk_test_e2ee377980275f8cbb12b662a4802ff098edfe5b';
-        dd(getenv('PAYSTACK_SECRET_KEY'), getenv('PAYSTACK_HOST'));
+        $host = getenv('PAYSTACK_HOST');
+        $secretKey =getenv('PAYSTACK_SECRET_KEY');
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . trim($secretKey)
         ])->get($host . 'bank/resolve', [
@@ -31,7 +30,7 @@ class PaystackService
     public function allBanks()
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
-        $host = "https://api.paystack.co/";
+        $host =getenv('PAYSTACK_HOST');
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer' . $secretKey,
@@ -56,7 +55,7 @@ class PaystackService
 
     public function initializeTransaction($input)
     {
-        $host = "https://api.paystack.co/";
+        $host =getenv('PAYSTACK_HOST');
         $input['amount'] = intval($input['amount']) * 100;
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
@@ -69,7 +68,7 @@ class PaystackService
 
     public function verifyPayment(Transaction $transaction)
     {
-        $host = "https://api.paystack.co/";
+        $host =getenv('PAYSTACK_HOST');
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->get($host . 'transaction/verify/' . $transaction->ref);
@@ -81,7 +80,7 @@ class PaystackService
 
     public function fetchRecipient(BankAccount $bankAccount)
     {
-        $host = "https://api.paystack.co/";
+        $host =getenv('PAYSTACK_HOST');
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post($host . 'transferrecipient', [
@@ -100,7 +99,7 @@ class PaystackService
 
     public function makePayout(Transaction $transaction)
     {
-        $host = "https://api.paystack.co/";
+        $host =getenv('PAYSTACK_HOST');
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
@@ -165,7 +164,7 @@ class PaystackService
 
     public function verifyOTPPayout(Transaction $transaction, String $otp)
     {
-        $host = "https://api.paystack.co/";
+        $host =getenv('PAYSTACK_HOST');
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
