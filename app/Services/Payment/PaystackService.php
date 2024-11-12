@@ -12,9 +12,10 @@ class PaystackService
 {
     public function verifyAccount($account_number, $bank_code)
     {
+        $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST') . 'bank/resolve', [
+        ])->get($host . 'bank/resolve', [
             'account_number' => $account_number,
             'bank_code' => $bank_code,
         ])->json();
@@ -52,11 +53,11 @@ class PaystackService
 
     public function initializeTransaction($input)
     {
-
+        $host = "https://api.paystack.co/";
         $input['amount'] = intval($input['amount']) * 100;
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->post(getenv('PAYSTACK_HOST') . 'transaction/initialize', $input);
+        ])->post($host . 'transaction/initialize', $input);
         return [
             'data' => $resp->json(),
             'code' => $resp->status(),
@@ -65,10 +66,10 @@ class PaystackService
 
     public function verifyPayment(Transaction $transaction)
     {
-
+        $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST') . 'transaction/verify/' . $transaction->ref);
+        ])->get($host . 'transaction/verify/' . $transaction->ref);
         return [
             'data' => $resp->json(),
             'code' => $resp->status(),
@@ -77,9 +78,10 @@ class PaystackService
 
     public function fetchRecipient(BankAccount $bankAccount)
     {
+        $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->post(getenv('PAYSTACK_HOST') . 'transferrecipient', [
+        ])->post($host . 'transferrecipient', [
             'type' => "nuban",
             'name' => $bankAccount->account_name,
             'account_number' => $bankAccount->account_number,
@@ -95,7 +97,7 @@ class PaystackService
 
     public function makePayout(Transaction $transaction)
     {
-
+        $host = "https://api.paystack.co/";
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
@@ -137,7 +139,7 @@ class PaystackService
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->post(getenv('PAYSTACK_HOST') . 'transfer', [
+        ])->post($host . 'transfer', [
             'source' => 'balance',
             'amount' => $amount,
             'recipient' => $transaction->bankAccount->recipient_code,
@@ -160,7 +162,7 @@ class PaystackService
 
     public function verifyOTPPayout(Transaction $transaction, String $otp)
     {
-
+        $host = "https://api.paystack.co/";
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
@@ -202,7 +204,7 @@ class PaystackService
         $ref = Str::lower($transaction->ref);
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->post(getenv('PAYSTACK_HOST') . 'transfer/finalize_transfer', [
+        ])->post($host . 'transfer/finalize_transfer', [
             'transfer_code' => $transaction->transfer_code,
             'otp' => $otp,
         ]);
