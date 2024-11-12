@@ -19,25 +19,20 @@ class PaystackService
         ])->json();
         return [
             'data' => $resp,
-            'code' => 200
+            'code' => 200,
         ];
     }
 
     public function allBanks()
     {
-        // $resp = Http::withHeaders([
-        //     'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        // ])->get(getenv('PAYSTACK_HOST') . '/bank');
-        dd(getenv('PAYSTACK_SECRET_KEY'), getenv('PAYSTACK_HOST'), Http::withHeaders([
-            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST') . '/bank'));
+        $secretKey = getenv('PAYSTACK_SECRET_KEY');
+        $host = getenv('PAYSTACK_HOST');
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $secretKey,
+        ])->get($host . 'bank');
 
-        return [
-            'data' => $resp->json(),
-            'code' => $resp->status()
-        ];
+        dd($secretKey, $host, $response->status(), $response->json());
     }
-
 
     public function initializeTransaction($input)
     {
@@ -48,10 +43,9 @@ class PaystackService
         ])->post(getenv('PAYSTACK_HOST') . 'transaction/initialize', $input);
         return [
             'data' => $resp->json(),
-            'code' => $resp->status()
+            'code' => $resp->status(),
         ];
     }
-
 
     public function verifyPayment(Transaction $transaction)
     {
@@ -61,7 +55,7 @@ class PaystackService
         ])->get(getenv('PAYSTACK_HOST') . 'transaction/verify/' . $transaction->ref);
         return [
             'data' => $resp->json(),
-            'code' => $resp->status()
+            'code' => $resp->status(),
         ];
     }
 
@@ -75,14 +69,13 @@ class PaystackService
             'account_number' => $bankAccount->account_number,
             'bank_code' => $bankAccount->bank_code,
             'description' => "Retrieve Bank Recipient Code",
-            'currency' => "NGN"
+            'currency' => "NGN",
         ]);
         return [
             'data' => $resp->json(),
-            'code' => $resp->status()
+            'code' => $resp->status(),
         ];
     }
-
 
     public function makePayout(Transaction $transaction)
     {
@@ -90,38 +83,38 @@ class PaystackService
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
-                    "message" => "This is not a payout transaction"
+                    "message" => "This is not a payout transaction",
                 ],
-                'code' => 422
+                'code' => 422,
             ];
         }
 
         if ($transaction->paid) {
             return [
                 'data' => [
-                    "message" => "Payment is paid"
+                    "message" => "Payment is paid",
                 ],
-                'code' => 422
+                'code' => 422,
             ];
         }
         if ($transaction->bankAccount == null) {
             return [
                 'data' => [
-                    "message" => "Bank Account is not found"
+                    "message" => "Bank Account is not found",
                 ],
-                'code' => 422
+                'code' => 422,
             ];
         }
         $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
             ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
             ->where('courses.user_id', $transaction->user->id)
-            // ->select('transactions.*')
+        // ->select('transactions.*')
             ->sum('transactions.amount');
         if ($transaction->amount > $available_balance) {
             $data['message'] = "Insufficient Funds";
             return [
                 'data' => $data,
-                'code' => 403
+                'code' => 403,
             ];
         }
         $amount = abs($transaction->amount) * 100;
@@ -133,7 +126,7 @@ class PaystackService
             'amount' => $amount,
             'recipient' => $transaction->bankAccount->recipient_code,
             'reason' => 'Withdrawal of Funds',
-            'reference' => $ref
+            'reference' => $ref,
         ]);
         $_resp = $resp->json();
 
@@ -145,7 +138,7 @@ class PaystackService
 
         return [
             'data' => $_resp,
-            'code' => $resp->status()
+            'code' => $resp->status(),
         ];
     }
 
@@ -155,38 +148,38 @@ class PaystackService
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
-                    "message" => "This is not a payout transaction"
+                    "message" => "This is not a payout transaction",
                 ],
-                'code' => 422
+                'code' => 422,
             ];
         }
 
         if ($transaction->paid) {
             return [
                 'data' => [
-                    "message" => "Payment is paid"
+                    "message" => "Payment is paid",
                 ],
-                'code' => 422
+                'code' => 422,
             ];
         }
         if ($transaction->bankAccount == null) {
             return [
                 'data' => [
-                    "message" => "Bank Account is not found"
+                    "message" => "Bank Account is not found",
                 ],
-                'code' => 422
+                'code' => 422,
             ];
         }
         $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
             ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
             ->where('courses.user_id', $transaction->user->id)
-            // ->select('transactions.*')
+        // ->select('transactions.*')
             ->sum('transactions.amount');
         if ($transaction->amount > $available_balance) {
             $data['message'] = "Insufficient Funds";
             return [
                 'data' => $data,
-                'code' => 403
+                'code' => 403,
             ];
         }
         $amount = abs($transaction->amount) * 100;
@@ -195,11 +188,11 @@ class PaystackService
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post(getenv('PAYSTACK_HOST') . 'transfer/finalize_transfer', [
             'transfer_code' => $transaction->transfer_code,
-            'otp' => $otp
+            'otp' => $otp,
         ]);
         return [
             'data' => $resp->json(),
-            'code' => $resp->status()
+            'code' => $resp->status(),
         ];
     }
 }
