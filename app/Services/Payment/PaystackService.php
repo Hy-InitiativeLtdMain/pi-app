@@ -14,11 +14,12 @@ class PaystackService
     {
         $host = "https://api.paystack.co/";
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'), // Add space after 'Bearer'
         ])->get($host . 'bank/resolve', [
             'account_number' => $account_number,
             'bank_code' => $bank_code,
         ])->json();
+
         return [
             'data' => $resp,
             'code' => 200,
@@ -28,14 +29,14 @@ class PaystackService
     public function allBanks()
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
-    $host = "https://api.paystack.co/";
+        $host = "https://api.paystack.co/";
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer' . $secretKey,
         ])->retry(3, 2000, function ($exception) {
             // Retry only if the response is available and it's a 429 or 503
             return $exception instanceof ConnectionException ||
-                   ($exception->response && in_array($exception->response->status(), [429, 503]));
+                ($exception->response && in_array($exception->response->status(), [429, 503]));
         })->get($host . 'bank');
 
         if ($response->successful()) {
