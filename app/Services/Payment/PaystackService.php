@@ -25,10 +25,12 @@ class PaystackService
 
     public function allBanks()
     {
-        $resp = Http::withHeaders([
+        // $resp = Http::withHeaders([
+        //     'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+        // ])->get(getenv('PAYSTACK_HOST') . '/bank');
+        dd(getenv('PAYSTACK_SECRET_KEY'), getenv('PAYSTACK_HOST'), Http::withHeaders([
             'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
-        ])->get(getenv('PAYSTACK_HOST') . '/bank');
-        dd(getenv('PAYSTACK_SECRET_KEY'), getenv('PAYSTACK_HOST'), $resp);
+        ])->get(getenv('PAYSTACK_HOST') . '/bank'));
 
         return [
             'data' => $resp->json(),
