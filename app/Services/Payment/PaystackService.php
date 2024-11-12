@@ -13,8 +13,9 @@ class PaystackService
     public function verifyAccount($account_number, $bank_code)
     {
         $host = "https://api.paystack.co/";
+        $secretKey = getenv('PAYSTACK_SECRET_KEY');
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer' . ' ' . getenv('PAYSTACK_SECRET_KEY'), // Add space after 'Bearer'
+            'Authorization' => 'Bearer ' . trim($secretKey)
         ])->get($host . 'bank/resolve', [
             'account_number' => $account_number,
             'bank_code' => $bank_code,
