@@ -4,6 +4,7 @@ namespace App\Services\Payment;
 
 use App\Models\BankAccount;
 use App\Models\Transaction;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -26,13 +27,15 @@ class PaystackService
     public function allBanks()
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
-        $host = getenv('PAYSTACK_HOST');
-         $response = Http::withHeaders(['Authorization' => 'Bearer' . $secretKey])
-            ->retry(3, 2000, function ($exception, $request) {
-                // Only retry on 429 (Too Many Requests) or 503 (Service Unavailable)
-                return $exception->response->status() === 429 || $exception->response->status() === 503;
-            })
-            ->get($host . 'bank');
+    $host = getenv('PAYSTACK_HOST');
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $secretKey,
+        ])->retry(3, 2000, function ($exception) {
+            // Retry only if the response is available and it's a 429 or 503
+            return $exception instanceof ConnectionException ||
+                   ($exception->response && in_array($exception->response->status(), [429, 503]));
+        })->get($host . 'bank');
 
         if ($response->successful()) {
             return [
@@ -40,6 +43,11 @@ class PaystackService
                 'code' => $response->status(),
             ];
         }
+
+        return [
+            'error' => $response->json()['message'] ?? 'Unexpected error occurred',
+            'code' => $response->status(),
+        ];
     }
 
     public function initializeTransaction($input)
