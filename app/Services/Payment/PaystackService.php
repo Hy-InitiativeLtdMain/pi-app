@@ -27,11 +27,11 @@ class PaystackService
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
         $host = getenv('PAYSTACK_HOST');
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $secretKey,
-        ])->get($host . 'bank');
+        // $response = ;
 
-        dd($secretKey, $host, $response->status(), $response->json());
+        dd($secretKey, $host, Http::withHeaders([
+            'Authorization' => 'Bearer' . $secretKey,
+        ])->get($host . 'bank'));
     }
 
     public function initializeTransaction($input)
