@@ -17,7 +17,17 @@ class AuthService
 {
     public function login($input)
     {
+
         $user = User::where('email', $input['email'])->first();
+        
+        if (isset($input['role'])) {
+            if ($input['role'] === 'creator') {
+                $user->is_admin = true;
+            } elseif ($input['role'] === 'learner') {
+                $user->is_admin = false;
+            }
+            $user->save();
+        }
 
         if ($user && Hash::check($input['password'], $user->password)) {
             // Determine user type

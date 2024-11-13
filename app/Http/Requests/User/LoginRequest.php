@@ -26,6 +26,7 @@ class LoginRequest extends FormRequest
         $rules = [
             'email' => 'required|exists:users,email',
             'password' => 'required|min:6',
+            'role' =>  'nullable|string',
         ];
         return $rules;
     }
