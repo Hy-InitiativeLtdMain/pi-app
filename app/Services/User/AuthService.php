@@ -19,7 +19,7 @@ class AuthService
     {
 
         $user = User::where('email', $input['email'])->first();
-        
+
         if (isset($input['role'])) {
             if ($input['role'] === 'creator') {
                 $user->is_admin = true;
@@ -142,9 +142,9 @@ class AuthService
         }
 
         // Check if user is a mentor or mentee and add to the payload
-        if ($user->is_admin && $user->mentor) {
+        if ($user->mentor) {
             $tokenPayload['is_mentor'] = true;
-        } elseif (!$user->is_admin && $user->mentee) {
+        } elseif ($user->mentee) {
             $tokenPayload['is_mentee'] = true;
         }
 
