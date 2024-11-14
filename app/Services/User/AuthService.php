@@ -142,7 +142,10 @@ class AuthService
         }
 
         // Check if user is a mentor or mentee and add to the payload
-        if ($user->mentor) {
+        if ($user->mentor && $user->mentee) {
+            $tokenPayload['is_mentor'] = true;
+            $tokenPayload['is_mentee'] = true;
+        } elseif ($user->mentor) {
             $tokenPayload['is_mentor'] = true;
         } elseif ($user->mentee) {
             $tokenPayload['is_mentee'] = true;
