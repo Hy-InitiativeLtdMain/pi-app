@@ -4,14 +4,11 @@ namespace App\Services\User;
 
 use App\Events\Admin\NewUser;
 use App\Jobs\User\AuthJobManager;
-use App\Models\AdminFeature;
-use App\Models\FcmToken;
-use App\Models\User;
 use App\Jobs\User\SendOtpSmsJob;
-use App\Models\VerificationToken;
+use App\Models\AdminFeature;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
@@ -20,14 +17,12 @@ class AuthService
 
         $user = User::where('email', $input['email'])->first();
 
-        if (isset($input['role'])) {
-            if ($input['role'] === 'creator') {
-                $user->is_admin = true;
-            } elseif ($input['role'] === 'learner') {
-                $user->is_admin = false;
-            }
-            $user->save();
+        if ($user->registered_role == true) {
+            $user->is_admin = true;
+        } elseif ($user->registered_role == false) {
+            $user->is_admin = false;
         }
+        $user->save();
 
         if ($user && Hash::check($input['password'], $user->password)) {
             // Determine user type
@@ -45,12 +40,12 @@ class AuthService
 
             return [
                 'data' => $tokenPayload,
-                'code' => 200
+                'code' => 200,
             ];
         } else {
             return [
                 'data' => ['message' => 'Invalid email or password'],
-                'code' => 422
+                'code' => 422,
             ];
         }
     }
@@ -127,7 +122,6 @@ class AuthService
     private function generateTokenPayload($user, $userType, $adminFeatures, $token)
     {
 
-
         // Build token payload
         $tokenPayload = [
             'token' => $token,
@@ -157,9 +151,13 @@ class AuthService
     public function register($input)
     {
 
-        if(isset($input['referrer_code'])){
+        if (isset($input['referrer_code'])) {
             $referrer = User::where('referral_code', $input['referrer_code'])->firstOrFail();
             $input['referrer_user_id'] = $referrer->id;
+        }
+
+        if (isset($input['is_admin'])) {
+            $input['registered_role'] = $input['is_admin'];
         }
 
         $user = User::create($input);
@@ -167,7 +165,7 @@ class AuthService
         // Generate OTP and save it to verifications table
         $otp = 1234;
         $user->verifications()->create([
-            'token' => $otp
+            'token' => $otp,
         ]);
 
         $user->save();
@@ -186,7 +184,7 @@ class AuthService
 
         return [
             'data' => $data,
-            'code' => 201
+            'code' => 201,
         ];
     }
 
@@ -197,17 +195,16 @@ class AuthService
 
         $user->verifications()->create([
             'user_id' => $user->id,
-            'token' => mt_rand(1000, 9999)
+            'token' => mt_rand(1000, 9999),
         ]);
         $emailJob = (new AuthJobManager($user, 'forgot_password'))->delay(Carbon::now()->addSeconds(2));
         dispatch($emailJob);
-
 
         $data['message'] = 'Check your email for RESET link';
 
         return [
             'data' => $data,
-            'code' => 200
+            'code' => 200,
         ];
     }
 
@@ -218,7 +215,7 @@ class AuthService
             $response = ['message' => 'Invalid Token'];
             return [
                 'data' => $response,
-                'code' => 422
+                'code' => 422,
             ];
         }
 
@@ -228,7 +225,7 @@ class AuthService
 
         return [
             'data' => $data,
-            'code' => 200
+            'code' => 200,
         ];
     }
 
@@ -240,7 +237,7 @@ class AuthService
             $response = ['message' => 'Invalid Token'];
             return [
                 'data' => $response,
-                'code' => 422
+                'code' => 422,
             ];
         }
         $user->email_verified_at = Carbon::now();
@@ -248,13 +245,13 @@ class AuthService
         $verify->delete();
 
         $token = $user->createToken('user_auth_token', ['server:user'])->plainTextToken;
-        $data = ['token' => $token, 'tokenType' => 'user',];
+        $data = ['token' => $token, 'tokenType' => 'user'];
 
         $data['message'] = 'Registration was completed successfully';
         event(new NewUser($user, $user->institute_slug));
         return [
             'data' => $data,
-            'code' => 200
+            'code' => 200,
         ];
     }
 
@@ -266,12 +263,12 @@ class AuthService
             $data['message'] = 'Account Already Comfirmed';
             return [
                 'data' => $data,
-                'code' => 403
+                'code' => 403,
             ];
         }
 
         $user->verifications()->create([
-            'token' => mt_rand(1000, 9999)
+            'token' => mt_rand(1000, 9999),
         ]);
 
         $emailJob = (new AuthJobManager($user, "new_user"))->delay(Carbon::now()->addSeconds(2));
@@ -280,7 +277,7 @@ class AuthService
         $data['message'] = 'Check your email for confirmation email';
         return [
             'data' => $data,
-            'code' => 200
+            'code' => 200,
         ];
     }
 }
