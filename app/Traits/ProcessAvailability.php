@@ -1,8 +1,9 @@
 <?php
 namespace App\Traits;
 
-use DateTime;
 use DateInterval;
+use DateTime;
+use InvalidArgumentException;
 
 trait ProcessAvailability
 {
@@ -25,7 +26,7 @@ trait ProcessAvailability
                 'meeting_link' => $requestData['meeting_link'],
                 'description' => $requestData['description'],
                 'id' => $requestData['id'],
-                'mentor_id' => $requestData['mentor_id']
+                'mentor_id' => $requestData['mentor_id'],
             ];
         } else {
             // Iterate over each day specified in the availability data
@@ -59,31 +60,42 @@ trait ProcessAvailability
             'duration' => $requestData['duration'],
             'about' => $requestData['about'],
             'id' => $requestData['id'],
-            'mentor_id' => $requestData['mentor_id']
+            'mentor_id' => $requestData['mentor_id'],
         ];
     }
 
     // Helper function to calculate end time
-    private function calculateEndTime($startTime, $duration)
+    private function parseTime($time)
     {
-        // dd($startTime, $duration);
-        // Convert the start time to a DateTime object
-        if (DateTime::createFromFormat('H:i:s', $startTime)) {
-            $startTime = DateTime::createFromFormat('H:i:s', $startTime);
-        } else if (DateTime::createFromFormat('H:i', $startTime)) {
-            $startTime = DateTime::createFromFormat('H:i', $startTime);
-        } else {
-            $startTime = DateTime::createFromFormat('h:i A', $startTime);
+        $formats = ['H:i:s', 'H:i', 'h:i A'];
+
+        foreach ($formats as $format) {
+            $parsedTime = DateTime::createFromFormat($format, $time);
+            if ($parsedTime) {
+                return $parsedTime;
+            }
         }
 
-        // Parse the duration to extract the number of hours and minutes
+        // Return null or a fallback time if parsing fails
+        return null; // or new DateTime();
+    }
+
+    private function calculateEndTime($startTime, $duration)
+    {
+        // Parse the start time
+        $startTime = $this->parseTime($startTime);
+        if (!$startTime) {
+            throw new InvalidArgumentException("Invalid start time format: $startTime");
+        }
+
+        // Parse the duration
         preg_match('/(\d+) hour/', $duration, $hourMatches);
         preg_match('/(\d+) minute/', $duration, $minuteMatches);
 
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
-        // Calculate the end time
+        // Clone and calculate the end time
         $endTime = clone $startTime;
         $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
 
@@ -121,6 +133,5 @@ trait ProcessAvailability
         // Format the end time as H:i
         return $endTime->format("H:i");
     }
-
 
 }
