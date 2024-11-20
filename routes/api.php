@@ -59,7 +59,7 @@ Route::post('/flw-hook', [WebhooksManager::class, 'flwWebhook']);
 
 Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], function () {
 
-   
+
 
     Route::group(['prefix' => 'user'], function () {
 
@@ -196,7 +196,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         //Booking
         Route::group(['prefix' => 'mentees', 'middleware' => ['auth:api']], function () {
             Route::get('/bookings', [BookingManager::class, 'index']);
-            Route::post('/bookings', [BookingManager::class, 'store']);
+            Route::post('/bookings', [BookingManager::class, 'storeOrUpdate']);
             Route::get('/bookings/{id}', [BookingManager::class, 'show']);
             Route::put('/bookings/{id}', [BookingManager::class, 'update']);
             Route::delete('/bookings/{id}', [BookingManager::class, 'destroy']);
