@@ -74,11 +74,12 @@ trait ProcessAvailability
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
             if ($parsedTime) {
-                // Return the formatted string instead of the DateTime object
-                return $parsedTime->format('Y-m-d H:i:s.u T (P)'); // You can adjust the format as needed
+                // dd($parsedTime);
+                return $parsedTime;
+                break;
             }
         }
-
+        // dd($parsedTime);
         // If parsing fails, return null
         return null;
     }
@@ -87,7 +88,7 @@ trait ProcessAvailability
     {
         // Parse the start time
         $parsedStartTime = $this->parseTime($startTime);
-
+        dd("Pasd: ", $parsedStartTime);
         if (!$parsedStartTime) {
             throw new InvalidArgumentException(
                 "Invalid start time format: " . (is_string($startTime) ? $startTime : json_encode($startTime))
