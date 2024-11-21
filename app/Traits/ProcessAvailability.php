@@ -88,7 +88,7 @@ trait ProcessAvailability
     {
         // Parse the start time
         $parsedStartTime = $this->parseTime($startTime);
-        // dd("Pasd: ", $parsedStartTime);
+        dd("Pasd: ", $parsedStartTime);
         if (!($this->parseTime($startTime) instanceof DateTime)) {
             dd("ParsedStartTime is not a DateTime object", $this->parseTime($startTime));
             throw new InvalidArgumentException(
