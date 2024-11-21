@@ -82,6 +82,8 @@ trait ProcessAvailability
 }
     private function calculateEndTime($startTime, $duration)
 {
+    $startTime = trim($startTime);
+
     // Convert the start time to a timestamp
     $startTimestamp = strtotime($startTime);
 
