@@ -69,17 +69,6 @@ trait ProcessAvailability
     {
         $formats = ['H:i:s', 'H:i', 'h:i A'];
 
-        $matchingFormat = null;
-
-        foreach ($formats as $format) {
-            $parsedTime = DateTime::createFromFormat($format, $time);
-            if ($parsedTime && $parsedTime->format($format) === $time) {
-                $matchingFormat = $format;
-                break;
-            }
-        }
-
-        dd($matchingFormat);
 
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
