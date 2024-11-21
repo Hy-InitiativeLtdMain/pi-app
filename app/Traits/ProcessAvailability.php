@@ -97,7 +97,7 @@ trait ProcessAvailability
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
-        dd($parsedStartTime);
+        dd(clone $parsedStartTime);
         // Ensure $parsedStartTime is safely cloned
         if (!$parsedStartTime instanceof DateTime) {
             throw new RuntimeException("Start time is not a valid DateTime object after parsing.");
