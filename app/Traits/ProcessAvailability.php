@@ -101,7 +101,7 @@ trait ProcessAvailability
         try {
             // dd($parsedStartTime);
             $endTime = $this->parseTime($startTime)->add(new DateInterval("PT{$hours}H{$minutes}M"))->format('H:i');// Safely clone the DateTime object
-
+            dd($endTime);
             // dd($endTime->format('H:i'));
 
         } catch (Exception $e) {
