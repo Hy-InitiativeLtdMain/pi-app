@@ -69,6 +69,18 @@ trait ProcessAvailability
     {
         $formats = ['H:i:s', 'H:i', 'h:i A'];
 
+        $matchingFormat = null;
+
+        foreach ($formats as $format) {
+            $parsedTime = DateTime::createFromFormat($format, $time);
+            if ($parsedTime && $parsedTime->format($format) === $time) {
+                $matchingFormat = $format;
+                break;
+            }
+        }
+
+        dd($matchingFormat);
+
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
             if ($parsedTime) {
@@ -76,13 +88,12 @@ trait ProcessAvailability
             }
         }
 
-        // Return null or a fallback time if parsing fails
-        return null; // or new DateTime();
+        // If parsing fails, return null
+        return null;
     }
 
     private function calculateEndTime($startTime, $duration)
     {
-        dd($startTime);
         // Parse the start time
         $startTime = $this->parseTime($startTime);
         if (!$startTime) {
@@ -90,13 +101,13 @@ trait ProcessAvailability
         }
 
         // Parse the duration
-        preg_match('/(\d+) hour/', $duration, $hourMatches);
-        preg_match('/(\d+) minute/', $duration, $minuteMatches);
+        preg_match('/(\d+)\s*hour/', $duration, $hourMatches);
+        preg_match('/(\d+)\s*minute/', $duration, $minuteMatches);
 
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
-        // Clone and calculate the end time
+        // Calculate the end time
         $endTime = clone $startTime;
         $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
 
