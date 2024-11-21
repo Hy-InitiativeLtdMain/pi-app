@@ -103,6 +103,7 @@ trait ProcessAvailability
 
         // Calculate the end time
         try {
+            dd($parsedStartTime);
             $endTime = new DateTime($parsedStartTime->format('Y-m-d H:i:s'));// Safely clone the DateTime object
             $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
             // dd($endTime->format('H:i'));
