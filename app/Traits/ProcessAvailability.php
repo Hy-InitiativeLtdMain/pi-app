@@ -68,22 +68,18 @@ trait ProcessAvailability
 
     // Helper function to calculate end time
     private function parseTime($time)
-    {
-        $formats = ['H:i:s', 'H:i', 'h:i A'];
-
-        foreach ($formats as $format) {
-            $parsedTime = DateTime::createFromFormat($format, $time);
-            if ($parsedTime) {
-                // dd($parsedTime);
-                return $parsedTime;
-                break;
-            }
-        }
-        // dd($parsedTime);
-        // If parsing fails, return null
-        return null;
+{
+    if ($parsedTime = DateTime::createFromFormat('H:i:s', $time)) {
+        return $parsedTime;
+    } elseif ($parsedTime = DateTime::createFromFormat('H:i', $time)) {
+        return $parsedTime;
+    } elseif ($parsedTime = DateTime::createFromFormat('h:i A', $time)) {
+        return $parsedTime;
     }
 
+    // If parsing fails, return null
+    return null;
+}
     private function calculateEndTime($startTime, $duration)
     {
         // Parse the start time
@@ -104,7 +100,7 @@ trait ProcessAvailability
         // Calculate the end time
         try {
             dd($parsedStartTime);
-            $endTime = new DateTime($parsedStartTime->format('Y-m-d H:i:s'));// Safely clone the DateTime object
+            $endTime = clone $parsedStartTime;// Safely clone the DateTime object
             $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
             // dd($endTime->format('H:i'));
 
