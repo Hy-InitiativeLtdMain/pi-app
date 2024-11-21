@@ -89,8 +89,8 @@ trait ProcessAvailability
         // Parse the start time
         $parsedStartTime = $this->parseTime($startTime);
         // dd("Pasd: ", $parsedStartTime);
-        if (!$parsedStartTime) {
-            dd("Sho wa okay bai");
+        if (!($parsedStartTime instanceof DateTime)) {
+            dd("ParsedStartTime is not a DateTime object", $parsedStartTime);
             throw new InvalidArgumentException(
                 "Invalid start time format: " . (is_string($startTime) ? $startTime : json_encode($startTime))
             );
