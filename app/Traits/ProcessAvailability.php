@@ -3,7 +3,9 @@ namespace App\Traits;
 
 use DateInterval;
 use DateTime;
+use Exception;
 use InvalidArgumentException;
+use RuntimeException;
 
 trait ProcessAvailability
 {
@@ -69,7 +71,6 @@ trait ProcessAvailability
     {
         $formats = ['H:i:s', 'H:i', 'h:i A'];
 
-
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
             if ($parsedTime) {
@@ -86,10 +87,12 @@ trait ProcessAvailability
     private function calculateEndTime($startTime, $duration)
     {
         // Parse the start time
-        $startTime = $this->parseTime($startTime);
-        dd("Start Time: ".$startTime);
-        if (!$startTime) {
-            throw new InvalidArgumentException("Invalid start time format: $startTime");
+        $parsedStartTime = $this->parseTime($startTime);
+
+        if (!$parsedStartTime) {
+            throw new InvalidArgumentException(
+                "Invalid start time format: " . (is_string($startTime) ? $startTime : json_encode($startTime))
+            );
         }
 
         // Parse the duration
@@ -99,9 +102,18 @@ trait ProcessAvailability
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
+        // Ensure $parsedStartTime is safely cloned
+        if (!$parsedStartTime instanceof DateTime) {
+            throw new RuntimeException("Start time is not a valid DateTime object after parsing.");
+        }
+
         // Calculate the end time
-        $endTime = clone $startTime;
-        $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
+        try {
+            $endTime = clone $parsedStartTime; // Safely clone the DateTime object
+            $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
+        } catch (Exception $e) {
+            throw new RuntimeException("Error calculating end time: " . $e->getMessage());
+        }
 
         // Format the end time as H:i
         return $endTime->format('H:i');
