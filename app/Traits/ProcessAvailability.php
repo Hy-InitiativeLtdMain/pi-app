@@ -97,15 +97,14 @@ trait ProcessAvailability
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
-        dd(clone $parsedStartTime);
+        // dd(clone $parsedStartTime);
         // Ensure $parsedStartTime is safely cloned
-        if (!$parsedStartTime instanceof DateTime) {
-            throw new RuntimeException("Start time is not a valid DateTime object after parsing.");
-        }
+
 
         // Calculate the end time
         try {
-            $endTime = clone $parsedStartTime; // Safely clone the DateTime object
+            $endTime = clone $parsedStartTime;
+            dd($endTime->add(new DateInterval("PT{$hours}H{$minutes}M")));// Safely clone the DateTime object
             $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
         } catch (Exception $e) {
             throw new RuntimeException("Error calculating end time: " . $e->getMessage());
