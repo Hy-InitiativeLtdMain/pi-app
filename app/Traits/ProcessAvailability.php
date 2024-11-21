@@ -88,13 +88,7 @@ trait ProcessAvailability
     {
         // Parse the start time
         $parsedStartTime = $this->parseTime($startTime);
-        dd("Pasd: ", $parsedStartTime);
-        if (!($this->parseTime($startTime) instanceof DateTime)) {
-            dd("ParsedStartTime is not a DateTime object", $this->parseTime($startTime));
-            throw new InvalidArgumentException(
-                "Invalid start time format: " . (is_string($startTime) ? $startTime : json_encode($startTime))
-            );
-        }
+
 
         // Parse the duration
         preg_match('/(\d+)\s*hour/', $duration, $hourMatches);
@@ -103,6 +97,7 @@ trait ProcessAvailability
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
+        dd($parsedStartTime);
         // Ensure $parsedStartTime is safely cloned
         if (!$parsedStartTime instanceof DateTime) {
             throw new RuntimeException("Start time is not a valid DateTime object after parsing.");
