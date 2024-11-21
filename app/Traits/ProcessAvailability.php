@@ -76,7 +76,7 @@ trait ProcessAvailability
                 return $parsedTime;
             }
         }
-
+        dd($parsedTime);
         // If parsing fails, return null
         return null;
     }
