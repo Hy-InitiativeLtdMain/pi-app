@@ -105,7 +105,7 @@ trait ProcessAvailability
         try {
             $endTime = clone $parsedStartTime;// Safely clone the DateTime object
             $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
-            dd($endTime->format('H:i'));
+            // dd($endTime->format('H:i'));
 
         } catch (Exception $e) {
             throw new RuntimeException("Error calculating end time: " . $e->getMessage());
