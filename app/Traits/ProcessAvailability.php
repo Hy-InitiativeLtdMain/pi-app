@@ -79,7 +79,7 @@ trait ProcessAvailability
                 break;
             }
         }
-        // dd($parsedTime);
+        dd($parsedTime('date'));
         // If parsing fails, return null
         return null;
     }
