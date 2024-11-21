@@ -68,42 +68,48 @@ trait ProcessAvailability
 
     // Helper function to calculate end time
     private function parseTime($time)
-{
-    if ($parsedTime = DateTime::createFromFormat('H:i:s', $time)) {
-        return $parsedTime;
-    } elseif ($parsedTime = DateTime::createFromFormat('H:i', $time)) {
-        return $parsedTime;
-    } elseif ($parsedTime = DateTime::createFromFormat('h:i A', $time)) {
-        return $parsedTime;
+    {
+        $formats = ['H:i:s', 'H:i', 'h:i A'];
+        foreach ($formats as $format) {
+            $parsedTime = DateTime::createFromFormat($format, $time);
+            if ($parsedTime && $parsedTime instanceof DateTime) {
+                return $parsedTime;
+            }
+        }
+        // If parsing fails, return null explicitly.
+        return null;
     }
 
-    // If parsing fails, return null
-    return null;
-}
     private function calculateEndTime($startTime, $duration)
-{
-    $startTime = trim($startTime);
+    {
+        // Parse the start time
+        $parsedStartTime = $this->parseTime($startTime);
 
-    // Convert the start time to a timestamp
-    $startTimestamp = strtotime($startTime);
+        // Ensure parsedStartTime is a valid DateTime object
+        if (!$parsedStartTime instanceof DateTime) {
+            throw new InvalidArgumentException(
+                "Invalid start time format: " . (is_string($startTime) ? $startTime : json_encode($startTime))
+            );
+        }
 
-    if ($startTimestamp === false) {
-        throw new InvalidArgumentException("Invalid start time format: " . $startTime);
+        // Parse the duration
+        preg_match('/(\d+)\s*hour/', $duration, $hourMatches);
+        preg_match('/(\d+)\s*minute/', $duration, $minuteMatches);
+
+        $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
+        $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
+
+        // Ensure $parsedStartTime is safely cloned
+        try {
+            $endTime = clone $parsedStartTime; // Safely clone the DateTime object
+            $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
+        } catch (Exception $e) {
+            throw new RuntimeException("Error calculating end time: " . $e->getMessage());
+        }
+
+        // Format the end time as H:i
+        return $endTime->format('H:i');
     }
-
-    // Parse the duration (e.g., "2 hour 30 minutes")
-    preg_match('/(\d+)\s*hour/', $duration, $hourMatches);
-    preg_match('/(\d+)\s*minute/', $duration, $minuteMatches);
-
-    $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
-    $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
-
-    // Add the duration to the start time
-    $endTimestamp = $startTimestamp + ($hours * 3600) + ($minutes * 60); // 1 hour = 3600 seconds, 1 minute = 60 seconds
-
-    // Format the end time
-    return date('H:i', $endTimestamp);
-}
 
     private function calculateEndTimeWithSeconds($startTime, $duration)
     {
