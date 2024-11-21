@@ -100,8 +100,8 @@ trait ProcessAvailability
         // Calculate the end time
         try {
             // dd($parsedStartTime);
-            $endTime = $this->parseTime($startTime);// Safely clone the DateTime object
-            $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
+            $endTime = $this->parseTime($startTime)->add(new DateInterval("PT{$hours}H{$minutes}M"))->format('H:i');// Safely clone the DateTime object
+
             // dd($endTime->format('H:i'));
 
         } catch (Exception $e) {
@@ -109,7 +109,7 @@ trait ProcessAvailability
         }
 
         // Format the end time as H:i
-        return $endTime->format('H:i');
+        return $endTime;
     }
 
     private function calculateEndTimeWithSeconds($startTime, $duration)
