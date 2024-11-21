@@ -81,36 +81,27 @@ trait ProcessAvailability
     return null;
 }
     private function calculateEndTime($startTime, $duration)
-    {
-        // Parse the start time
-        $parsedStartTime = $this->parseTime($startTime);
+{
+    // Convert the start time to a timestamp
+    $startTimestamp = strtotime($startTime);
 
-
-        // Parse the duration
-        preg_match('/(\d+)\s*hour/', $duration, $hourMatches);
-        preg_match('/(\d+)\s*minute/', $duration, $minuteMatches);
-
-        $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
-        $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
-
-        // dd(clone $parsedStartTime);
-        // Ensure $parsedStartTime is safely cloned
-
-
-        // Calculate the end time
-        try {
-            // dd($parsedStartTime);
-            $endTime = $this->parseTime($startTime)->add(new DateInterval("PT{$hours}H{$minutes}M"))->format('H:i');// Safely clone the DateTime object
-            // dd($endTime);
-            // dd($endTime->format('H:i'));
-
-        } catch (Exception $e) {
-            throw new RuntimeException("Error calculating end time: " . $e->getMessage());
-        }
-
-        // Format the end time as H:i
-        return $endTime;
+    if ($startTimestamp === false) {
+        throw new InvalidArgumentException("Invalid start time format: " . $startTime);
     }
+
+    // Parse the duration (e.g., "2 hour 30 minutes")
+    preg_match('/(\d+)\s*hour/', $duration, $hourMatches);
+    preg_match('/(\d+)\s*minute/', $duration, $minuteMatches);
+
+    $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
+    $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
+
+    // Add the duration to the start time
+    $endTimestamp = $startTimestamp + ($hours * 3600) + ($minutes * 60); // 1 hour = 3600 seconds, 1 minute = 60 seconds
+
+    // Format the end time
+    return date('H:i', $endTimestamp);
+}
 
     private function calculateEndTimeWithSeconds($startTime, $duration)
     {
