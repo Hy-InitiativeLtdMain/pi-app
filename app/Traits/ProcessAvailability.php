@@ -74,12 +74,11 @@ trait ProcessAvailability
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
             if ($parsedTime) {
-                // dd($parsedTime);
-                return $parsedTime;
-                break;
+                // Return the formatted string instead of the DateTime object
+                return $parsedTime->format('Y-m-d H:i:s.u T (P)'); // You can adjust the format as needed
             }
         }
-        dd($parsedTime('date'));
+
         // If parsing fails, return null
         return null;
     }
