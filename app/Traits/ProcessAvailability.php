@@ -75,7 +75,7 @@ trait ProcessAvailability
             if ($parsedTime) {
                 // dd($parsedTime);
                 return $parsedTime;
-
+                break;
             }
         }
         // dd($parsedTime);
@@ -87,7 +87,7 @@ trait ProcessAvailability
     {
         // Parse the start time
         $startTime = $this->parseTime($startTime);
-        dd($startTime);
+        dd("Start Time: ".$startTime);
         if (!$startTime) {
             throw new InvalidArgumentException("Invalid start time format: $startTime");
         }
