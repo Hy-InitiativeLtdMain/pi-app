@@ -73,7 +73,7 @@ trait ProcessAvailability
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
             if ($parsedTime) {
-                dd($parsedTime);
+                // dd($parsedTime);
                 return $parsedTime;
 
             }
@@ -87,6 +87,7 @@ trait ProcessAvailability
     {
         // Parse the start time
         $startTime = $this->parseTime($startTime);
+        dd($startTime);
         if (!$startTime) {
             throw new InvalidArgumentException("Invalid start time format: $startTime");
         }
