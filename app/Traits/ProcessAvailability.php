@@ -82,6 +82,7 @@ trait ProcessAvailability
 
     private function calculateEndTime($startTime, $duration)
     {
+        dd($startTime);
         // Parse the start time
         $startTime = $this->parseTime($startTime);
         if (!$startTime) {
