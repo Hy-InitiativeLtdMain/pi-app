@@ -73,10 +73,12 @@ trait ProcessAvailability
         foreach ($formats as $format) {
             $parsedTime = DateTime::createFromFormat($format, $time);
             if ($parsedTime) {
+                dd($parsedTime);
                 return $parsedTime;
+
             }
         }
-        dd($parsedTime);
+        // dd($parsedTime);
         // If parsing fails, return null
         return null;
     }
