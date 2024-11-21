@@ -80,16 +80,18 @@ trait ProcessAvailability
         return null;
     }
 
-    private function calculateEndTime($startTime, $duration)
+    public function calculateEndTime($startTime, $duration)
     {
-        // Parse the start time
-        $parsedStartTime = $this->parseTime($startTime);
+        static $parsedStartTime;
 
-        // Ensure parsedStartTime is a valid DateTime object
-        if (!$parsedStartTime instanceof DateTime) {
-            throw new InvalidArgumentException(
-                "Invalid start time format: " . (is_string($startTime) ? $startTime : json_encode($startTime))
-            );
+        if (!$parsedStartTime) {
+            // Parse the start time only once
+            $parsedStartTime = $this->parseTime($startTime);
+
+            // Ensure it's a valid DateTime
+            if (!$parsedStartTime instanceof DateTime) {
+                throw new InvalidArgumentException("Invalid start time format: " . $startTime);
+            }
         }
 
         // Parse the duration
@@ -99,7 +101,7 @@ trait ProcessAvailability
         $hours = !empty($hourMatches) ? intval($hourMatches[1]) : 0;
         $minutes = !empty($minuteMatches) ? intval($minuteMatches[1]) : 0;
 
-        // Ensure $parsedStartTime is safely cloned
+        // Calculate the end time using the stored parsed start time
         try {
             $endTime = clone $parsedStartTime; // Safely clone the DateTime object
             $endTime->add(new DateInterval("PT{$hours}H{$minutes}M"));
