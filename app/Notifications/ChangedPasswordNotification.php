@@ -58,7 +58,9 @@ class ChangedPasswordNotification extends Notification
             "title" => "Password Changed",
             "description" => "Your password has been successfully changed.",
             "category" => "Security",
-            "user_id" => $this->user->id
+            "user_id" => $this->user->id,
+            "type" => "User",
+            "id" => $this->user->id,
         ];
     }
 }

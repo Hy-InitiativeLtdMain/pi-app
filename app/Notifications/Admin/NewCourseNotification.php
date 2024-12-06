@@ -55,7 +55,10 @@ class NewCourseNotification extends Notification
         return [
             "title" => "New Course Created",
             "description" => "A new course titled \"" . $this->course->title . "\" has been created.",
-            "category" => "Course"
+            "category" => "Course",
+            "type" => "Course",
+            "id" => $this->course->id,
+
         ];
     }
 }
