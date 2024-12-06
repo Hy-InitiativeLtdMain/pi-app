@@ -19,7 +19,7 @@ class ReviewResource extends JsonResource
             'mentor_id' => $this->mentor_id,
             'mentor_name' => $this->mentor->firstname. ' '. $this->mentor->lastname,
             'mentee_id' => $this->mentee_id,
-            'mentee_name' => $this->mentee->name,
+            'mentee_name' => $this->mentees->name,
             'review' => $this->review,
             'rating' => $this->rating,
             'session' => $this->session ? 'True': 'False',
