@@ -56,7 +56,9 @@ class AICourseCreated extends Notification
             "title" => "AI Content Generated",
             "description" => "Your Course details that you generated are done, please check it soon.",
             "category" => "Urgent",
-            "user_id" => $this->user->id
+            "user_id" => $this->user->id,
+            "type" => "Course",
+            "id" => $this->course->id,
         ];
     }
 }

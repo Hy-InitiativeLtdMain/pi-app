@@ -81,7 +81,9 @@ class CourseFlaggedNotification extends Notification
             'user_id' => $this->lesson->course->user_id,
             'title' => $title,
             'description' => $message,
-            'category' => "Course"
+            'category' => "Course",
+            "type" => "Lesson",
+            "id" => $this->lesson->id
         ];
     }
 }

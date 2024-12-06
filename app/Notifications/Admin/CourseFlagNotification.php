@@ -83,6 +83,8 @@ class CourseFlagNotification extends Notification
             'title' => $title,
             'description' => $message,
             'category' => "Course",
+            "type" => "Course",
+            "id" => $this->course->id,
         ];
     }
 }
