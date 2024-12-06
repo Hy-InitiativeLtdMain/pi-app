@@ -58,7 +58,9 @@ class BookingReminderNotification extends Notification
             'booking_id' => $this->booking->id,
             'title' => "Mentorship Session Reminder",
             'description' => "This is a reminder for your upcoming Mentorship Session at ". $this->booking->time .".",
-            'category' => "Reminder"
+            'category' => "Reminder",
+            "type" => "Booking",
+            "id" => $this->booking->id,
         ];
     }
 }

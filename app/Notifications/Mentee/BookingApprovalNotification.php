@@ -64,7 +64,9 @@ class BookingApprovalNotification extends Notification
         return [
             "title" => "Booking " . ucfirst($statusMessage),
             "description" => "Your booking for the session has been " . $statusMessage . ".",
-            "category" => "Booking"
+            "category" => "Booking",
+            "type" => "Booking",
+            "id" => $this->booking->id,
         ];
     }
 }

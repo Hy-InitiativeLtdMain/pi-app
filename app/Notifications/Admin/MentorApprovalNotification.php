@@ -84,7 +84,9 @@ class MentorApprovalNotification extends Notification
             'mentor_id' => $this->mentor->id,
             'title' => $title,
             'description' => $message,
-            'category' => "Mentor"
+            'category' => "Mentor",
+            "type" => "User",
+            "id" => $notifiable->id,
         ];
     }
 }

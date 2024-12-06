@@ -54,7 +54,9 @@ class NewUserNotification extends Notification
         return [
             "title" => "New User Registered.",
             "description" => "A new user has registered in your institute.",
-            "category" => "User"
+            "category" => "User",
+            "type" => "User",
+            "id" => $this->user->id,
         ];
     }
 }

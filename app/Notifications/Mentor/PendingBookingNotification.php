@@ -58,7 +58,9 @@ class PendingBookingNotification extends Notification
             "title" => "New Pending Booking",
             "description" => "A mentee has created a new booking that requires your action.",
             "category" => "Booking",
-            "booking_id" => $this->booking->id
+            "booking_id" => $this->booking->id,
+            "type" => "Booking",
+            "id" => $this->booking->id,
         ];
     }
 }
