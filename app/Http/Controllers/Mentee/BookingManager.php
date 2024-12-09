@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
 use App\Http\Resources\Mentee\AvailableMentorsResource;
 use App\Http\Resources\Mentee\BookingResource;
-use App\Http\Resources\Mentor\AvailabilityResource;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Jobs\SendBookingReminder;
 use App\Models\Booking;
@@ -16,7 +15,6 @@ use App\Models\MentorAvailability;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class BookingManager extends Controller
 {
@@ -83,15 +81,46 @@ class BookingManager extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $mentee = auth()->user()->mentee->id;
-        $bookings = Booking::where('mentee_id', $mentee)->with('mentorAvailability')->get();
 
-        if (!$mentee){
-            return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
+        if (!$mentee) {
+            return response()->json(['message' => 'Mentee not found OR mentee details not registered'], 404);
         }
-        // dd($bookings);
+
+        // Start the query for bookings
+        $query = Booking::where('mentee_id', $mentee)->with('mentorAvailability');
+
+        // Add date filters based on request parameters
+        if ($request->has('filter')) {
+            $filter = $request->input('filter');
+
+            switch ($filter) {
+                case 'today':
+                    $query->whereDate('created_at', Carbon::today());
+                    break;
+
+                case 'week':
+                    $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                    break;
+
+                case 'month':
+                    $query->whereMonth('created_at', Carbon::now()->month)
+                        ->whereYear('created_at', Carbon::now()->year);
+                    break;
+
+                case 'year':
+                    $query->whereYear('created_at', Carbon::now()->year);
+                    break;
+
+                default:
+                    return response()->json(['message' => 'Invalid filter provided.'], 400);
+            }
+        }
+
+        $bookings = $query->get();
+
         // Add flags for expired bookings and meeting links for approved bookings
         $bookings->transform(function ($booking) {
             if ($booking->hasExpired()) {
@@ -132,7 +161,7 @@ class BookingManager extends Controller
     {
         // Validate the incoming request
         $request->validate([
-            'date' => 'required|date'
+            'date' => 'required|date',
         ]);
 
         // Retrieve the date from the request
@@ -144,7 +173,6 @@ class BookingManager extends Controller
         }
         // get signed-in mentee id
         $menteeId = auth()->user()->mentee->id;
-
 
         //retrieve the signed-in mentee's bookings
         $menteeBookings = Booking::where('mentee_id', $menteeId)->pluck('mentor_availability_id');
@@ -158,7 +186,7 @@ class BookingManager extends Controller
             // Decode the availability field only if it's a string
             $availabilityData = is_string($availability->availability) ? json_decode($availability->availability, true) : $availability->availability;
             // Check if the decoded data has the expected structure and date
-            $isAvailable = is_array($availabilityData) && isset ($availabilityData['date']) && $availabilityData['date'] === $date;
+            $isAvailable = is_array($availabilityData) && isset($availabilityData['date']) && $availabilityData['date'] === $date;
             // Check if the mentor has been booked
             $isBooked = $menteeBookings->contains($availability->id);
             // Add a temporary field to the availability record to indicate if the mentor is booked
@@ -191,11 +219,10 @@ class BookingManager extends Controller
             'status' => 'required|in:Pending,Approved,Declined',
         ]);
 
-
         $booking->update(['status' => $request->input('status')]);
 
         // if the booking status is approved
-        if ($booking->status == 'Approved'){
+        if ($booking->status == 'Approved') {
             // Schedule the reminder notification
             $bookingDate = Carbon::parse($booking->date); // Assume booking->date holds the booking date
             $delay = $bookingDate->addHour(1); // Adjust the delay as needed
@@ -227,22 +254,18 @@ class BookingManager extends Controller
     //     return $availableMentors;
     // }
 
-
     // get mentors based on approved booking
     public function getMentors()
     {
         $menteeId = auth()->user()->mentee->id;
 
-        if (!$menteeId){
+        if (!$menteeId) {
             return response()->json(['message' => 'Mentee not found OR mentee details not registed'], 404);
         }
-
 
         $bookings = Booking::where('mentee_id', $menteeId)->where('status', 'Approved')->with('mentor')->get();
         // get the mentors from the bookings
         $mentors = $bookings->pluck('mentor');
-
-
 
         return $this->showAll(MentorResource::collection($mentors), 200);
     }
@@ -288,4 +311,3 @@ class BookingManager extends Controller
         return response()->json(['no_of_mentors' => $count], 200);
     }
 }
-
