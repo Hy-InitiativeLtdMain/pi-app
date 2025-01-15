@@ -13,7 +13,7 @@ class PaystackService
     public function verifyAccount($account_number, $bank_code)
     {
         $host = getenv('PAYSTACK_HOST');
-        $secretKey =getenv('PAYSTACK_SECRET_KEY');
+        $secretKey = getenv('PAYSTACK_SECRET_KEY');
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer ' . trim($secretKey)
         ])->get($host . 'bank/resolve', [
@@ -30,7 +30,7 @@ class PaystackService
     public function allBanks()
     {
         $secretKey = getenv('PAYSTACK_SECRET_KEY');
-        $host =getenv('PAYSTACK_HOST');
+        $host = getenv('PAYSTACK_HOST');
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer' . $secretKey,
@@ -55,11 +55,12 @@ class PaystackService
 
     public function initializeTransaction($input)
     {
-        $host =getenv('PAYSTACK_HOST');
+        $host = getenv('PAYSTACK_HOST');
         $input['amount'] = intval($input['amount']) * 100;
         $resp = Http::withHeaders([
-            'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
+            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post($host . 'transaction/initialize', $input);
+
         return [
             'data' => $resp->json(),
             'code' => $resp->status(),
@@ -68,7 +69,7 @@ class PaystackService
 
     public function verifyPayment(Transaction $transaction)
     {
-        $host =getenv('PAYSTACK_HOST');
+        $host = getenv('PAYSTACK_HOST');
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->get($host . 'transaction/verify/' . $transaction->ref);
@@ -80,7 +81,7 @@ class PaystackService
 
     public function fetchRecipient(BankAccount $bankAccount)
     {
-        $host =getenv('PAYSTACK_HOST');
+        $host = getenv('PAYSTACK_HOST');
         $resp = Http::withHeaders([
             'Authorization' => 'Bearer' . getenv('PAYSTACK_SECRET_KEY'),
         ])->post($host . 'transferrecipient', [
@@ -99,7 +100,7 @@ class PaystackService
 
     public function makePayout(Transaction $transaction)
     {
-        $host =getenv('PAYSTACK_HOST');
+        $host = getenv('PAYSTACK_HOST');
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
@@ -128,7 +129,7 @@ class PaystackService
         $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
             ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
             ->where('courses.user_id', $transaction->user->id)
-        // ->select('transactions.*')
+            // ->select('transactions.*')
             ->sum('transactions.amount');
         if ($transaction->amount > $available_balance) {
             $data['message'] = "Insufficient Funds";
@@ -164,7 +165,7 @@ class PaystackService
 
     public function verifyOTPPayout(Transaction $transaction, String $otp)
     {
-        $host =getenv('PAYSTACK_HOST');
+        $host = getenv('PAYSTACK_HOST');
         if ($transaction->type != "User Payout") {
             return [
                 'data' => [
@@ -193,7 +194,7 @@ class PaystackService
         $available_balance = Transaction::leftJoin('transaction_course', 'transaction_course.transaction_id', '=', 'transactions.id')
             ->leftJoin('courses', 'transaction_course.course_id', '=', 'courses.id')
             ->where('courses.user_id', $transaction->user->id)
-        // ->select('transactions.*')
+            // ->select('transactions.*')
             ->sum('transactions.amount');
         if ($transaction->amount > $available_balance) {
             $data['message'] = "Insufficient Funds";
@@ -210,6 +211,32 @@ class PaystackService
             'transfer_code' => $transaction->transfer_code,
             'otp' => $otp,
         ]);
+        return [
+            'data' => $resp->json(),
+            'code' => $resp->status(),
+        ];
+    }
+
+    public function createSubaccount($input)
+    {
+        $host = getenv('PAYSTACK_HOST');
+        $resp = Http::withHeaders([
+            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+        ])->post($host . 'subaccount', $input);
+
+        return [
+            'data' => $resp->json(),
+            'code' => $resp->status(),
+        ];
+    }
+
+    public function getSubaccounts()
+    {
+        $host = getenv('PAYSTACK_HOST');
+        $resp = Http::withHeaders([
+            'Authorization' => 'Bearer ' . getenv('PAYSTACK_SECRET_KEY'),
+        ])->get($host . 'subaccount');
+
         return [
             'data' => $resp->json(),
             'code' => $resp->status(),
