@@ -355,4 +355,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/', [VimeoManager::class, 'generatePresignedUrl']);
         });
     });
+    Route::group(['prefix' => 'paystack', 'middleware' => ['auth:api']], function () {
+        Route::post('/create-subaccount', [PaystackManager::class, 'createSubaccount']);
+        Route::get('/subaccounts', [PaystackManager::class, 'getSubaccounts']);
+    });
 });
