@@ -266,6 +266,7 @@ class InstituteController extends Controller
         $validated['password'] = bcrypt('qwerty12345');
         $validated['institute_slug'] = $institute_slug;
         $validated['is_admin'] = 1;
+        $validated['email_verified_at'] = now(); // Mark as verified immediately
 
         $user = User::create($validated);
         $user->verifications()->create([
@@ -301,6 +302,7 @@ class InstituteController extends Controller
         $validated = $request->validate(RegisterRequest::$_learnerRules);
         $validated['password'] = bcrypt('qwerty12345');
         $validated['institute_slug'] = $institute_slug;
+        $validated['email_verified_at'] = now(); // Mark as verified immediately
 
         $user = User::create($validated);
         $user->verifications()->create([
