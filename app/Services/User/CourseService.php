@@ -13,6 +13,7 @@ use App\Models\Quiz;
 use App\Models\Flashcard;
 use App\Models\Module;
 use App\Models\ModuleLesson;
+use App\Models\Subaccount;
 use App\Services\Media\CloudinaryService;
 use App\Services\Payment\PaystackService;
 use App\Services\Query\FilteringService;
@@ -83,7 +84,7 @@ class CourseService
     public function viewAiCourse(Course $course)
     {
 
-        $data['course'] = $course->fresh(['user', 'categories','modules','modules.lessons', 'quizzes', 'flashcards']);
+        $data['course'] = $course->fresh(['user', 'categories', 'modules', 'modules.lessons', 'quizzes', 'flashcards']);
 
         return [
             'data' => $data,
@@ -138,7 +139,7 @@ class CourseService
             $course->save();
         }
         if (isset($input['categories'])) {
-            CourseCategory::where('course_id', $course->id, )->delete();
+            CourseCategory::where('course_id', $course->id,)->delete();
             foreach ($input['categories'] as $category_id) {
                 CourseCategory::create([
                     'course_id' => $course->id,
@@ -188,7 +189,7 @@ class CourseService
         }
 
         if ($course->pendingPayment != null) {
-            $data['message'] = 'You have an Pending Payment';
+            $data['message'] = 'You have a Pending Payment';
             $data['transaction'] = $course->pendingPayment;
             return [
                 'data' => $data,
@@ -196,39 +197,54 @@ class CourseService
             ];
         }
 
-        $ref = 'CRS' . (str_pad((Str::random(3) . mt_rand(0, 9999)), 7, '0', STR_PAD_LEFT));
-        $transaction = Transaction::create([
-            'ref' => $ref,
-            'type' => $type,
-            'amount' => $course->price,
-            'user_id' => $user->id
-        ]);
+        $price = $course->price;
+        $sharingRatio = [0.5, 0.3, 0.2]; // 50:30:20
+        $stakeholders = [
+            'creator' => $course->user_id,
+            'institute' => $course->institute_id,
+            'wesonline' => 1 // Assuming WESonline has a user_id of 1
+        ];
 
+        $transactions = [];
+        foreach ($sharingRatio as $index => $ratio) {
+            $amount = $price * $ratio;
+            $ref = 'CRS' . (str_pad((Str::random(3) . mt_rand(0, 9999)), 7, '0', STR_PAD_LEFT));
+            $transaction = Transaction::create([
+                'ref' => $ref,
+                'type' => $type,
+                'amount' => $amount,
+                'user_id' => $stakeholders[array_keys($stakeholders)[$index]]
+            ]);
 
+            TransactionCourse::create([
+                'course_id' => $course->id,
+                'transaction_id' => $transaction->id,
+            ]);
 
-        $transactionCourse = TransactionCourse::create([
-            'course_id' => $course->id,
-            'transaction_id' => $transaction->id,
-        ]);
-
+            $transactions[] = $transaction;
+        }
 
         $data['message'] = 'Subscription was successful';
-        $data['transaction'] = $transaction;
+        $data['transactions'] = $transactions;
         $data['course'] = $course;
-        $data['transactionCourse'] = $transactionCourse;
-
 
         if ($type == 'paystack') {
             $_paystackService = new PaystackService();
+            $creatorSubaccount = Subaccount::where('user_id', $course->user_id)->first()->subaccount_code;
+            $instituteSubaccount = Subaccount::where('user_id', $course->institute_id)->first()->subaccount_code;
+
             $_data = $_paystackService->initializeTransaction([
                 'email' => $user->email,
-                'amount' => $course->price,
-                'reference' => $ref,
+                'amount' => $price,
+                'reference' => $transactions[0]->ref,
+                'subaccounts' => [
+                    ['subaccount' => $creatorSubaccount, 'share' => $sharingRatio[0] * 100],
+                    ['subaccount' => $instituteSubaccount, 'share' => $sharingRatio[1] * 100]
+                ]
             ]);
-
-            $data = [...$data, ...($_data['data'])];
-            $data['NOTE'] = 'USE REF TRANSACTION AS PAYMENT TX_REF';
+            $data['payment'] = $_data;
         }
+
         return [
             'data' => $data,
             'code' => 200
@@ -236,89 +252,89 @@ class CourseService
     }
 
     public function createCourseWithAI(UploadedFile $file, Course $course)
-{
-    set_time_limit(600); // Set the execution time limit to 600 seconds
-    try {
-        // Prepare the HTTP client request
-        $response = Http::timeout(600)
-            ->connectTimeout(600)
-            ->withHeaders([
-                'X-AUG-KEY' => "fHjrSbk5.VdXuuv4lxnF2acfgIqsEDsMF5g1tvM4z",
-                'Authorization' => '••••••',
-            ])
-            ->attach(
-                'files',
-                file_get_contents($file->getPathname()),
-                $file->getClientOriginalName()
-            )
-            ->post('https://api.autogon.ai/api/v1/services/create-course/');
+    {
+        set_time_limit(600); // Set the execution time limit to 600 seconds
+        try {
+            // Prepare the HTTP client request
+            $response = Http::timeout(600)
+                ->connectTimeout(600)
+                ->withHeaders([
+                    'X-AUG-KEY' => "fHjrSbk5.VdXuuv4lxnF2acfgIqsEDsMF5g1tvM4z",
+                    'Authorization' => '••••••',
+                ])
+                ->attach(
+                    'files',
+                    file_get_contents($file->getPathname()),
+                    $file->getClientOriginalName()
+                )
+                ->post('https://api.autogon.ai/api/v1/services/create-course/');
 
-        // Handle the response
-        if ($response->successful()) {
-            $data = $response->json()['data'];
+            // Handle the response
+            if ($response->successful()) {
+                $data = $response->json()['data'];
 
-            // Save Modules, Lessons, Quizzes, and Flashcards
-            $courseId = $course->id;
+                // Save Modules, Lessons, Quizzes, and Flashcards
+                $courseId = $course->id;
 
-            // Save Modules and Lessons
-            foreach ($data['overview']['modules'] as $moduleData) {
-                $module = Module::create([
-                    'module_title' => $moduleData['moduleTitle'],
-                    'module_description' => $moduleData['moduleDescription'],
-                    'course_id' => $courseId,
-                ]);
+                // Save Modules and Lessons
+                foreach ($data['overview']['modules'] as $moduleData) {
+                    $module = Module::create([
+                        'module_title' => $moduleData['moduleTitle'],
+                        'module_description' => $moduleData['moduleDescription'],
+                        'course_id' => $courseId,
+                    ]);
 
-                foreach ($moduleData['lessons'] as $lessonData) {
-                    ModuleLesson::create([
-                        'module_id' => $module->id,
-                        'lesson_title' => $lessonData['lessonTitle'],
-                        'lesson_content' => $lessonData['lessonContent'],
+                    foreach ($moduleData['lessons'] as $lessonData) {
+                        ModuleLesson::create([
+                            'module_id' => $module->id,
+                            'lesson_title' => $lessonData['lessonTitle'],
+                            'lesson_content' => $lessonData['lessonContent'],
+                        ]);
+                    }
+                }
+
+                // Save Quizzes
+                foreach ($data['quizzes']['quizzes'] as $quizData) {
+                    Quiz::create([
+                        'question' => $quizData['question'],
+                        'options' => $quizData['options'],
+                        'correct_answer' => $quizData['correctAnswer'],
+                        'course_id' => $courseId,
                     ]);
                 }
-            }
 
-            // Save Quizzes
-            foreach ($data['quizzes']['quizzes'] as $quizData) {
-                Quiz::create([
-                    'question' => $quizData['question'],
-                    'options' => $quizData['options'],
-                    'correct_answer' => $quizData['correctAnswer'],
-                    'course_id' => $courseId,
-                ]);
-            }
+                // Save Flashcards
+                foreach ($data['flashcards']['flashcards'] as $flashcardData) {
+                    Flashcard::create([
+                        'front' => $flashcardData['front'],
+                        'back' => $flashcardData['back'],
+                        'course_id' => $courseId,
+                    ]);
+                }
 
-            // Save Flashcards
-            foreach ($data['flashcards']['flashcards'] as $flashcardData) {
-                Flashcard::create([
-                    'front' => $flashcardData['front'],
-                    'back' => $flashcardData['back'],
-                    'course_id' => $courseId,
-                ]);
+                return [
+                    'data' => $data,
+                    'code' => 200
+                ];
+            } else {
+                $errorMessage = 'Unexpected HTTP status: ' . $response->status() . ' ' . $response->body();
+                Log::error('Error creating course with AI: ' . $errorMessage);
+                return [
+                    'message' => $errorMessage,
+                    'code' => $response->status()
+                ];
             }
-
-            return [
-                'data' => $data,
-                'code' => 200
-            ];
-        } else {
-            $errorMessage = 'Unexpected HTTP status: ' . $response->status() . ' ' . $response->body();
-            Log::error('Error creating course with AI: ' . $errorMessage);
+        } catch (\Exception $e) {
+            $errorMessage = 'Error creating course with AI: ' . $e->getMessage();
+            Log::error($errorMessage);
             return [
                 'message' => $errorMessage,
-                'code' => $response->status()
+                'code' => 500
             ];
         }
-    } catch (\Exception $e) {
-        $errorMessage = 'Error creating course with AI: ' . $e->getMessage();
-        Log::error($errorMessage);
-        return [
-            'message' => $errorMessage,
-            'code' => 500
-        ];
     }
-}
 
-public function updateCourseModule($data, Course $course)
+    public function updateCourseModule($data, Course $course)
     {
         try {
             foreach ($data['modules'] as $moduleData) {
