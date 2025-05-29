@@ -45,8 +45,12 @@ class Mentor extends Model
         return $this->hasMany(MentorExperience::class);
     }
 
-    public function skills(){
-        return $this->hasOne(MentorSkill::class);
+    public function skills()
+    {
+        return $this->hasOne(MentorSkill::class)
+            ->select('skills')
+            ->selectRaw('JSON_UNQUOTE(skills) as skills')
+            ->whereNotNull('skills');
     }
 
     public function accessability(){
