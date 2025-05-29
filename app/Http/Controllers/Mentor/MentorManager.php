@@ -10,6 +10,7 @@ use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
 use App\Models\MentorExperience;
+use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,29 @@ class MentorManager extends Controller
         $userId = auth()->user()->id;
         $userEmail = auth()->user()->email;
 
+// Add user_uuid and status if available
+        if (auth()->user()->user_uuid) {
+            if ($request->hasFile('profile_pic')) {
+                $cloudinary = new CloudinaryService();
+                $profilePic = $request->file('profile_pic');
+                $resp = $cloudinary->store($profilePic, "mentor-images");
+                $request->merge([
+                    'profile_pic' => $resp[0],
+                ]);
+            }
+
+            if ($request->hasFile('resume_link')) {
+                $cloudinary = new CloudinaryService();
+                $resume = $request->file('resume_link'); 
+                $resp = $cloudinary->store($resume, "mentor-resume");
+                $request->merge([
+                    'resume_link' => $resp[0]
+                ]);
+            }
+            $request->merge([
+                'status' => 'approved'
+            ]);
+        }
         $request->merge([
             'user_id' => $userId,
             'email' => $userEmail,
@@ -87,6 +111,7 @@ class MentorManager extends Controller
         } else if (auth()->user()->mentor->status == 'declined') {
             return $this->errorResponse('Your account is rejected', 404);
         }
+        
         $mentor = Mentor::find(auth()->user()->mentor->id);
         return $this->showOne(new MentorResource($mentor), 200);
     }

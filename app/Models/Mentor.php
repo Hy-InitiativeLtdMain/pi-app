@@ -18,7 +18,17 @@ class Mentor extends Model
         'company',
         'job_title',
         'bio',
-        'status'
+        'status',
+        'highest_edu_qualification',
+        'past_mentorship_exp',
+        'video_intro',
+
+        'profile_pic',
+        'country',
+        'linkedin_profile',
+        'portfolio',
+        'resume_link',
+        'project_choice'
     ];
 
     public function user()
