@@ -30,7 +30,16 @@ class MentorResource extends JsonResource
             'job_title' => $this->job_title,
             'experience' => $this->experience,
             'skills' => $this->skills,
+            "highest_edu_qualification" => $this->highest_edu_qualification,
+            "past_mentorship_exp" => $this->past_mentorship_exp,
+            "video_intro" => $this->video_intro,
             'accessability' => $this->accessability,
+            'profile_pic' => $this->profile_pic,
+            'country' => $this->country,
+            'linkedin_profile' => $this->linkedin_profile,
+            'portfolio' => $this->portfolio,
+            'resume_link' => $this->resume_link,
+            'project_choice' => $this->project_choice,
             'availability' => $this->availability->map(function ($avail) {
                 if (is_string($avail->availability)) {
                     $availability = json_decode($avail->availability);
@@ -60,6 +69,7 @@ class MentorResource extends JsonResource
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            
         ];
     }
 }
