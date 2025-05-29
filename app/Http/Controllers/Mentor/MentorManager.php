@@ -44,7 +44,7 @@ class MentorManager extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(MentorRequest $request)
+    public function store(Request $request)
     {
 
         // get the user_id from the auth user
@@ -53,23 +53,26 @@ class MentorManager extends Controller
 
 // Add user_uuid and status if available
         if (auth()->user()->user_uuid) {
-            if ($request->hasFile('profile_pic')) {
+            if ($request->hasFile('profile')) {
                 $cloudinary = new CloudinaryService();
-                $profilePic = $request->file('profile_pic');
+                $profilePic = $request->file('profile');
+
                 $resp = $cloudinary->store($profilePic, "mentor-images");
                 $request->merge([
                     'profile_pic' => $resp[0],
                 ]);
             }
 
-            if ($request->hasFile('resume_link')) {
+            if ($request->hasFile('resume')) {
                 $cloudinary = new CloudinaryService();
-                $resume = $request->file('resume_link'); 
+                $resume = $request->file('resume'); 
                 $resp = $cloudinary->store($resume, "mentor-resume");
                 $request->merge([
                     'resume_link' => $resp[0]
                 ]);
             }
+
+            // dd($request->all());
             $request->merge([
                 'status' => 'approved'
             ]);
