@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Mentor;
 
 use App\Models\Booking;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -29,7 +30,7 @@ class MentorResource extends JsonResource
             'company' => $this->company,
             'job_title' => $this->job_title,
             'experience' => $this->experience,
-            'skills' => $this->skills,
+            'skills' => $this->formatSkillsWithNames(),
             "highest_edu_qualification" => $this->highest_edu_qualification,
             "past_mentorship_exp" => $this->past_mentorship_exp,
             "video_intro" => $this->video_intro,
@@ -71,5 +72,32 @@ class MentorResource extends JsonResource
             'updated_at' => $this->updated_at,
             
         ];
+    }
+
+    protected function formatSkillsWithNames()
+    {
+        $formattedSkills = [];
+        
+        if ($this->skills) {
+            $skillsData = json_decode($this->skills, true);
+            if (is_array($skillsData) && isset($skillsData['skills'])) {
+                foreach ($skillsData['skills'] as $skillData) {
+                    if (isset($skillData['skill_id'])) {
+                        $skill = Skill::find($skillData['skill_id']);
+                        
+                        if ($skill) {
+                            $formattedSkills[] = [
+                                'id' => $skill->id,
+                                'name' => $skill->name,
+                                'category_id' => $skill->category_id,
+                                'level' => $skillData['level'] ?? null,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $formattedSkills;
     }
 }

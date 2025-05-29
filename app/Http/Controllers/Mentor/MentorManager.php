@@ -10,6 +10,7 @@ use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
 use App\Models\MentorExperience;
+use App\Models\MentorSkill;
 use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
@@ -220,22 +221,25 @@ class MentorManager extends Controller
         }
         $mentor = auth()->user()->mentor;
 
-        $validate = $request->validate(SkillRequest::$_updateRule);
+        $skillsData = is_string($request['skills']) ? json_decode($request['skills'], true) : $request['skills'];
+        $encoded = json_encode($skillsData);
+        // Create or update the mentor_skills record
+    
         // check if mentor has experience
         if ($mentor->skills) {
             // update experience
-            $mentor->skills->update($validate);
+            $mentor->skills->update(['mentor_id' => $mentor->id,
+            'skills' => $encoded]);
             $data = [
-                'message' => 'Skills successfully updated',
-                'data' => new MentorResource($mentor)
+                'message' => 'Skills successfully updated'
             ];
             return $this->successResponse($data, 200);
         } else {
             // create experience
-            $mentor->skills()->create($validate);
+            $mentor->skills()->create(['mentor_id' => $mentor->id,
+            'skills' => $encoded]);
             $data = [
                 'message' => 'Your Skills have been added successfully',
-                'data' => new MentorResource($mentor)
             ];
             return $this->successResponse($data, 200);
         }
