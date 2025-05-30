@@ -10,6 +10,8 @@ use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
 use App\Models\MentorExperience;
+use App\Models\MentorSkill;
+use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,13 +45,39 @@ class MentorManager extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(MentorRequest $request)
+    public function store(Request $request)
     {
 
         // get the user_id from the auth user
         $userId = auth()->user()->id;
         $userEmail = auth()->user()->email;
 
+// Add user_uuid and status if available
+        if (auth()->user()->user_uuid) {
+            if ($request->hasFile('profile')) {
+                $cloudinary = new CloudinaryService();
+                $profilePic = $request->file('profile');
+
+                $resp = $cloudinary->store($profilePic, "mentor-images");
+                $request->merge([
+                    'profile_pic' => $resp[0],
+                ]);
+            }
+
+            if ($request->hasFile('resume')) {
+                $cloudinary = new CloudinaryService();
+                $resume = $request->file('resume'); 
+                $resp = $cloudinary->store($resume, "mentor-resume");
+                $request->merge([
+                    'resume_link' => $resp[0]
+                ]);
+            }
+
+            // dd($request->all());
+            $request->merge([
+                'status' => 'approved'
+            ]);
+        }
         $request->merge([
             'user_id' => $userId,
             'email' => $userEmail,
@@ -87,6 +115,7 @@ class MentorManager extends Controller
         } else if (auth()->user()->mentor->status == 'declined') {
             return $this->errorResponse('Your account is rejected', 404);
         }
+        
         $mentor = Mentor::find(auth()->user()->mentor->id);
         return $this->showOne(new MentorResource($mentor), 200);
     }
@@ -192,22 +221,25 @@ class MentorManager extends Controller
         }
         $mentor = auth()->user()->mentor;
 
-        $validate = $request->validate(SkillRequest::$_updateRule);
+        $skillsData = is_string($request['skills']) ? json_decode($request['skills'], true) : $request['skills'];
+        $encoded = json_encode($skillsData);
+        // Create or update the mentor_skills record
+    
         // check if mentor has experience
         if ($mentor->skills) {
             // update experience
-            $mentor->skills->update($validate);
+            $mentor->skills->update(['mentor_id' => $mentor->id,
+            'skills' => $encoded]);
             $data = [
-                'message' => 'Skills successfully updated',
-                'data' => new MentorResource($mentor)
+                'message' => 'Skills successfully updated'
             ];
             return $this->successResponse($data, 200);
         } else {
             // create experience
-            $mentor->skills()->create($validate);
+            $mentor->skills()->create(['mentor_id' => $mentor->id,
+            'skills' => $encoded]);
             $data = [
                 'message' => 'Your Skills have been added successfully',
-                'data' => new MentorResource($mentor)
             ];
             return $this->successResponse($data, 200);
         }

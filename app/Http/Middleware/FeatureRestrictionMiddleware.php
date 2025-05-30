@@ -21,7 +21,11 @@ class FeatureRestrictionMiddleware
     {
         $user = Auth::user();
         // dd($user);
-        // dd($user);
+        // dd($user->user_uuid);
+        if ($user && $user->user_uuid) {
+            return $next($request);
+        }
+        
 
         if (!$user) {
             // If the user is not authenticated or not an admin, deny access

@@ -76,6 +76,6 @@ class Kernel extends HttpKernel
 
         'feature' => \App\Http\Middleware\FeatureRestrictionMiddleware::class,
         // 'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
-
+        'mentorship' => \App\Http\Middleware\JWTMentorshipAuth::class,
     ];
 }

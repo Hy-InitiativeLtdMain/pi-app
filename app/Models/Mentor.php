@@ -18,7 +18,17 @@ class Mentor extends Model
         'company',
         'job_title',
         'bio',
-        'status'
+        'status',
+        'highest_edu_qualification',
+        'past_mentorship_exp',
+        'video_intro',
+
+        'profile_pic',
+        'country',
+        'linkedin_profile',
+        'portfolio',
+        'resume_link',
+        'project_choice'
     ];
 
     public function user()
@@ -35,8 +45,12 @@ class Mentor extends Model
         return $this->hasMany(MentorExperience::class);
     }
 
-    public function skills(){
-        return $this->hasOne(MentorSkill::class);
+    public function skills()
+    {
+        return $this->hasOne(MentorSkill::class)
+            ->select('skills')
+            ->selectRaw('JSON_UNQUOTE(skills) as skills')
+            ->whereNotNull('skills');
     }
 
     public function accessability(){
