@@ -29,6 +29,15 @@ class MentorRequest extends FormRequest
             'job_title' => 'nullable|string',
             'company' => 'nullable|string',
             'bio' => 'nullable',
+            "highest_edu_qualification" => 'nullable|string',
+            "past_mentorship_exp" => 'nullable|string',
+            "video_intro" => 'nullable|string',
+            'profile' => 'nullable|string|url',
+            'country' => 'nullable|string',
+            'linkedin_profile' => 'nullable|string|url',
+            'portfolio' => 'nullable|string|url',
+            'resume' => 'nullable|string|url',
+            'project_choice' => 'nullable|string'
         ];
     }
 }

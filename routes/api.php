@@ -16,6 +16,7 @@ use App\Http\Controllers\Mentee\BookingManager;
 use App\Http\Controllers\Mentee\MenteeManager;
 use App\Http\Controllers\Mentor\AvailabilityController;
 use App\Http\Controllers\Mentor\MentorManager;
+use App\Http\Controllers\Mentorship\SkillCategoryController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Notification\FeatureController;
 use App\Http\Controllers\SessionsManager;
@@ -359,4 +360,64 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::post('/create-subaccount', [PaystackManager::class, 'createSubaccount']);
         Route::get('/subaccounts', [PaystackManager::class, 'getSubaccounts']);
     });
+});
+
+Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['mentorship']], function (){
+    Route::group(['prefix' => 'mentees'], function () {
+        Route::get('/bookings', [BookingManager::class, 'index']);
+        Route::post('/bookings', [BookingManager::class, 'storeOrUpdate']);
+        Route::get('/bookings/{id}', [BookingManager::class, 'show']);
+        Route::put('/bookings/{id}', [BookingManager::class, 'update']);
+        Route::delete('/bookings/{id}', [BookingManager::class, 'destroy']);
+        // View Available Mentors
+        Route::get('/mentors', [MentorManager::class, 'index']);
+        Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
+        Route::get('/my-mentors', [BookingManager::class, 'getMentors']);
+        Route::get('/bookings/{bookingId}/mentor', [BookingManager::class, 'getMentor']);
+
+        Route::get('/session-data', [SessionsManager::class, 'sessions']);
+        Route::get('/number-of-mentors', [BookingManager::class, 'countMentors']);
+        Route::post('/mentor/profile/{id}/review', [UserReviewController::class, 'store']);
+        Route::put('mentor/profile/{id}/review/{userReview}', [UserReviewController::class, 'update']);
+        Route::delete('mentor/profile/{id}/review/{userReview}', [UserReviewController::class, 'destroy']);
+
+        Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMenteeReview']);
+        Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
+
+    });
+
+    // Mentor routes
+    Route::group(['prefix' => 'mentors'], function () {
+        Route::apiResource('availability', AvailabilityController::class)->except('show');
+        Route::get('availabilities', function () {
+            return response()->json(['message' => 'Testing availability index endpoint']);
+        });
+        Route::get('availability/bookings', [AvailabilityController::class, 'booking']);
+
+        // Update booking status
+        Route::patch('availability/bookings/{booking}', [BookingManager::class, 'updateStatus']);
+        Route::get('availability/bookings/{id}', [AvailabilityController::class, 'getBooking']);
+        Route::get('accepted-bookings', [BookingManager::class, 'getAcceptedBookings']);
+
+        Route::get('/session-data', [SessionsManager::class, 'sessions']);
+
+        Route::post('/experience', [MentorManager::class, 'createExperience']);
+        Route::post('/skills', [MentorManager::class, 'createSkills']);
+        Route::post('/accessability', [MentorManager::class, 'createAccessability']);
+        Route::get('/number-of-mentees', [BookingManager::class, 'countMentees']);
+        Route::post('/mentee/profile/{id}/review', [UserReviewController::class, 'store']);
+
+        Route::put('mentee/profile/{id}/review/{userReview}', [UserReviewController::class, 'update']);
+        Route::delete('mentee/profile/{id}/review/{userReview}', [UserReviewController::class, 'destroy']);
+        Route::get('/mentor/profile/reviews', [UserReviewController::class, 'fetchMentorReviews']);
+        Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMentorReview']);
+        Route::apiResource('skill-categories', SkillCategoryController::class);
+    });
+
+    Route::resource('mentor', MentorManager::class)->except('index');
+    Route::resource('mentee', MenteeManager::class)->except(['index', 'show']);
+    Route::get('mentee-profile', [MenteeManager::class, 'showProfile']);
+    Route::get('mentor-profile', [MentorManager::class, 'showProfile']);
+    Route::get('event', [EventController::class, 'index']);
+    Route::get('event/{event}', [EventController::class, 'show']);
 });
