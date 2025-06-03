@@ -362,7 +362,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
     });
 });
 
-Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['mentorship']], function (){
+Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship']], function (){
     Route::group(['prefix' => 'mentees'], function () {
         Route::get('/bookings', [BookingManager::class, 'index']);
         Route::post('/bookings', [BookingManager::class, 'storeOrUpdate']);
