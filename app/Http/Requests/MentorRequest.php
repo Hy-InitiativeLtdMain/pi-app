@@ -32,7 +32,7 @@ class MentorRequest extends FormRequest
             "highest_edu_qualification" => 'nullable|string',
             "past_mentorship_exp" => 'nullable|string',
             "video_intro" => 'nullable|string',
-            'profile' => 'nullable|string|url',
+            'profile' => 'nullable',
             'country' => 'nullable|string',
             'linkedin_profile' => 'nullable|string|url',
             'portfolio' => 'nullable|string|url',
