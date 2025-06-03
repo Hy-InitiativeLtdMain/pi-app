@@ -9,6 +9,7 @@ use App\Http\Requests\Mentors\ExperienceRequest;
 use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Models\Mentor;
+use App\Models\MentorAccessability;
 use App\Models\MentorExperience;
 use App\Models\MentorSkill;
 use App\Services\Media\CloudinaryService;
@@ -52,7 +53,7 @@ class MentorManager extends Controller
         $userId = auth()->user()->id;
         $userEmail = auth()->user()->email;
 
-// Add user_uuid and status if available
+        // Add user_uuid and status if available
         if (auth()->user()->user_uuid) {
             if ($request->hasFile('profile')) {
                 $cloudinary = new CloudinaryService();
@@ -66,7 +67,7 @@ class MentorManager extends Controller
 
             if ($request->hasFile('resume')) {
                 $cloudinary = new CloudinaryService();
-                $resume = $request->file('resume'); 
+                $resume = $request->file('resume');
                 $resp = $cloudinary->store($resume, "mentor-resume");
                 $request->merge([
                     'resume_link' => $resp[0]
@@ -107,38 +108,59 @@ class MentorManager extends Controller
      */
     public function showProfile()
     {
-        if (!auth()->user()->mentor->id) {
-            return $this->errorResponse('You are not a mentor', 404);
-        }
-        if (auth()->user()->mentor->status == 'pending') {
-            return $this->errorResponse('Your account is pending', 404);
-        } else if (auth()->user()->mentor->status == 'declined') {
-            return $this->errorResponse('Your account is rejected', 404);
+        $user = auth()->user();
+        if (!$user->mentor) {
+            return $this->errorResponse('Mentor data not found', 404);
         }
         
-        $mentor = Mentor::find(auth()->user()->mentor->id);
-        return $this->showOne(new MentorResource($mentor), 200);
+        if ($user->mentor->status == 'pending') {
+            return $this->errorResponse('Your account is pending', 404);
+        } else if ($user->mentor->status == 'declined') {
+            return $this->errorResponse('Your account is rejected', 404);
+        }
+
+        return $this->showOne(new MentorResource($user->mentor), 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(MentorRequest $request, Mentor $mentor)
-    {
-        if (!auth()->user()->mentor->id) {
+    public function update(Request $request, Mentor $mentor)
+    {        
+        if (!$mentor) {
             return $this->errorResponse('You are not a mentor', 404);
         }
-        if (auth()->user()->mentor->status == 'pending') {
-            return $this->errorResponse('Your account is pending', 404);
-        } else if (auth()->user()->mentor->status == 'declined') {
-            return $this->errorResponse('Your account is rejected', 404);
+        
+        if ($mentor->status === 'pending') {
+            return $this->errorResponse('Your account is pending approval', 403);
         }
-        $mentor->update($request->validated());
-        $data = [
-            'message' => 'Profile Updated Successfully.',
-            'data' => new MentorResource($mentor)
-        ];
-        return $this->successResponse($data, 200);
+        
+        if ($mentor->status === 'declined') {
+            return $this->errorResponse('Your account has been rejected', 403);
+        }
+
+        // Only handle file uploads if user has UUID (matching store() logic)
+        if (auth()->user()->user_uuid) {
+            // Handle profile picture upload
+            if ($request->hasFile('profile')) {
+                $cloudinary = new CloudinaryService();
+                $profilePic = $request->file('profile');
+                $resp = $cloudinary->store($profilePic, "mentor-images");
+                $request->merge(['profile_pic' => $resp[0]]);
+            }
+
+            // Handle resume upload
+            if ($request->hasFile('resume')) {
+                $cloudinary = new CloudinaryService();
+                $resume = $request->file('resume');
+                $resp = $cloudinary->store($resume, "mentor-resume");
+                $request->merge(['resume_link' => $resp[0]]);
+            }
+        }
+
+        $mentor->update($request->all());
+        
+        return $this->showOne(new MentorResource($mentor->fresh()), 200);
     }
 
     /**
@@ -210,71 +232,60 @@ class MentorManager extends Controller
 
     public function createSkills(Request $request)
     {
-
-        if (!auth()->user()->mentor) {
-            return response()->json('Please fill your mentor details', 404);
-        }
-        if (auth()->user()->mentor->status == 'pending') {
-            return $this->errorResponse('Your account is pending', 404);
-        } else if (auth()->user()->mentor->status == 'declined') {
-            return $this->errorResponse('Your account is rejected', 404);
-        }
         $mentor = auth()->user()->mentor;
-
-        $skillsData = is_string($request['skills']) ? json_decode($request['skills'], true) : $request['skills'];
-        $encoded = json_encode($skillsData);
-        // Create or update the mentor_skills record
-    
-        // check if mentor has experience
-        if ($mentor->skills) {
-            // update experience
-            $mentor->skills->update(['mentor_id' => $mentor->id,
-            'skills' => $encoded]);
-            $data = [
-                'message' => 'Skills successfully updated'
-            ];
-            return $this->successResponse($data, 200);
-        } else {
-            // create experience
-            $mentor->skills()->create(['mentor_id' => $mentor->id,
-            'skills' => $encoded]);
-            $data = [
-                'message' => 'Your Skills have been added successfully',
-            ];
-            return $this->successResponse($data, 200);
+        
+        if (!$mentor) {
+            return $this->errorResponse('Please complete your mentor profile first', 404);
         }
+        
+        if ($mentor->status === 'pending') {
+            return $this->errorResponse('Your account is pending approval', 403);
+        }
+        
+        if ($mentor->status === 'declined') {
+            return $this->errorResponse('Your account has been rejected', 403);
+        }
+
+        $validated = $request->validate([
+            'skills' => 'required|json'
+        ]);
+
+        $skillsData = json_decode($validated['skills'], true, 512, JSON_THROW_ON_ERROR);
+        
+        MentorSkill::updateOrCreate(
+            ['mentor_id' => $mentor->id],
+            ['skills' => $skillsData]
+        );
+
+        return $this->showOne(new MentorResource($mentor->fresh()->load('skills')), 200);
     }
 
     public function createAccessability(Request $request)
     {
-        if (!auth()->user()->mentor) {
-            return response()->json('Please fill your mentor details', 404);
-        }
-        if (auth()->user()->mentor->status == 'pending') {
-            return $this->errorResponse('Your account is pending', 404);
-        } else if (auth()->user()->mentor->status == 'declined') {
-            return $this->errorResponse('Your account is rejected', 404);
-        }
         $mentor = auth()->user()->mentor;
-
-        $validate = $request->validate(AssessabilityRequest::$_updateRules);
-        // check if mentor has experience
-        if ($mentor->accessability) {
-            // update experience
-            $mentor->accessability->update($validate);
-            $data = [
-                'message' => 'Availability updated successfully.',
-                'data' => new MentorResource($mentor)
-            ];
-            return $this->successResponse($data, 200);
-        } else {
-            // create experience
-            $mentor->accessability()->create($validate);
-            $data = [
-                'message' => 'Availablity added successfully.',
-                'data' => new MentorResource($mentor)
-            ];
-            return $this->successResponse($data, 200);
+        
+        if (!$mentor) {
+            return $this->errorResponse('Please complete your mentor profile first', 404);
         }
+        
+        if ($mentor->status === 'pending') {
+            return $this->errorResponse('Your account is pending approval', 403);
+        }
+        
+        if ($mentor->status === 'declined') {
+            return $this->errorResponse('Your account has been rejected', 403);
+        }
+
+        $validated = $request->validate(AssessabilityRequest::$_updateRules);
+
+        MentorAccessability::updateOrCreate(
+            ['mentor_id' => $mentor->id],
+            $validated
+        );
+
+        return $this->showOne(
+            new MentorResource($mentor->fresh()->load('accessability')), 
+            200
+        );
     }
 }
