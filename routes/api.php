@@ -388,7 +388,14 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
     // Mentor routes
     Route::group(['prefix' => 'mentors'], function () {
-        Route::apiResource('availability', AvailabilityController::class)->except('show');
+        Route::apiResource('availability', AvailabilityController::class)->except('show')->names([
+            'index' => 'mentorship.availability.index',
+            'store' => 'mentorship.availability.store',
+            'update' => 'mentorship.availability.update',
+            'destroy' => 'mentorship.availability.destroy',
+            'edit' => 'mentorship.availability.edit',
+            'create' => 'mentorship.availability.create',
+        ]);
         Route::get('availabilities', function () {
             return response()->json(['message' => 'Testing availability index endpoint']);
         });
