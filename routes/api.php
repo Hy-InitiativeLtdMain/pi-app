@@ -421,8 +421,21 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::apiResource('skill-categories', SkillCategoryController::class);
     });
 
-    Route::resource('mentor', MentorManager::class)->except('index');
-    Route::resource('mentee', MenteeManager::class)->except(['index', 'show']);
+    Route::resource('mentor', MentorManager::class)->except('index')->names([
+
+        'store' => 'mentorship.mentor.store',
+        'update' => 'mentorship.mentor.update',
+        'destroy' => 'mentorship.mentor.destroy',
+        'edit' => 'mentorship.mentor.edit',
+        'create' => 'mentorship.mentor.create',
+    ]);
+    Route::resource('mentee', MenteeManager::class)->except(['index', 'show'])->names([
+        'store' => 'mentorship.mentee.store',
+        'update' => 'mentorship.mentee.update',
+        'destroy' => 'mentorship.mentee.destroy',
+        'edit' => 'mentorship.mentee.edit',
+        'create' => 'mentorship.mentee.create',
+    ]);
     Route::get('mentee-profile', [MenteeManager::class, 'showProfile']);
     Route::get('mentor-profile', [MentorManager::class, 'showProfile']);
     Route::get('event', [EventController::class, 'index']);
