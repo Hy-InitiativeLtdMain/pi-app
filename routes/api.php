@@ -428,6 +428,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         'destroy' => 'mentorship.mentor.destroy',
         'edit' => 'mentorship.mentor.edit',
         'create' => 'mentorship.mentor.create',
+        'show' => 'mentorship.mentor.show',
     ]);
     Route::resource('mentee', MenteeManager::class)->except(['index', 'show'])->names([
         'store' => 'mentorship.mentee.store',
@@ -435,6 +436,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         'destroy' => 'mentorship.mentee.destroy',
         'edit' => 'mentorship.mentee.edit',
         'create' => 'mentorship.mentee.create',
+        'show' => 'mentorship.mentee.show',
     ]);
     Route::get('mentee-profile', [MenteeManager::class, 'showProfile']);
     Route::get('mentor-profile', [MentorManager::class, 'showProfile']);
