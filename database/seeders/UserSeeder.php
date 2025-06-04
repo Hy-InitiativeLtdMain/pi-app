@@ -15,14 +15,16 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $adminUser = User::firstOrCreate(
+            ['email' => 'root@mail.com'], // Lookup key only
             [
-                "first_name" => "root user",
-                "last_name" => "root user",
-                "email" => "root@mail.com",
-                "password" => "password",
-                "is_admin" => true
+                'first_name' => 'root user',
+                'last_name' => 'root user',
+                'password' => bcrypt('password'), // Always hash!
+                'is_admin' => true,
             ]
         );
+
+        // Verify email timestamp if newly created or already exists
         $adminUser->email_verified_at = Carbon::now();
         $adminUser->save();
     }
