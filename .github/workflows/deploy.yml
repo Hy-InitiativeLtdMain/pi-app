@@ -50,7 +50,8 @@ jobs:
             # Deploy to production
             git pull origin develop
             composer install
-            php artisan migrate --force
+
+            php artisan migrate --force --seed
             php artisan config:cache
             php artisan route:cache
             php artisan cache:clear

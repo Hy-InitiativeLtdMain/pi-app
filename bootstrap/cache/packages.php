@@ -1,13 +1,13 @@
 <?php return array (
   'cloudinary-labs/cloudinary-laravel' => 
   array (
-    'providers' => 
-    array (
-      0 => 'CloudinaryLabs\\CloudinaryLaravel\\CloudinaryServiceProvider',
-    ),
     'aliases' => 
     array (
       'Cloudinary' => 'CloudinaryLabs\\CloudinaryLaravel\\Facades\\Cloudinary',
+    ),
+    'providers' => 
+    array (
+      0 => 'CloudinaryLabs\\CloudinaryLaravel\\CloudinaryServiceProvider',
     ),
   ),
   'laravel/sail' => 
@@ -33,13 +33,13 @@
   ),
   'maatwebsite/excel' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
-    ),
     'aliases' => 
     array (
       'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
+    ),
+    'providers' => 
+    array (
+      0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
     ),
   ),
   'nesbot/carbon' => 
@@ -65,13 +65,13 @@
   ),
   'spatie/laravel-ignition' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
-    ),
     'aliases' => 
     array (
       'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
+    ),
+    'providers' => 
+    array (
+      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
   'tymon/jwt-auth' => 
@@ -88,13 +88,13 @@
   ),
   'vimeo/laravel' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Vimeo\\Laravel\\VimeoServiceProvider',
-    ),
     'aliases' => 
     array (
       'Vimeo' => 'Vimeo\\Laravel\\Facades\\Vimeo',
+    ),
+    'providers' => 
+    array (
+      0 => 'Vimeo\\Laravel\\VimeoServiceProvider',
     ),
   ),
 );
