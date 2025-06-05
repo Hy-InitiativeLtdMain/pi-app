@@ -74,6 +74,15 @@ class MentorManager extends Controller
                 ]);
             }
 
+            if ($request->hasFile('intro')) {
+                $cloudinary = new CloudinaryService();
+                $resume = $request->file('intro');
+                $resp = $cloudinary->store($resume, "mentor-intro");
+                $request->merge([
+                    'video_intro' => $resp[0]
+                ]);
+            }
+
             // dd($request->all());
             $request->merge([
                 'status' => 'approved'
@@ -159,6 +168,15 @@ class MentorManager extends Controller
                 $resume = $request->file('resume');
                 $resp = $cloudinary->store($resume, "mentor-resume");
                 $request->merge(['resume_link' => $resp[0]]);
+            }
+
+            if ($request->hasFile('intro')) {
+                $cloudinary = new CloudinaryService();
+                $resume = $request->file('intro');
+                $resp = $cloudinary->store($resume, "mentor-intro");
+                $request->merge([
+                    'video_intro' => $resp[0]
+                ]);
             }
         }
 
