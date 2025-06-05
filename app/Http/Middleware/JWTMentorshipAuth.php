@@ -20,7 +20,7 @@ class JWTMentorshipAuth
     public function handle(Request $request, Closure $next): Response
     {
         $jwt = $request->bearerToken();
-        $key = config('jwt.mentorship_secret');
+        $key = config('jwt.secret');
 
         if (!is_string($key) || trim($key) === '') {
             return response()->json(['error' => 'JWT secret key is not properly configured.'], 500);
