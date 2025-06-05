@@ -27,6 +27,7 @@ return [
 
     'secret' => env('JWT_SECRET', 'X25euw0XrHf3H5nppxRj8YYoa7qJXBFOO0OpR4pGEE5RqQGXaTOytiTTY8U87mwY'),
 
+    'mentorship_secret' => 'X25euw0XrHf3H5nppxRj8YYoa7qJXBFOO0OpR4pGEE5RqQGXaTOytiTTY8U87mwY',
     /*
     |--------------------------------------------------------------------------
     | JWT Authentication Keys
