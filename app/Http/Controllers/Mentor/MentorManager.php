@@ -112,16 +112,13 @@ class MentorManager extends Controller
         if (!$user->mentor) {
             return $this->errorResponse('Mentor data not found', 404);
         }
-
-        if ($user->mentor->status == 'pending') {
-            // If user has user_uuid, update status to approved
-            if ($user->user_uuid) {
+        if ($user->user_uuid) {
             $user->mentor->status = 'approved';
             $user->mentor->save();
-            } else {
+        }
+        if ($user->mentor->status == 'pending') {
             return $this->errorResponse('Your account is pending', 404);
-            }
-        
+
         } else if ($user->mentor->status == 'declined') {
             return $this->errorResponse('Your account is rejected', 404);
         }
