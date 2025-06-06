@@ -31,8 +31,8 @@ return new class extends Migration
     {
         Schema::table('mentors', function (Blueprint $table) {
             $table->dropColumn([
-                'highest_edu_qualification', 
-                'past_mentorship_exp', 
+                'highest_edu_qualification',
+                'past_mentorship_exp',
                 'video_intro',
                 'profile_pic',
                 'country',
@@ -40,7 +40,7 @@ return new class extends Migration
                 'portfolio',
                 'resume_link',
                 'project_choice',
-             ]);
+            ]);
         });
     }
 };
