@@ -28,7 +28,7 @@ class Mentor extends Model
         'linkedin_profile',
         'portfolio',
         'resume_link',
-        'project_choice'
+        'project_id'
     ];
 
     public function user()
@@ -55,6 +55,11 @@ class Mentor extends Model
 
     public function accessability(){
         return $this->hasOne(MentorAccessability::class);
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
     }
 
     // Define the relationship with bookings
