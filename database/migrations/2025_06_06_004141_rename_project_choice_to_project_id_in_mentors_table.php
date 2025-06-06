@@ -13,7 +13,7 @@ return new class extends Migration
         public function up(): void
         {
             Schema::table('mentors', function (Blueprint $table) {
-                $table->unsignedBigInteger('project_id')->after('resume_link');
+                $table->unsignedBigInteger('project_id')->after('resume_link')->nullable();
                 $table->foreign('project_id')->references('id')->on('projects');
             });
 
