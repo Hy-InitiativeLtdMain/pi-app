@@ -12,6 +12,7 @@ use App\Models\Mentor;
 use App\Models\MentorAccessability;
 use App\Models\MentorExperience;
 use App\Models\MentorSkill;
+use App\Models\Project;
 use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
@@ -108,8 +109,6 @@ class MentorManager extends Controller
             ];
             return $this->successResponse($data, 201);
         }
-
-
     }
 
     /**
@@ -127,7 +126,6 @@ class MentorManager extends Controller
         }
         if ($user->mentor->status == 'pending') {
             return $this->errorResponse('Your account is pending', 404);
-
         } else if ($user->mentor->status == 'declined') {
             return $this->errorResponse('Your account is rejected', 404);
         }
@@ -280,6 +278,14 @@ class MentorManager extends Controller
         );
 
         return $this->showOne(new MentorResource($mentor->fresh()->load('skills')), 200);
+    }
+
+    public function getProjectsWithCategories()
+    {
+        $projects = Project::with('category')->get();
+        return $this->successResponse([
+            'data' => $projects
+        ], 200);
     }
 
     public function createAccessability(Request $request)
