@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             SkillSeeder::class,
             SkillCategorySeeder::class,
             MentorSkillSeeder::class,
+            ProjectsTableSeeder::class,
         ]);
     }
 }
