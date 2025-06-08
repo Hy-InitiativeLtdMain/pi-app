@@ -9,11 +9,23 @@ use Illuminate\Database\Seeder;
 use App\Models\Project;
 use App\Models\ProjectCategory;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class ProjectsTableSeeder extends Seeder
 {
     public function run()
     {
+        // Disable foreign key checks and truncate tables
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        ProjectCategory::truncate();
+        Project::truncate();
+        
+        // Reset auto-increment to 1
+        DB::statement('ALTER TABLE project_categories AUTO_INCREMENT = 1');
+        DB::statement('ALTER TABLE projects AUTO_INCREMENT = 1');
+        
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
         $categories = [
             'Foundational level',
             'Data Science and Machine Learning',
