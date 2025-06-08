@@ -12,19 +12,25 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // First, add project_id column
         Schema::table('mentors', function (Blueprint $table) {
             if (!Schema::hasColumn('mentors', 'project_id')) {
-                $table->unsignedBigInteger('project_id')->after('resume_link')->nullable();
-                $table->foreign('project_id')->references('id')->on('projects');
+                $table->unsignedBigInteger('project_id')->nullable()->after('resume_link');
             }
         });
 
-        // Manual update for existing data if project_choice exists
+        // Then, if project_choice exists, migrate the data
         if (Schema::hasColumn('mentors', 'project_choice')) {
-            // Convert project_choice values to project_id, handling nulls
-            DB::statement('UPDATE mentors SET project_id = NULLIF(project_choice, "")');
+            // Convert non-empty project_choice values to project_id
+            DB::statement('UPDATE mentors SET project_id = CASE 
+                WHEN project_choice IS NOT NULL AND project_choice != "" 
+                THEN CAST(project_choice AS UNSIGNED) 
+                ELSE NULL END'
+            );
 
+            // Add foreign key constraint after data migration
             Schema::table('mentors', function (Blueprint $table) {
+                $table->foreign('project_id')->references('id')->on('projects');
                 $table->dropColumn('project_choice');
             });
         }
@@ -36,13 +42,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mentors', function (Blueprint $table) {
+            // Add project_choice column first
             if (!Schema::hasColumn('mentors', 'project_choice')) {
-                $table->string('project_choice')->after('resume_link')->nullable();
+                $table->string('project_choice')->nullable()->after('resume_link');
             }
 
-            // Manual rollback for existing data, handling nulls
-            DB::statement('UPDATE mentors SET project_choice = COALESCE(project_id, "")');
+            // Convert data back
+            DB::statement('UPDATE mentors SET project_choice = CAST(project_id AS CHAR)');
 
+            // Drop project_id column and its foreign key
             if (Schema::hasColumn('mentors', 'project_id')) {
                 $table->dropForeign(['project_id']);
                 $table->dropColumn('project_id');
