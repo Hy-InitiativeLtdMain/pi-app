@@ -142,23 +142,17 @@ class MentorManager extends Controller
             return $this->errorResponse('You are not a mentor', 404);
         }
 
+        // Check if this mentor belongs to the authenticated user
+        if ($mentor->user_id !== auth()->id()) {
+            return $this->errorResponse('Unauthorized access', 403);
+        }
+
         if ($mentor->status === 'pending') {
             return $this->errorResponse('Your account is pending approval', 403);
         }
 
         if ($mentor->status === 'declined') {
             return $this->errorResponse('Your account has been rejected', 403);
-        }
-
-        // Check if email is being changed and if it already exists
-        if ($request->has('email') && $request->email !== $mentor->email) {
-            $existingMentor = Mentor::where('email', $request->email)
-                ->where('id', '!=', $mentor->id)
-                ->first();
-                
-            if ($existingMentor) {
-                return $this->errorResponse('Email already exists for another mentor', 409);
-            }
         }
 
         // Only handle file uploads if user has UUID
