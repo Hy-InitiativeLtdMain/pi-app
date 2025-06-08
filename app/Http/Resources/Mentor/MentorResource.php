@@ -40,7 +40,7 @@ class MentorResource extends JsonResource
             'linkedin_profile' => $this->linkedin_profile,
             'portfolio' => $this->portfolio,
             'resume_link' => $this->resume_link,
-            'project_choice' => $this->project_choice,
+            'project' => $this->project,
             'availability' => $this->availability->map(function ($avail) {
                 if (is_string($avail->availability)) {
                     $availability = json_decode($avail->availability);
@@ -70,21 +70,21 @@ class MentorResource extends JsonResource
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            
+
         ];
     }
 
     protected function formatSkillsWithNames()
     {
         $formattedSkills = [];
-        
+
         if ($this->skills) {
             $skillsData = json_decode($this->skills, true);
             if (is_array($skillsData) && isset($skillsData['skills'])) {
                 foreach ($skillsData['skills'] as $skillData) {
                     if (isset($skillData['skill_id'])) {
                         $skill = Skill::find($skillData['skill_id']);
-                        
+
                         if ($skill) {
                             $formattedSkills[] = [
                                 'id' => $skill->id,
@@ -97,7 +97,7 @@ class MentorResource extends JsonResource
                 }
             }
         }
-        
+
         return $formattedSkills;
     }
 }
