@@ -12,25 +12,37 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // First, add project_id column
+        // Step 1: Add project_id column without constraints first
         Schema::table('mentors', function (Blueprint $table) {
             if (!Schema::hasColumn('mentors', 'project_id')) {
                 $table->unsignedBigInteger('project_id')->nullable()->after('resume_link');
             }
         });
 
-        // Then, if project_choice exists, migrate the data
+        // Step 2: Update data with a more careful conversion
         if (Schema::hasColumn('mentors', 'project_choice')) {
-            // Convert non-empty project_choice values to project_id
-            DB::statement('UPDATE mentors SET project_id = CASE 
-                WHEN project_choice IS NOT NULL AND project_choice != "" 
-                THEN CAST(project_choice AS UNSIGNED) 
-                ELSE NULL END'
-            );
+            DB::statement("
+                UPDATE mentors
+                SET project_id = NULLIF(
+                    CASE
+                        WHEN project_choice REGEXP '^[0-9]+$'
+                        THEN project_choice
+                        ELSE NULL
+                    END,
+                    ''
+                )
+            ");
 
-            // Add foreign key constraint after data migration
+            // Step 3: Add foreign key constraint
             Schema::table('mentors', function (Blueprint $table) {
-                $table->foreign('project_id')->references('id')->on('projects');
+                $table->foreign('project_id')
+                    ->references('id')
+                    ->on('projects')
+                    ->nullOnDelete();
+            });
+
+            // Step 4: Remove old column
+            Schema::table('mentors', function (Blueprint $table) {
                 $table->dropColumn('project_choice');
             });
         }
@@ -42,15 +54,17 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mentors', function (Blueprint $table) {
-            // Add project_choice column first
             if (!Schema::hasColumn('mentors', 'project_choice')) {
                 $table->string('project_choice')->nullable()->after('resume_link');
             }
 
-            // Convert data back
-            DB::statement('UPDATE mentors SET project_choice = CAST(project_id AS CHAR)');
+            // Convert data back safely
+            DB::statement("
+                UPDATE mentors
+                SET project_choice = COALESCE(CAST(project_id AS CHAR), '')
+                WHERE project_id IS NOT NULL
+            ");
 
-            // Drop project_id column and its foreign key
             if (Schema::hasColumn('mentors', 'project_id')) {
                 $table->dropForeign(['project_id']);
                 $table->dropColumn('project_id');
