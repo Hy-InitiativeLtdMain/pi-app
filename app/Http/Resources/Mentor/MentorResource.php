@@ -40,18 +40,13 @@ class MentorResource extends JsonResource
             'linkedin_profile' => $this->linkedin_profile,
             'portfolio' => $this->portfolio,
             'resume_link' => $this->resume_link,
-            'project' => $this->whenLoaded('project', function() {
-                return [
-                    'id' => $this->project->id,
-                    'name' => $this->project->name,
-                    'description' => $this->project->description,
-                    'category' => [
-                        'id' => $this->project->category->id,
-                        'name' => $this->project->category->name,
-                    ],
-                    'dataset_link' => $this->project->dataset_link,
-                ];
-            }),
+            'project' => $this->project_reference_id ? [
+                'id' => $this->project_reference_id,
+                'name' => $this->project->name ?? null,
+                'objective' => $this->project->objective ?? null,
+                'dataset_link' => $this->project->dataset_link ?? null,
+                'category' => $this->project->category ?? null,
+            ] : null,
             'availability' => $this->availability->map(function ($avail) {
                 if (is_string($avail->availability)) {
                     $availability = json_decode($avail->availability);
