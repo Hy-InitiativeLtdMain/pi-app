@@ -21,7 +21,8 @@ return new class extends Migration
 
         // Manual update for existing data if project_choice exists
         if (Schema::hasColumn('mentors', 'project_choice')) {
-            DB::statement('UPDATE mentors SET project_id = project_choice');
+            // Convert project_choice values to project_id, handling nulls
+            DB::statement('UPDATE mentors SET project_id = NULLIF(project_choice, "")');
 
             Schema::table('mentors', function (Blueprint $table) {
                 $table->dropColumn('project_choice');
@@ -39,8 +40,8 @@ return new class extends Migration
                 $table->string('project_choice')->after('resume_link')->nullable();
             }
 
-            // Manual rollback for existing data
-            DB::statement('UPDATE mentors SET project_choice = project_id');
+            // Manual rollback for existing data, handling nulls
+            DB::statement('UPDATE mentors SET project_choice = COALESCE(project_id, "")');
 
             if (Schema::hasColumn('mentors', 'project_id')) {
                 $table->dropForeign(['project_id']);
