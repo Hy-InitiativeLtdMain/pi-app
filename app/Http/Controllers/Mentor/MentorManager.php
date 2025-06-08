@@ -150,9 +150,19 @@ class MentorManager extends Controller
             return $this->errorResponse('Your account has been rejected', 403);
         }
 
-        // Only handle file uploads if user has UUID (matching store() logic)
+        // Check if email is being changed and if it already exists
+        if ($request->has('email') && $request->email !== $mentor->email) {
+            $existingMentor = Mentor::where('email', $request->email)
+                ->where('id', '!=', $mentor->id)
+                ->first();
+                
+            if ($existingMentor) {
+                return $this->errorResponse('Email already exists for another mentor', 409);
+            }
+        }
+
+        // Only handle file uploads if user has UUID
         if (auth()->user()->user_uuid) {
-            // Handle profile picture upload
             if ($request->hasFile('profile')) {
                 $cloudinary = new CloudinaryService();
                 $profilePic = $request->file('profile');
@@ -160,7 +170,6 @@ class MentorManager extends Controller
                 $request->merge(['profile_pic' => $resp[0]]);
             }
 
-            // Handle resume upload
             if ($request->hasFile('resume')) {
                 $cloudinary = new CloudinaryService();
                 $resume = $request->file('resume');
@@ -172,15 +181,16 @@ class MentorManager extends Controller
                 $cloudinary = new CloudinaryService();
                 $resume = $request->file('intro');
                 $resp = $cloudinary->store($resume, "mentor-intro");
-                $request->merge([
-                    'video_intro' => $resp[0]
-                ]);
+                $request->merge(['video_intro' => $resp[0]]);
             }
         }
 
-        $mentor->update($request->all());
-
-        return $this->showOne(new MentorResource($mentor->fresh()), 200);
+        try {
+            $mentor->update($request->all());
+            return $this->showOne(new MentorResource($mentor->fresh()), 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error updating mentor profile: ' . $e->getMessage(), 500);
+        }
     }
 
     /**

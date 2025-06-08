@@ -86,4 +86,21 @@ class Mentor extends Model
         // Count the number of mentees
         return $query->distinct('mentee_id')->count('mentee_id');
     }
+
+    public static function boot()
+    {
+        parent::boot();
+        
+        static::saving(function ($mentor) {
+            if ($mentor->isDirty('email')) {
+                $existingMentor = static::where('email', $mentor->email)
+                    ->where('id', '!=', $mentor->id)
+                    ->exists();
+                    
+                if ($existingMentor) {
+                    throw new \Exception('Email already exists for another mentor');
+                }
+            }
+        });
+    }
 }
