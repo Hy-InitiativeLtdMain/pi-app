@@ -61,7 +61,7 @@ class Mentor extends Model
     /**
      * Get the project associated with the mentor.
      */
-    public function project(): BelongsTo
+    public function project()
     {
         return $this->belongsTo(Project::class, 'project_reference_id');
     }
