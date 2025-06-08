@@ -10,36 +10,42 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-        public function up(): void
-        {
-            Schema::table('mentors', function (Blueprint $table) {
+    public function up(): void
+    {
+        Schema::table('mentors', function (Blueprint $table) {
+            if (!Schema::hasColumn('mentors', 'project_id')) {
                 $table->unsignedBigInteger('project_id')->after('resume_link')->nullable();
                 $table->foreign('project_id')->references('id')->on('projects');
-            });
+            }
+        });
 
-            // Manual update for existing data
+        // Manual update for existing data if project_choice exists
+        if (Schema::hasColumn('mentors', 'project_choice')) {
             DB::statement('UPDATE mentors SET project_id = project_choice');
 
             Schema::table('mentors', function (Blueprint $table) {
                 $table->dropColumn('project_choice');
             });
         }
+    }
 
     /**
      * Reverse the migrations.
      */
-        public function down(): void
-        {
-            Schema::table('mentors', function (Blueprint $table) {
-                $table->string('project_choice')->after('resume_link');
-            });
+    public function down(): void
+    {
+        Schema::table('mentors', function (Blueprint $table) {
+            if (!Schema::hasColumn('mentors', 'project_choice')) {
+                $table->string('project_choice')->after('resume_link')->nullable();
+            }
 
             // Manual rollback for existing data
             DB::statement('UPDATE mentors SET project_choice = project_id');
 
-            Schema::table('mentors', function (Blueprint $table) {
+            if (Schema::hasColumn('mentors', 'project_id')) {
                 $table->dropForeign(['project_id']);
                 $table->dropColumn('project_id');
-            });
-        }
+            }
+        });
+    }
 };
