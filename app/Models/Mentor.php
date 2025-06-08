@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mentor extends Model
 {
@@ -28,7 +29,7 @@ class Mentor extends Model
         'linkedin_profile',
         'portfolio',
         'resume_link',
-        'project_id'
+        'project_reference_id',
     ];
 
     public function user()
@@ -57,9 +58,12 @@ class Mentor extends Model
         return $this->hasOne(MentorAccessability::class);
     }
 
-    public function project()
+    /**
+     * Get the project associated with the mentor.
+     */
+    public function project(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class, 'project_reference_id');
     }
 
     // Define the relationship with bookings
