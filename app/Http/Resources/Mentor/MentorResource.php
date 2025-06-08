@@ -40,7 +40,18 @@ class MentorResource extends JsonResource
             'linkedin_profile' => $this->linkedin_profile,
             'portfolio' => $this->portfolio,
             'resume_link' => $this->resume_link,
-            'project' => $this->project,
+            'project' => $this->whenLoaded('project', function() {
+                return [
+                    'id' => $this->project->id,
+                    'name' => $this->project->name,
+                    'description' => $this->project->description,
+                    'category' => [
+                        'id' => $this->project->category->id,
+                        'name' => $this->project->category->name,
+                    ],
+                    'dataset_link' => $this->project->dataset_link,
+                ];
+            }),
             'availability' => $this->availability->map(function ($avail) {
                 if (is_string($avail->availability)) {
                     $availability = json_decode($avail->availability);
@@ -66,7 +77,6 @@ class MentorResource extends JsonResource
                     'days' => $avail->availability['day'],
                     'time_slots' => $avail->availability['time_slots'],
                 ];
-                ;
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
