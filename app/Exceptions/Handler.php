@@ -100,7 +100,7 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => 'The specified URL cannot be found'], 404);
         }
         if ($exception instanceof HttpException) {
-            return response()->json(['error' => 'User is not permitted to perform this action'], 401);
+            return response()->json(['error' => 'User is not permitted to perform this action'. $exception], 401);
         }
 
         // if ($exception instanceof ErrorException) {
