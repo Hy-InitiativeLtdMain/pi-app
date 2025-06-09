@@ -40,6 +40,7 @@ class MentorResource extends JsonResource
             'linkedin_profile' => $this->linkedin_profile,
             'portfolio' => $this->portfolio,
             'resume_link' => $this->resume_link,
+            'time_commitment' => $this->time_commitment,
             'project' => $this->project_reference_id ? [
                 'id' => $this->project_reference_id,
                 'name' => $this->project->name ?? null,

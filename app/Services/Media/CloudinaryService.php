@@ -5,10 +5,10 @@ namespace App\Services\Media;
 
 class CloudinaryService
 {
-    public function store($file, $folder="product_images")
+    public function store($image, $folder="product_images")
     {
         $imageUrl = cloudinary()->upload(
-            $file->getRealPath(),
+            $image->getRealPath(),
             [
                 'folder' => $folder,
                 "resource_type" => "auto",
