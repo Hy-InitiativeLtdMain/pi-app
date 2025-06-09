@@ -167,14 +167,14 @@ class MentorManager extends Controller
             if ($request->hasFile('resume')) {
                 $cloudinary = new CloudinaryService();
                 $resume = $request->file('resume');
-                $resp = $cloudinary->store($resume, "mentor-resume");
+                $resp = $cloudinary->storeFiles($resume, "mentor-resume");
                 $request->merge(['resume_link' => $resp[0]]);
             }
 
             if ($request->hasFile('intro')) {
                 $cloudinary = new CloudinaryService();
                 $resume = $request->file('intro');
-                $resp = $cloudinary->store($resume, "mentor-intro");
+                $resp = $cloudinary->storeFiles($resume, "mentor-intro");
                 $request->merge(['video_intro' => $resp[0]]);
             }
         }

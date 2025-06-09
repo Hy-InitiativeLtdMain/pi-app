@@ -23,7 +23,7 @@ class Mentor extends Model
         'highest_edu_qualification',
         'past_mentorship_exp',
         'video_intro',
-
+        'time_commitment',
         'profile_pic',
         'country',
         'linkedin_profile',
@@ -90,13 +90,13 @@ class Mentor extends Model
     public static function boot()
     {
         parent::boot();
-        
+
         static::saving(function ($mentor) {
             if ($mentor->isDirty('email')) {
                 $existingMentor = static::where('email', $mentor->email)
                     ->where('id', '!=', $mentor->id)
                     ->exists();
-                    
+
                 if ($existingMentor) {
                     throw new \Exception('Email already exists for another mentor');
                 }
