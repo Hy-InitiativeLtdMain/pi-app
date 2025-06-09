@@ -5,7 +5,7 @@ namespace App\Services\Media;
 
 class CloudinaryService
 {
-    public function store($image, $folder="product_images")
+    public function store($image, $folder = "product_images")
     {
         $imageUrl = cloudinary()->upload(
             $image->getRealPath(),
@@ -31,7 +31,7 @@ class CloudinaryService
 
     public function storeFiles($file, $folder = "product_files")
     {
-        $fileURL = cloudinary()->uploadLarge(
+        $fileURL = cloudinary()->uploadApi()->upload(
             $file->getRealPath(),
             [
                 'folder' => $folder,
@@ -40,14 +40,14 @@ class CloudinaryService
         );
 
         return [
-            $fileURL->getSecurePath(),
-            $fileURL->getPublicId(),
+            $fileURL['secure_url'],
+            $fileURL['public_id'],
         ];
     }
 
     public function storeVideo($file, $folder = "product_videos")
     {
-        $upload = cloudinary()->uploadLarge(
+        $upload = cloudinary()->uploadApi()->upload(
             $file->getRealPath(),
             [
                 'folder' => $folder,
@@ -57,8 +57,8 @@ class CloudinaryService
         );
 
         return [
-            $upload->getSecurePath(),
-            $upload->getPublicId(),
+            $upload['secure_url'],
+            $upload['public_id'],
         ];
     }
 }
