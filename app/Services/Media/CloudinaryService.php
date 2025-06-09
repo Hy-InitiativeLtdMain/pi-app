@@ -44,4 +44,21 @@ class CloudinaryService
             $fileURL->getPublicId(),
         ];
     }
+
+    public function storeVideo($file, $folder = "product_videos")
+    {
+        $upload = cloudinary()->uploadLarge(
+            $file->getRealPath(),
+            [
+                'folder' => $folder,
+                'resource_type' => 'video',
+                'chunk_size' => 6000000,
+            ]
+        );
+
+        return [
+            $upload->getSecurePath(),
+            $upload->getPublicId(),
+        ];
+    }
 }
