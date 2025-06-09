@@ -100,12 +100,13 @@ class Handler extends ExceptionHandler
         if ($exception instanceof NotFoundHttpException) {
             return response()->json(['error' => 'The specified URL cannot be found'], 404);
         }
-        if ($exception instanceof HttpException) {
-            return response()->json(['error' => 'User is not permitted to perform this action'], 401);
-        }
         if ($exception instanceof PostTooLargeException) {
             return response()->json(['error' => 'Uploaded file is too large. Please upload a smaller file.'], 413);
         }
+        if ($exception instanceof HttpException) {
+            return response()->json(['error' => 'User is not permitted to perform this action'], 401);
+        }
+
 
         // if ($exception instanceof ErrorException) {
         //     return response()->json(['error' => $exception->getMessage()], 500);
