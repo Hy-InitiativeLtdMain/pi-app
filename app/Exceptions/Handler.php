@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 class Handler extends ExceptionHandler
 {
@@ -100,7 +101,10 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => 'The specified URL cannot be found'], 404);
         }
         if ($exception instanceof HttpException) {
-            return response()->json(['error' => 'User is not permitted to perform this action'. $exception], 401);
+            return response()->json(['error' => 'User is not permitted to perform this action'], 401);
+        }
+        if ($exception instanceof PostTooLargeException) {
+            return response()->json(['error' => 'Uploaded file is too large. Please upload a smaller file.'], 413);
         }
 
         // if ($exception instanceof ErrorException) {
