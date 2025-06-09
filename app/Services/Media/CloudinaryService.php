@@ -29,14 +29,16 @@ class CloudinaryService
         return cloudinary()->UploadApi()->destroy($url_id);
     }
 
-    public function storeFiles($file, $folder="product_files"){
-        $fileURL =cloudinary()->uploadFile(
+    public function storeFiles($file, $folder = "product_files")
+    {
+        $fileURL = cloudinary()->uploadLarge(
             $file->getRealPath(),
             [
                 'folder' => $folder,
                 "resource_type" => "auto",
             ]
         );
+
         return [
             $fileURL->getSecurePath(),
             $fileURL->getPublicId(),
