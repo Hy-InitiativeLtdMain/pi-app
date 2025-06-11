@@ -42,7 +42,7 @@ class MentorResource extends JsonResource
             'resume_link' => $this->resume_link,
             'time_commitment' => $this->time_commitment,
             'project' => $this->project_reference_id ? [
-                'id' => $this->project_reference_id,
+                'id' => $this->project_reference_id ?? null,
                 'name' => $this->project->name ?? null,
                 'objective' => $this->project->objective ?? null,
                 'dataset_link' => $this->project->dataset_link ?? null,
