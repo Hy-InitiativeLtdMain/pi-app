@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Mentee;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -32,9 +33,39 @@ class JWTMentorshipAuth
             $userId = $decoded->user_id ?? null;
             $email = $decoded->email ?? null;
             $role = $decoded->role ?? null;
+            $track = $decoded->track ?? null;
+            $institute = $decoded->institute ?? null;
 
             if (!$userId || !$email) {
                 return response()->json(['error' => 'Invalid token payload: missing required claims'], 401);
+            }
+            if ($role === 'Mentee' || $role === 'Student') {
+                // Allow access and create a mentee in the Mentee model
+                $user = User::firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'user_uuid' => $userId,
+                        'password' => bcrypt('SecretKey010'),
+                        'role' => $role,
+                        'institute_slug' => $institute,
+                        'track' => $track,
+                    ]
+                );
+
+                // Create a mentee record if not exists
+                Mentee::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'email' => $email,
+                        'level' => 'Unknown',
+                        'course' => $track,
+                        'track' => $track,
+                        'institute_slug' => $institute,
+                    ]
+                );
+
+                Auth::login($user);
+                return $next($request);
             }
 
             if ($role !== 'Mentor') {
@@ -47,6 +78,8 @@ class JWTMentorshipAuth
                     'user_uuid' => $userId,
                     'password' => bcrypt('SecretKey010'),
                     'role' => $role,
+                    'institute_slug' => $institute,
+                    'track' => $track,
                 ]
             );
 

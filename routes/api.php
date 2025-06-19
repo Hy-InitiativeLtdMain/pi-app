@@ -396,6 +396,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
             'edit' => 'mentorship.availability.edit',
             'create' => 'mentorship.availability.create',
         ]);
+        Route::get('mentees', [BookingManager::class, 'getMentees']);
         Route::get('availabilities', function () {
             return response()->json(['message' => 'Testing availability index endpoint']);
         });

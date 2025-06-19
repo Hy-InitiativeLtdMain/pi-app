@@ -30,6 +30,8 @@ class Mentor extends Model
         'portfolio',
         'resume_link',
         'project_reference_id',
+        'track',
+        'institute',
     ];
 
     public function user()
