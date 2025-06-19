@@ -16,6 +16,8 @@ class Mentee extends Model
         'phone',
         'level',
         'course',
+        'track',
+        'institute',
     ];
 
     public function user()

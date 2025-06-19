@@ -302,6 +302,26 @@ class BookingManager extends Controller
         return response()->json(['no_of_mentees' => $count], 200);
     }
 
+    // Get all mentees for the authenticated mentor based on approved bookings
+    public function getMentees()
+    {
+        $mentorId = auth()->user()->mentor->id;
+
+        if (!$mentorId) {
+            return response()->json(['message' => 'Mentor not found or not registered'], 404);
+        }
+
+        $bookings = Booking::where('mentor_id', $mentorId)
+            ->where('status', 'Approved')
+            ->with('mentee')
+            ->get();
+
+        // Get unique mentees from the bookings
+        $mentees = $bookings->pluck('mentee')->unique('id')->values();
+
+        return $this->showAll($mentees, 200);
+    }
+
     // create a count for mentors too
 
     public function countMentors()

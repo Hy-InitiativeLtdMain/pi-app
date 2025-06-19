@@ -8,11 +8,14 @@ use App\Http\Requests\Mentors\AssessabilityRequest;
 use App\Http\Requests\Mentors\ExperienceRequest;
 use App\Http\Requests\Mentors\SkillRequest;
 use App\Http\Resources\Mentor\MentorResource;
+use App\Models\Mentee;
 use App\Models\Mentor;
 use App\Models\MentorAccessability;
 use App\Models\MentorExperience;
+use App\Models\MentorMentee;
 use App\Models\MentorSkill;
 use App\Models\Project;
+use App\Services\FirebaseService;
 use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
@@ -49,66 +52,93 @@ class MentorManager extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
 
-        // get the user_id from the auth user
-        $userId = auth()->user()->id;
-        $userEmail = auth()->user()->email;
+        $userId = $user->id;
+        $userEmail = $user->email;
 
-        // Add user_uuid and status if available
-        if (auth()->user()->user_uuid) {
+        $firebase = app(FirebaseService::class);
+
+        // Optional: Only if user_uuid exists
+        if ($user->user_uuid) {
             if ($request->hasFile('profile')) {
-                $cloudinary = new CloudinaryService();
-                $profilePic = $request->file('profile');
-
-                $resp = $cloudinary->store($profilePic, "mentor-images");
-                $request->merge([
-                    'profile_pic' => $resp[0],
-                ]);
+                $url = $firebase->uploadFile($request->file('profile'), 'mentor-images');
+                $request->merge(['profile_pic' => $url]);
             }
 
             if ($request->hasFile('resume')) {
-                $cloudinary = new CloudinaryService();
-                $resume = $request->file('resume');
-                $resp = $cloudinary->storeFiles($resume, "mentor-resume");
-                $request->merge([
-                    'resume_link' => $resp[0]
-                ]);
+                $url = $firebase->uploadFile($request->file('resume'), 'mentor-resume');
+                $request->merge(['resume_link' => $url]);
             }
 
             if ($request->hasFile('intro')) {
-                $cloudinary = new CloudinaryService();
-                $resume = $request->file('intro');
-                $resp = $cloudinary->storeVideo($resume, "mentor-intro");
-                $request->merge([
-                    'video_intro' => $resp[0]
-                ]);
+                $url = $firebase->uploadFile($request->file('intro'), 'mentor-intro');
+                $request->merge(['video_intro' => $url]);
             }
 
-            // dd($request->all());
+            $request->merge(['status' => 'approved']);
             $request->merge([
-                'status' => 'approved'
+                'institute' => $user->institute_slug ?? null,
+                'track' => $user->track ?? null,
             ]);
         }
+
+        // Always attach these
         $request->merge([
             'user_id' => $userId,
-            'email' => $userEmail,
+            'email'   => $userEmail,
         ]);
 
-
+        // Check for existing mentor with same email
         $existingMentor = Mentor::where('email', $userEmail)->first();
         if ($existingMentor) {
-            // Handle the case where another user already has this email
-            return response()->json(['message' => 'Mentor profile already created.'], 409); // 409 Conflict
-        } else {
-            // dd($request->all());
-
-            $mentor = Mentor::create($request->all());
-            $data = [
-                'message' => 'Profile Created Successfully.',
-                'data' => new MentorResource($mentor)
-            ];
-            return $this->successResponse($data, 201);
+            return response()->json(['message' => 'Mentor profile already created.'], 409);
         }
+
+        // Create mentor
+        $mentor = Mentor::create($request->all());
+
+        // Assign 10 random available mentees with the same track
+        $track = $mentor->track;
+        if ($track) {
+            $assignedCount = 0;
+            $checkedMenteeIds = [];
+            while ($assignedCount < 10) {
+                // Get next batch of random mentees not already checked
+                $mentees = Mentee::where('track', $track)
+                    ->whereNotIn('id', $checkedMenteeIds)
+                    ->inRandomOrder()
+                    ->limit(10 - $assignedCount)
+                    ->get();
+
+                if ($mentees->isEmpty()) {
+                    break; // No more mentees to assign
+                }
+
+                foreach ($mentees as $mentee) {
+                    $checkedMenteeIds[] = $mentee->id;
+                    // Double-check mentee is not already assigned in MentorMentee table
+                    $alreadyAssigned = MentorMentee::where('mentee_id', $mentee->id)->exists();
+                    if (!$alreadyAssigned) {
+                        MentorMentee::create([
+                            'mentor_id' => $mentor->id,
+                            'mentee_id' => $mentee->id,
+                        ]);
+                        $assignedCount++;
+                        if ($assignedCount >= 10) {
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        $data = [
+            'message' => 'Profile Created Successfully.',
+            'data'    => new MentorResource($mentor)
+        ];
+
+        return $this->successResponse($data, 201);
     }
 
     /**
@@ -142,7 +172,6 @@ class MentorManager extends Controller
             return $this->errorResponse('You are not a mentor', 404);
         }
 
-        // Check if this mentor belongs to the authenticated user
         if ($mentor->user_id !== auth()->id()) {
             return $this->errorResponse('Unauthorized access', 403);
         }
@@ -155,27 +184,24 @@ class MentorManager extends Controller
             return $this->errorResponse('Your account has been rejected', 403);
         }
 
-        // Only handle file uploads if user has UUID
-        if (auth()->user()->user_uuid) {
+        $firebase = app(FirebaseService::class);
+        $user = auth()->user();
+
+        // Handle file uploads if user has UUID
+        if ($user->user_uuid) {
             if ($request->hasFile('profile')) {
-                $cloudinary = new CloudinaryService();
-                $profilePic = $request->file('profile');
-                $resp = $cloudinary->store($profilePic, "mentor-images");
-                $request->merge(['profile_pic' => $resp[0]]);
+                $url = $firebase->uploadFile($request->file('profile'), 'mentor-images');
+                $request->merge(['profile_pic' => $url]);
             }
 
             if ($request->hasFile('resume')) {
-                $cloudinary = new CloudinaryService();
-                $resume = $request->file('resume');
-                $resp = $cloudinary->storeFiles($resume, "mentor-resume");
-                $request->merge(['resume_link' => $resp[0]]);
+                $url = $firebase->uploadFile($request->file('resume'), 'mentor-resume');
+                $request->merge(['resume_link' => $url]);
             }
 
             if ($request->hasFile('intro')) {
-                $cloudinary = new CloudinaryService();
-                $resume = $request->file('intro');
-                $resp = $cloudinary->storeVideo($resume, "mentor-intro");
-                $request->merge(['video_intro' => $resp[0]]);
+                $url = $firebase->uploadFile($request->file('intro'), 'mentor-intro');
+                $request->merge(['video_intro' => $url]);
             }
         }
 
@@ -186,6 +212,7 @@ class MentorManager extends Controller
             return $this->errorResponse('Error updating mentor profile: ' . $e->getMessage(), 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
