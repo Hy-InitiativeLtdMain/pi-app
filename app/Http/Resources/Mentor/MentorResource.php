@@ -26,6 +26,8 @@ class MentorResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'bio' => $this->bio,
+            'track' => $this->track,
+            'institute' => $this->institute,
             'no_of_mentees' => $count,
             'company' => $this->company,
             'job_title' => $this->job_title,
