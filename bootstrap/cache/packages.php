@@ -1,109 +1,109 @@
 <?php return array (
-  'cloudinary-labs/cloudinary-laravel' => 
+  'cloudinary-labs/cloudinary-laravel' =>
   array (
-    'aliases' => 
+    'aliases' =>
     array (
       'Cloudinary' => 'CloudinaryLabs\\CloudinaryLaravel\\Facades\\Cloudinary',
     ),
-    'providers' => 
+    'providers' =>
     array (
       0 => 'CloudinaryLabs\\CloudinaryLaravel\\CloudinaryServiceProvider',
     ),
   ),
-  'kreait/laravel-firebase' => 
+  'kreait/laravel-firebase' =>
   array (
-    'aliases' => 
+    'aliases' =>
     array (
       'Firebase' => 'Kreait\\Laravel\\Firebase\\Facades\\Firebase',
     ),
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Kreait\\Laravel\\Firebase\\ServiceProvider',
     ),
   ),
-  'laravel/sail' => 
+  'laravel/sail' =>
   array (
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Laravel\\Sail\\SailServiceProvider',
     ),
   ),
-  'laravel/sanctum' => 
+  'laravel/sanctum' =>
   array (
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     ),
   ),
-  'laravel/tinker' => 
+  'laravel/tinker' =>
   array (
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
     ),
   ),
-  'maatwebsite/excel' => 
+  'maatwebsite/excel' =>
   array (
-    'aliases' => 
+    'aliases' =>
     array (
       'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
     ),
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
     ),
   ),
-  'nesbot/carbon' => 
+  'nesbot/carbon' =>
   array (
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Carbon\\Laravel\\ServiceProvider',
     ),
   ),
-  'nunomaduro/collision' => 
+  'nunomaduro/collision' =>
   array (
-    'providers' => 
+    'providers' =>
     array (
       0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
-  'nunomaduro/termwind' => 
+  'nunomaduro/termwind' =>
   array (
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
-  'spatie/laravel-ignition' => 
+  'spatie/laravel-ignition' =>
   array (
-    'aliases' => 
+    'aliases' =>
     array (
       'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
     ),
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
-  'tymon/jwt-auth' => 
+  'tymon/jwt-auth' =>
   array (
-    'aliases' => 
+    'aliases' =>
     array (
       'JWTAuth' => 'Tymon\\JWTAuth\\Facades\\JWTAuth',
       'JWTFactory' => 'Tymon\\JWTAuth\\Facades\\JWTFactory',
     ),
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
     ),
   ),
-  'vimeo/laravel' => 
+  'vimeo/laravel' =>
   array (
-    'aliases' => 
+    'aliases' =>
     array (
       'Vimeo' => 'Vimeo\\Laravel\\Facades\\Vimeo',
     ),
-    'providers' => 
+    'providers' =>
     array (
       0 => 'Vimeo\\Laravel\\VimeoServiceProvider',
     ),
