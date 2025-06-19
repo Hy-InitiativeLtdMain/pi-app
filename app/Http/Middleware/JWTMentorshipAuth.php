@@ -72,7 +72,6 @@ class JWTMentorshipAuth
                 return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
             }
 
-
             $user = User::firstOrCreate(
                 ['email' => $email],
                 [
