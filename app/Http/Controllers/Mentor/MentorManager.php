@@ -16,7 +16,6 @@ use App\Models\MentorMentee;
 use App\Models\MentorSkill;
 use App\Models\Project;
 use App\Services\FirebaseService;
-use App\Services\Media\CloudinaryService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
