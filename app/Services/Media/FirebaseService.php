@@ -14,7 +14,9 @@ class FirebaseService
 
     public function __construct()
     {
-        $factory = (new Factory)->withServiceAccount(config('firebase.credentials.file'));
+        // Use base_path() to resolve the absolute path
+        $serviceAccountPath = base_path(env('FIREBASE_CREDENTIALS', 'config/firebase/pi-chat-api-firebase.json'));
+        $factory = (new Factory)->withServiceAccount($serviceAccountPath);
 
         $this->storage = $factory->createStorage();
         $this->firestore = $factory->createFirestore();
