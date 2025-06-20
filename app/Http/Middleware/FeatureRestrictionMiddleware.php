@@ -25,11 +25,11 @@ class FeatureRestrictionMiddleware
         if ($user && $user->user_uuid) {
             return $next($request);
         }
-        
+
 
         if (!$user) {
             // If the user is not authenticated or not an admin, deny access
-            return response()->json(['error' => 'Unauthorized.'], 401);
+            return response()->json(['error' => 'Unauthorized.'], 404);
         }
 
 
