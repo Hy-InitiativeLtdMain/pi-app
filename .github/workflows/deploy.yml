@@ -8,6 +8,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Fix apt sources and install php-pear
+        run: |
+          sudo sed -i 's|http://mirrors.digitalocean.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sudo sed -i 's|http://security.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sudo apt-get update
+          sudo apt-get install -y php-pear php-dev
       - name: Deploy Laravel APP
         uses: appleboy/ssh-action@v0.1.4
         with:
