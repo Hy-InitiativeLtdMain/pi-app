@@ -227,7 +227,6 @@
             "time": "2025-06-04T18:36:41+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "beste/clock",
             "version": "3.0.0",
             "source": {
@@ -444,22 +443,6 @@
                 "shasum": ""
             },
             "require": {
-=======
-            "name": "brick/math",
-            "version": "0.12.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/brick/math.git",
-                "reference": "866551da34e9a618e64a819ee1e01c20d8a588ba"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/brick/math/zipball/866551da34e9a618e64a819ee1e01c20d8a588ba",
-                "reference": "866551da34e9a618e64a819ee1e01c20d8a588ba",
-                "shasum": ""
-            },
-            "require": {
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
                 "php": "^8.1"
             },
             "require-dev": {
@@ -1370,7 +1353,6 @@
             "time": "2024-11-01T03:51:45+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "fig/http-message-util",
             "version": "1.1.5",
             "source": {
@@ -1427,8 +1409,6 @@
             "time": "2020-11-24T22:02:12+00:00"
         },
         {
-=======
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             "name": "firebase/php-jwt",
             "version": "v6.11.1",
             "source": {
@@ -1563,7 +1543,6 @@
             "time": "2023-10-12T05:21:21+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "google/auth",
             "version": "v1.47.0",
             "source": {
@@ -2011,22 +1990,6 @@
                 "shasum": ""
             },
             "require": {
-=======
-            "name": "graham-campbell/manager",
-            "version": "v5.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/GrahamCampbell/Laravel-Manager.git",
-                "reference": "b6a4172a32b931fe20c5c242251c8c98b2c79e41"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/GrahamCampbell/Laravel-Manager/zipball/b6a4172a32b931fe20c5c242251c8c98b2c79e41",
-                "reference": "b6a4172a32b931fe20c5c242251c8c98b2c79e41",
-                "shasum": ""
-            },
-            "require": {
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
                 "illuminate/contracts": "^8.75 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
                 "illuminate/support": "^8.75 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
                 "php": "^7.4.15 || ^8.0.2"
@@ -2145,7 +2108,6 @@
             "time": "2024-07-20T21:45:45+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "grpc/grpc",
             "version": "1.57.0",
             "source": {
@@ -2199,17 +2161,6 @@
             },
             "dist": {
                 "type": "zip",
-=======
-            "name": "guzzlehttp/guzzle",
-            "version": "7.9.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "7b2f29fe81dc4da0ca0ea7d42107a0845946ea77"
-            },
-            "dist": {
-                "type": "zip",
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
                 "url": "https://api.github.com/repos/guzzle/guzzle/zipball/7b2f29fe81dc4da0ca0ea7d42107a0845946ea77",
                 "reference": "7b2f29fe81dc4da0ca0ea7d42107a0845946ea77",
                 "shasum": ""
@@ -2612,7 +2563,6 @@
             "time": "2025-02-03T10:55:03+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "kreait/firebase-php",
             "version": "7.10.0",
             "source": {
@@ -2875,22 +2825,6 @@
                 "shasum": ""
             },
             "require": {
-=======
-            "name": "laravel/framework",
-            "version": "v10.48.29",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel/framework.git",
-                "reference": "8f7f9247cb8aad1a769d6b9815a6623d89b46b47"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/8f7f9247cb8aad1a769d6b9815a6623d89b46b47",
-                "reference": "8f7f9247cb8aad1a769d6b9815a6623d89b46b47",
-                "shasum": ""
-            },
-            "require": {
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
                 "brick/math": "^0.9.3|^0.10.2|^0.11|^0.12",
                 "composer-runtime-api": "^2.2",
                 "doctrine/inflector": "^2.0.5",
@@ -3336,7 +3270,6 @@
         },
         {
             "name": "lcobucci/clock",
-<<<<<<< HEAD
             "version": "3.0.0",
             "source": {
                 "type": "git",
@@ -3347,27 +3280,11 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/lcobucci/clock/zipball/039ef98c6b57b101d10bd11d8fdfda12cbd996dc",
                 "reference": "039ef98c6b57b101d10bd11d8fdfda12cbd996dc",
-=======
-            "version": "2.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/lcobucci/clock.git",
-                "reference": "c7aadcd6fd97ed9e199114269c0be3f335e38876"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/clock/zipball/c7aadcd6fd97ed9e199114269c0be3f335e38876",
-                "reference": "c7aadcd6fd97ed9e199114269c0be3f335e38876",
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
                 "shasum": ""
             },
             "require": {
                 "php": "~8.1.0 || ~8.2.0",
-<<<<<<< HEAD
                 "psr/clock": "^1.0"
-=======
-                "stella-maris/clock": "^0.1.7"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             },
             "provide": {
                 "psr/clock-implementation": "1.0"
@@ -3401,11 +3318,7 @@
             "description": "Yet another clock abstraction",
             "support": {
                 "issues": "https://github.com/lcobucci/clock/issues",
-<<<<<<< HEAD
                 "source": "https://github.com/lcobucci/clock/tree/3.0.0"
-=======
-                "source": "https://github.com/lcobucci/clock/tree/2.3.0"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             },
             "funding": [
                 {
@@ -3417,7 +3330,6 @@
                     "type": "patreon"
                 }
             ],
-<<<<<<< HEAD
             "time": "2022-12-19T15:00:24+00:00"
         },
         {
@@ -3457,49 +3369,6 @@
                 "phpunit/phpunit": "^9.5"
             },
             "type": "library",
-=======
-            "time": "2022-12-19T14:38:11+00:00"
-        },
-        {
-            "name": "lcobucci/jwt",
-            "version": "4.0.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "55564265fddf810504110bd68ca311932324b0e9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/55564265fddf810504110bd68ca311932324b0e9",
-                "reference": "55564265fddf810504110bd68ca311932324b0e9",
-                "shasum": ""
-            },
-            "require": {
-                "ext-mbstring": "*",
-                "ext-openssl": "*",
-                "lcobucci/clock": "^2.0",
-                "php": "^7.4 || ^8.0"
-            },
-            "require-dev": {
-                "infection/infection": "^0.20",
-                "lcobucci/coding-standard": "^6.0",
-                "mikey179/vfsstream": "^1.6",
-                "phpbench/phpbench": "^0.17",
-                "phpstan/extension-installer": "^1.0",
-                "phpstan/phpstan": "^0.12",
-                "phpstan/phpstan-deprecation-rules": "^0.12",
-                "phpstan/phpstan-phpunit": "^0.12",
-                "phpstan/phpstan-strict-rules": "^0.12",
-                "phpunit/php-invoker": "^3.1",
-                "phpunit/phpunit": "^9.4"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.0-dev"
-                }
-            },
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             "autoload": {
                 "psr-4": {
                     "Lcobucci\\JWT\\": "src"
@@ -3523,11 +3392,7 @@
             ],
             "support": {
                 "issues": "https://github.com/lcobucci/jwt/issues",
-<<<<<<< HEAD
                 "source": "https://github.com/lcobucci/jwt/tree/4.3.0"
-=======
-                "source": "https://github.com/lcobucci/jwt/tree/4.0.4"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             },
             "funding": [
                 {
@@ -3539,11 +3404,7 @@
                     "type": "patreon"
                 }
             ],
-<<<<<<< HEAD
             "time": "2023-01-02T13:28:00+00:00"
-=======
-            "time": "2021-09-28T19:18:28+00:00"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
         },
         {
             "name": "league/commonmark",
@@ -5053,7 +4914,6 @@
             "time": "2025-04-30T15:16:02+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "psr/cache",
             "version": "3.0.0",
             "source": {
@@ -5103,8 +4963,6 @@
             "time": "2021-02-03T23:26:27+00:00"
         },
         {
-=======
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             "name": "psr/clock",
             "version": "1.0.0",
             "source": {
@@ -5795,7 +5653,6 @@
             "time": "2025-06-01T06:28:46+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "rize/uri-template",
             "version": "0.4.0",
             "source": {
@@ -5816,33 +5673,11 @@
                 "friendsofphp/php-cs-fixer": "^3.63",
                 "phpstan/phpstan": "^1.12",
                 "phpunit/phpunit": "~10.0"
-=======
-            "name": "stella-maris/clock",
-            "version": "0.1.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/stella-maris-solutions/clock.git",
-                "reference": "fa23ce16019289a18bb3446fdecd45befcdd94f8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/stella-maris-solutions/clock/zipball/fa23ce16019289a18bb3446fdecd45befcdd94f8",
-                "reference": "fa23ce16019289a18bb3446fdecd45befcdd94f8",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.0|^8.0",
-                "psr/clock": "^1.0"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-<<<<<<< HEAD
                     "Rize\\": "src/Rize"
-=======
-                    "StellaMaris\\Clock\\": "src"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -5851,7 +5686,6 @@
             ],
             "authors": [
                 {
-<<<<<<< HEAD
                     "name": "Marut K",
                     "homepage": "http://twitter.com/rezigned"
                 }
@@ -6053,24 +5887,6 @@
                 }
             ],
             "time": "2025-03-13T15:25:07+00:00"
-=======
-                    "name": "Andreas Heigl",
-                    "role": "Maintainer"
-                }
-            ],
-            "description": "A pre-release of the proposed PSR-20 Clock-Interface",
-            "homepage": "https://gitlab.com/stella-maris/clock",
-            "keywords": [
-                "clock",
-                "datetime",
-                "point in time",
-                "psr20"
-            ],
-            "support": {
-                "source": "https://github.com/stella-maris-solutions/clock/tree/0.1.7"
-            },
-            "time": "2022-11-25T16:15:06+00:00"
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
         },
         {
             "name": "symfony/console",
@@ -8230,7 +8046,6 @@
                 }
             ],
             "time": "2025-04-09T07:34:50+00:00"
-<<<<<<< HEAD
         },
         {
             "name": "symfony/var-exporter",
@@ -8308,8 +8123,6 @@
                 }
             ],
             "time": "2025-05-14T13:00:13+00:00"
-=======
->>>>>>> 6ff7bd95114328e8f87b30a293f8e5012b60817e
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",
