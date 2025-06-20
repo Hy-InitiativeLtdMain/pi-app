@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Media;
 
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Contract\Storage as FirebaseStorage;
