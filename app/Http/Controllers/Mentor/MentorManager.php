@@ -188,20 +188,20 @@ class MentorManager extends Controller
 
         // Handle file uploads if user has UUID
         if ($user->user_uuid) {
-            if ($request->hasFile('profile')) {
-                $url = $firebase->uploadFile($request->file('profile'), 'mentor-images');
-                $request->merge(['profile_pic' => $url]);
-            }
+            // if ($request->hasFile('profile')) {
+            //     $url = $firebase->uploadFile($request->file('profile'), 'mentor-images');
+            //     $request->merge(['profile_pic' => $url]);
+            // }
 
-            if ($request->hasFile('resume')) {
-                $url = $firebase->uploadFile($request->file('resume'), 'mentor-resume');
-                $request->merge(['resume_link' => $url]);
-            }
+            // if ($request->hasFile('resume')) {
+            //     $url = $firebase->uploadFile($request->file('resume'), 'mentor-resume');
+            //     $request->merge(['resume_link' => $url]);
+            // }
 
-            if ($request->hasFile('intro')) {
-                $url = $firebase->uploadFile($request->file('intro'), 'mentor-intro');
-                $request->merge(['video_intro' => $url]);
-            }
+            // if ($request->hasFile('intro')) {
+            //     $url = $firebase->uploadFile($request->file('intro'), 'mentor-intro');
+            //     $request->merge(['video_intro' => $url]);
+            // }
         }
 
         try {
