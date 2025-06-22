@@ -50,9 +50,13 @@ jobs:
             # Deploy to production
             git pull origin develop
 
+            # Fix apt sources to use official Ubuntu mirrors
+            sudo sed -i 's|http://mirrors.digitalocean.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+            sudo sed -i 's|http://security.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+            sudo apt-get update
+
             # Install grpc extension if not already installed
             if ! php -m | grep -q grpc; then
-              sudo apt-get update
               sudo apt-get install -y php-pear php-dev
               sudo pecl install -f grpc || true
               PHP_INI=$(php -i | grep 'Loaded Configuration File' | awk '{print $5}')
