@@ -16,7 +16,11 @@ class FirebaseService
     {
         // Use base_path() to resolve the absolute path
         $serviceAccountPath = base_path(env('FIREBASE_CREDENTIALS', 'config/firebase/pi-chat-api-firebase.json'));
-        $factory = (new Factory)->withServiceAccount($serviceAccountPath);
+        $storageBucket = env('FIREBASE_STORAGE_BUCKET', 'pi-chat-api.appspot.com'); // <-- ✅ Explicit bucket set here
+
+        $factory = (new Factory)
+            ->withServiceAccount($serviceAccountPath)
+            ->withDefaultStorageBucket($storageBucket); // <-- ✅ Important fix!
 
         $this->storage = $factory->createStorage();
         $this->firestore = $factory->createFirestore();
