@@ -57,8 +57,19 @@ jobs:
 
             # Install grpc extension if not already installed
             if ! php -m | grep -q grpc; then
+              # Add swap to avoid out-of-memory during compilation
+              sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile
+              sudo swapon /swapfile
+
               sudo apt-get install -y php-pear php-dev
               sudo pecl install -f grpc || true
+
+              # Remove swap after compilation
+              sudo swapoff /swapfile
+              sudo rm /swapfile
+
               PHP_INI=$(php -i | grep 'Loaded Configuration File' | awk '{print $5}')
               if ! grep -q "extension=grpc.so" "$PHP_INI"; then
                 echo "extension=grpc.so" | sudo tee -a "$PHP_INI"
