@@ -80,7 +80,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::post('notifications/mark-as-read', [NotificationController::class, 'markNotification'])->middleware(['auth:api']);
 
         Route::resource('mentor', MentorManager::class)->middleware(['auth:api'])->except('index');
-        Route::resource('mentee', MenteeManager::class)->middleware(['auth:api'])->except(['index', 'show']);
+        Route::resource('mentee', MenteeManager::class)->middleware(['auth:api'])->except(['index', 'show'])->names([
+            'store' => 'mentorship.mentee.store',
+            'update' => 'mentorship.mentee.update',
+            'destroy' => 'mentorship.mentee.destroy',
+            'edit' => 'mentorship.mentee.edit',
+            'create' => 'mentorship.mentee.create',
+            'show' => 'mentorship.mentee.show',
+        ]);
         Route::get('mentee-profile', [MenteeManager::class, 'showProfile'])->middleware(['auth:api']);
 
         Route::get('mentor-profile', [MentorManager::class, 'showProfile'])->middleware(['auth:api']);
@@ -160,6 +167,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('mentors/export', [MentorController::class, 'mentorsExport']);
             Route::delete('/mentors/delete', [MentorController::class, 'deleteMentors']);
 
+            // Mentee Assignment Routes
+            Route::get('/mentors/needing-assignments', [MentorManager::class, 'getMentorsNeedingAssignments']);
+            Route::post('/mentors/run-automated-assignment', [MentorManager::class, 'runAutomatedMenteeAssignment']);
+            Route::post('/mentors/{mentor}/assign-mentees', [MentorManager::class, 'manuallyAssignMentees']);
+            Route::get('/mentors/{mentor}/capacity', [MentorManager::class, 'checkMentorCapacity']);
+
             // Route::get('/approve-mentors-in-db', [InstituteController::class, 'approveMentors']);
 
             Route::apiResource('/events', EventController::class);
@@ -178,6 +191,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::patch('availability/bookings/{booking}', [BookingManager::class, 'updateStatus']);
             Route::get('availability/bookings/{id}', [AvailabilityController::class, 'getBooking']);
             Route::get('accepted-bookings', [BookingManager::class, 'getAcceptedBookings']);
+
+            // Session management
+            Route::post('bookings/{booking}/cancel', [BookingManager::class, 'cancelSession']);
+            Route::post('bookings/{booking}/reschedule', [BookingManager::class, 'rescheduleSession']);
 
             Route::get('/session-data', [SessionsManager::class, 'sessions']);
 
@@ -369,6 +386,11 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('/bookings/{id}', [BookingManager::class, 'show']);
         Route::put('/bookings/{id}', [BookingManager::class, 'update']);
         Route::delete('/bookings/{id}', [BookingManager::class, 'destroy']);
+        
+        // Session management for mentees
+        Route::post('/bookings/{booking}/cancel', [BookingManager::class, 'cancelSession']);
+        Route::post('/bookings/{booking}/reschedule', [BookingManager::class, 'rescheduleSession']);
+        
         // View Available Mentors
         Route::get('/mentors', [MentorManager::class, 'index']);
         Route::get('/available-mentors', [BookingManager::class, 'getAvailableMentorsAtCurrentTime']);
@@ -383,7 +405,6 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
         Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMenteeReview']);
         Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
-
     });
 
     // Mentor routes
@@ -407,6 +428,10 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('availability/bookings/{id}', [AvailabilityController::class, 'getBooking']);
         Route::get('accepted-bookings', [BookingManager::class, 'getAcceptedBookings']);
 
+        // Session management for mentors
+        Route::post('bookings/{booking}/cancel', [BookingManager::class, 'cancelSession']);
+        Route::post('bookings/{booking}/reschedule', [BookingManager::class, 'rescheduleSession']);
+
         Route::get('/session-data', [SessionsManager::class, 'sessions']);
 
         Route::post('/experience', [MentorManager::class, 'createExperience']);
@@ -423,7 +448,6 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     });
 
     Route::resource('mentor', MentorManager::class)->except('index')->names([
-
         'store' => 'mentorship.mentor.store',
         'update' => 'mentorship.mentor.update',
         'destroy' => 'mentorship.mentor.destroy',
@@ -440,6 +464,15 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         'create' => 'mentorship.mentee.create',
         'show' => 'mentorship.mentee.show',
     ]);
+
+    // Mentee Assignment Routes (for 3mtt institute) - Admin only
+    Route::group(['prefix' => 'admin', 'middleware' => ['auth:api', 'auth.admin.access']], function () {
+        Route::get('/mentors/needing-assignments', [MentorManager::class, 'getMentorsNeedingAssignments']);
+        Route::post('/mentors/run-automated-assignment', [MentorManager::class, 'runAutomatedMenteeAssignment']);
+        Route::post('/mentors/{mentor}/assign-mentees', [MentorManager::class, 'manuallyAssignMentees']);
+        Route::get('/mentors/{mentor}/capacity', [MentorManager::class, 'checkMentorCapacity']);
+    });
+
     Route::get('mentor-projects', [MentorManager::class, 'getProjectsWithCategories']);
     Route::get('mentee-profile', [MenteeManager::class, 'showProfile']);
     Route::get('mentor-profile', [MentorManager::class, 'showProfile']);
