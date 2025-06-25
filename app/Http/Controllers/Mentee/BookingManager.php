@@ -12,17 +12,23 @@ use App\Http\Resources\Mentor\MentorResource;
 use App\Jobs\SendBookingReminder;
 use App\Models\Booking;
 use App\Models\MentorAvailability;
+use App\Services\Notification\FirebaseNotificationService;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BookingManager extends Controller
 {
     use ApiResponser;
-    public function __construct()
+    
+    protected FirebaseNotificationService $firebaseNotificationService;
+
+    public function __construct(FirebaseNotificationService $firebaseNotificationService)
     {
         // 'mentorship', 'course', 'analytics', 'transaction'
         $this->middleware('feature:mentorship');
+        $this->firebaseNotificationService = $firebaseNotificationService;
     }
 
     public function storeOrUpdate(BookingRequest $request)
@@ -329,5 +335,88 @@ class BookingManager extends Controller
         $menteeId = auth()->user()->mentee->id;
         $count = Booking::where('mentee_id', $menteeId)->where('status', 'Approved')->count();
         return response()->json(['no_of_mentors' => $count], 200);
+    }
+
+    /**
+     * Cancel a booking session
+     */
+    public function cancelSession(Request $request, Booking $booking)
+    {
+        $user = auth()->user();
+        $institute = $user->institute_slug ?? 'default';
+
+        // Check if user is authorized to cancel this booking
+        if ($user->mentor && $booking->mentor_id !== $user->mentor->id) {
+            return $this->errorResponse('Unauthorized to cancel this booking', 403);
+        }
+
+        if ($user->mentee && $booking->mentee_id !== $user->mentee->id) {
+            return $this->errorResponse('Unauthorized to cancel this booking', 403);
+        }
+
+        // Update booking status
+        $booking->update(['status' => 'Cancelled']);
+
+        // Send Firebase notifications
+        try {
+            $cancelledBy = $user->first_name . ' ' . $user->last_name;
+            $this->firebaseNotificationService->sendSessionCancellationNotification($booking, $cancelledBy, $institute);
+        } catch (\Exception $e) {
+            Log::error('Failed to send Firebase session cancellation notification', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return response()->json(['message' => 'Session cancelled successfully'], 200);
+    }
+
+    /**
+     * Reschedule a booking session
+     */
+    public function rescheduleSession(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'new_date' => 'required|date|after:today',
+            'new_time' => 'required|date_format:H:i',
+        ]);
+
+        $user = auth()->user();
+        $institute = $user->institute_slug ?? 'default';
+
+        // Check if user is authorized to reschedule this booking
+        if ($user->mentor && $booking->mentor_id !== $user->mentor->id) {
+            return $this->errorResponse('Unauthorized to reschedule this booking', 403);
+        }
+
+        if ($user->mentee && $booking->mentee_id !== $user->mentee->id) {
+            return $this->errorResponse('Unauthorized to reschedule this booking', 403);
+        }
+
+        // Store old date and time for notification
+        $oldDate = $booking->date;
+        $oldTime = $booking->time;
+
+        // Update booking
+        $booking->update([
+            'date' => $request->new_date,
+            'time' => $request->new_time,
+        ]);
+
+        // Send Firebase notifications
+        try {
+            $rescheduledBy = $user->first_name . ' ' . $user->last_name;
+            $this->firebaseNotificationService->sendSessionRescheduledNotification($booking, $rescheduledBy, $institute);
+        } catch (\Exception $e) {
+            Log::error('Failed to send Firebase session rescheduled notification', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Session rescheduled successfully',
+            'data' => new BookingResource($booking)
+        ], 200);
     }
 }
