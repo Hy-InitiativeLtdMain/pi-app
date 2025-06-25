@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\NotifyUsers::class,
+        Commands\AssignMenteesToMentors::class,
     ];
 
     /**
@@ -26,6 +27,9 @@ class Kernel extends ConsoleKernel
     {
         // Schedule the notify:booking command to run daily
         $schedule->command('notify:booking')->daily();
+        
+        // Schedule automated mentee assignment to run daily at 2 AM
+        $schedule->command('mentors:assign-mentees')->dailyAt('02:00');
     }
 
     /**
