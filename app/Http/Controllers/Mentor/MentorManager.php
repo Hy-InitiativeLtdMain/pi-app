@@ -17,9 +17,11 @@ use App\Models\MentorSkill;
 use App\Models\Project;
 use App\Services\Media\CloudinaryService;
 use App\Services\Media\FirebaseService;
+use App\Services\Notification\FirebaseNotificationService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MentorManager extends Controller
 {
@@ -98,44 +100,13 @@ class MentorManager extends Controller
         // Create mentor
         $mentor = Mentor::create($request->all());
 
-        // Assign 10 random available mentees with the same track
-        $track = $mentor->track;
-        if ($track) {
-            $assignedCount = 0;
-            $checkedMenteeIds = [];
-            while ($assignedCount < 10) {
-                // Get next batch of random mentees not already checked
-                $mentees = Mentee::where('track', $track)
-                    ->whereNotIn('id', $checkedMenteeIds)
-                    ->inRandomOrder()
-                    ->limit(10 - $assignedCount)
-                    ->get();
-
-                if ($mentees->isEmpty()) {
-                    break; // No more mentees to assign
-                }
-
-                foreach ($mentees as $mentee) {
-                    $checkedMenteeIds[] = $mentee->id;
-                    // Double-check mentee is not already assigned in MentorMentee table
-                    $alreadyAssigned = MentorMentee::where('mentee_id', $mentee->id)->exists();
-                    if (!$alreadyAssigned) {
-                        MentorMentee::create([
-                            'mentor_id' => $mentor->id,
-                            'mentee_id' => $mentee->id,
-                        ]);
-                        $assignedCount++;
-                        if ($assignedCount >= 10) {
-                            break 2;
-                        }
-                    }
-                }
-            }
-        }
+        // Assign mentees to the mentor using the new function
+        $assignmentResult = $this->assignMenteesToMentor($mentor);
 
         $data = [
             'message' => 'Profile Created Successfully.',
-            'data'    => new MentorResource($mentor)
+            'data'    => new MentorResource($mentor),
+            'mentee_assignment' => $assignmentResult
         ];
 
         return $this->successResponse($data, 201);
@@ -228,6 +199,224 @@ class MentorManager extends Controller
         }
         $mentor->delete();
         return $this->successResponse('Mentor profile deleted successfully', 204);
+    }
+
+    /**
+     * Assign mentees to a mentor based on track and institute
+     * @param Mentor $mentor
+     * @return array
+     */
+    private function assignMenteesToMentor(Mentor $mentor)
+    {
+        $assignedCount = 0;
+        $maxMentees = 10;
+        $checkedMenteeIds = [];
+        
+        // Get current mentee count for this mentor
+        $currentMenteeCount = MentorMentee::where('mentor_id', $mentor->id)->count();
+        
+        // If mentor already has 10 mentees, return early
+        if ($currentMenteeCount >= $maxMentees) {
+            return [
+                'assigned' => 0,
+                'message' => 'Mentor already has maximum number of mentees (10)',
+                'total_mentees' => $currentMenteeCount
+            ];
+        }
+        
+        // Calculate how many more mentees can be assigned
+        $remainingSlots = $maxMentees - $currentMenteeCount;
+        
+        $track = $mentor->track;
+        $institute = $mentor->institute;
+        
+        if (!$track) {
+            return [
+                'assigned' => 0,
+                'message' => 'Mentor track not specified',
+                'total_mentees' => $currentMenteeCount
+            ];
+        }
+        
+        // Check if mentor is from 3mtt institute
+        if ($institute !== '3mtt') {
+            return [
+                'assigned' => 0,
+                'message' => 'Mentor is not from 3mtt institute',
+                'total_mentees' => $currentMenteeCount
+            ];
+        }
+        
+        while ($assignedCount < $remainingSlots) {
+            // Build query for available mentees - only from 3mtt institute
+            $menteesQuery = Mentee::where('track', $track)
+                ->where('institute', '3mtt') // Only target 3mtt mentees
+                ->whereNotIn('id', $checkedMenteeIds);
+            
+            // Get next batch of random mentees not already checked
+            $mentees = $menteesQuery->inRandomOrder()
+                ->limit($remainingSlots - $assignedCount)
+                ->get();
+
+            if ($mentees->isEmpty()) {
+                break; // No more mentees to assign
+            }
+
+            foreach ($mentees as $mentee) {
+                $checkedMenteeIds[] = $mentee->id;
+                
+                // Check if mentee is not already assigned to any mentor
+                $alreadyAssigned = MentorMentee::where('mentee_id', $mentee->id)->exists();
+                
+                if (!$alreadyAssigned) {
+                    MentorMentee::create([
+                        'mentor_id' => $mentor->id,
+                        'mentee_id' => $mentee->id,
+                    ]);
+                    $assignedCount++;
+                    
+                    if ($assignedCount >= $remainingSlots) {
+                        break 2;
+                    }
+                }
+            }
+        }
+        
+        $finalMenteeCount = MentorMentee::where('mentor_id', $mentor->id)->count();
+        
+        // Send Firebase notification if mentees were assigned
+        if ($assignedCount > 0) {
+            try {
+                $firebaseNotificationService = app(FirebaseNotificationService::class);
+                $firebaseNotificationService->sendMenteeAssignmentNotification($mentor, $assignedCount);
+            } catch (\Exception $e) {
+                Log::error('Failed to send Firebase mentee assignment notification', [
+                    'mentor_id' => $mentor->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        return [
+            'assigned' => $assignedCount,
+            'message' => "Assigned {$assignedCount} new mentees to mentor",
+            'total_mentees' => $finalMenteeCount,
+            'remaining_slots' => $maxMentees - $finalMenteeCount
+        ];
+    }
+
+    /**
+     * Check if a mentor can accept more mentees
+     * @param Mentor $mentor
+     * @return array
+     */
+    public function checkMentorCapacity(Mentor $mentor)
+    {
+        $currentMenteeCount = MentorMentee::where('mentor_id', $mentor->id)->count();
+        $maxMentees = 10;
+        
+        return [
+            'mentor_id' => $mentor->id,
+            'current_mentees' => $currentMenteeCount,
+            'max_mentees' => $maxMentees,
+            'remaining_slots' => max(0, $maxMentees - $currentMenteeCount),
+            'can_accept_more' => $currentMenteeCount < $maxMentees,
+            'is_full' => $currentMenteeCount >= $maxMentees
+        ];
+    }
+
+    /**
+     * Manually assign mentees to a mentor (for admin use)
+     * @param Request $request
+     * @param Mentor $mentor
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function manuallyAssignMentees(Request $request, Mentor $mentor)
+    {
+        // Check if mentor is from 3mtt institute
+        if ($mentor->institute !== '3mtt') {
+            return $this->errorResponse('This assignment system is only for 3mtt institute mentors', 400);
+        }
+        
+        // Check if mentor can accept more mentees
+        $capacityCheck = $this->checkMentorCapacity($mentor);
+        
+        if (!$capacityCheck['can_accept_more']) {
+            return $this->errorResponse('Mentor cannot accept more mentees. Current count: ' . $capacityCheck['current_mentees'], 400);
+        }
+        
+        $result = $this->assignMenteesToMentor($mentor);
+        
+        return $this->successResponse([
+            'message' => $result['message'],
+            'data' => $result
+        ], 200);
+    }
+
+    /**
+     * Get mentors that need mentee assignments (for automated tasks)
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMentorsNeedingAssignments()
+    {
+        $mentors = Mentor::where('status', 'approved')
+            ->whereNotNull('track')
+            ->where('institute', '3mtt') // Only target 3mtt mentors
+            ->get();
+        
+        $mentorsNeedingAssignments = [];
+        
+        foreach ($mentors as $mentor) {
+            $capacityCheck = $this->checkMentorCapacity($mentor);
+            
+            if ($capacityCheck['can_accept_more']) {
+                $mentorsNeedingAssignments[] = [
+                    'mentor' => new MentorResource($mentor),
+                    'capacity' => $capacityCheck
+                ];
+            }
+        }
+        
+        return $this->successResponse([
+            'mentors_needing_assignments' => $mentorsNeedingAssignments,
+            'total_mentors_needing_assignments' => count($mentorsNeedingAssignments)
+        ], 200);
+    }
+
+    /**
+     * Run automated mentee assignment for all eligible mentors
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function runAutomatedMenteeAssignment()
+    {
+        $mentors = Mentor::where('status', 'approved')
+            ->whereNotNull('track')
+            ->where('institute', '3mtt') // Only target 3mtt mentors
+            ->get();
+        
+        $results = [];
+        $totalAssigned = 0;
+        
+        foreach ($mentors as $mentor) {
+            $capacityCheck = $this->checkMentorCapacity($mentor);
+            
+            if ($capacityCheck['can_accept_more']) {
+                $assignmentResult = $this->assignMenteesToMentor($mentor);
+                $totalAssigned += $assignmentResult['assigned'];
+                
+                $results[] = [
+                    'mentor_id' => $mentor->id,
+                    'mentor_name' => $mentor->firstname . ' ' . $mentor->lastname,
+                    'assignment_result' => $assignmentResult
+                ];
+            }
+        }
+        
+        return $this->successResponse([
+            'message' => "Automated mentee assignment completed for 3mtt institute. Total new assignments: {$totalAssigned}",
+            'total_new_assignments' => $totalAssigned,
+            'results' => $results
+        ], 200);
     }
 
     // create/update mentor experience
