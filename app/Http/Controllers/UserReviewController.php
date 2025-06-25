@@ -8,10 +8,19 @@ use App\Http\Resources\ReviewResource;
 use App\Models\Mentee;
 use App\Models\Mentor;
 use App\Models\UserReview;
+use App\Services\Notification\FirebaseNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserReviewController extends Controller
 {
+    protected FirebaseNotificationService $firebaseNotificationService;
+
+    public function __construct(FirebaseNotificationService $firebaseNotificationService)
+    {
+        $this->firebaseNotificationService = $firebaseNotificationService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -19,8 +28,6 @@ class UserReviewController extends Controller
     {
         //
     }
-
-
 
     /**
      * Store a newly created resource in storage.
@@ -37,8 +44,24 @@ class UserReviewController extends Controller
             $data['session_hours'] = $request->session_hours ? $request->session_hours : null;
             $data['number_of_sessions'] = $request->number_of_sessions ? $request->number_of_sessions : null;
             UserReview::create($data);
+
+            // Send Firebase notification to mentee
+            try {
+                $mentee = Mentee::find($id);
+                if ($mentee && $mentee->user) {
+                    $reviewerName = auth()->user()->first_name . ' ' . auth()->user()->last_name;
+                    $institute = auth()->user()->institute_slug ?? 'default';
+                    $this->firebaseNotificationService->sendReviewNotification($mentee->user, $reviewerName, $institute);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send Firebase review notification to mentee', [
+                    'mentee_id' => $id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
             return response()->json(['message' => 'Review Submitted successfully.'], 201);
-        }else if (auth()->user()->mentee) {
+        } else if (auth()->user()->mentee) {
             $data['user_type'] = 0;
             $data['mentor_id'] = $id;
             $data['mentee_id'] = auth()->user()->mentee->id;
@@ -48,9 +71,24 @@ class UserReviewController extends Controller
             $data['session_hours'] = $request->session_hours ? $request->session_hours : null;
             $data['number_of_sessions'] = $request->number_of_sessions ? $request->number_of_sessions : null;
             UserReview::create($data);
+
+            // Send Firebase notification to mentor
+            try {
+                $mentor = Mentor::find($id);
+                if ($mentor && $mentor->user) {
+                    $reviewerName = auth()->user()->first_name . ' ' . auth()->user()->last_name;
+                    $institute = auth()->user()->institute_slug ?? 'default';
+                    $this->firebaseNotificationService->sendReviewNotification($mentor->user, $reviewerName, $institute);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send Firebase review notification to mentor', [
+                    'mentor_id' => $id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
             return response()->json(['message' => 'Review Submitted successfully.'], 201);
         }
-
     }
 
     /**
@@ -60,8 +98,6 @@ class UserReviewController extends Controller
     {
         return response()->json($userReview);
     }
-
-
 
     /**
      * Update the specified resource in storage.
@@ -87,7 +123,6 @@ class UserReviewController extends Controller
         $reviews = UserReview::where('mentor_id', auth()->user()->mentor->id)
                                ->where('user_type', 0)->get();
         return response()->json( ReviewResource::collection($reviews));
-
     }
 
     public function fetchMenteeReviews()
