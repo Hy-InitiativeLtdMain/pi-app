@@ -10,7 +10,7 @@
         "cloudinary-labs/cloudinary-laravel": "^2.0",
         "firebase/php-jwt": "^6.11",
         "google/cloud-firestore": "*",
-        "guzzlehttp/guzzle": "^7.2",
+        "guzzlehttp/guzzle": "^7.9",
         "kreait/firebase-php": "*",
         "kreait/laravel-firebase": "^5.8",
         "laravel/framework": "^10.10",
