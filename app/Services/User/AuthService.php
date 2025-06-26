@@ -154,9 +154,9 @@ class AuthService
         }
 
         if (isset($input['is_admin'])) {
-            //$input['registered_role'] = $input['is_admin'];
+            $input['registered_role'] = $input['is_admin'];
         } else {
-            // $input['registered_role'] = false;
+            $input['registered_role'] = false;
         }
 
         $user = User::create($input);
