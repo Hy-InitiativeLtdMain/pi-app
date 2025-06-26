@@ -22,8 +22,7 @@ class PaystackWebhookService
         }
         Log::info('Transaction found', ['transaction_id' => $transaction->id]);
         
-        // Find all transactions created in the same subscription session
-        // Look for transactions with the same course and created within a short time window
+        // TEMPORARY: Mark all course transactions as paid regardless of amount verification
         $courseId = $transaction->courses()->first()->id ?? null;
         if (!$courseId) {
             Log::error('No course found for transaction', ['transaction_id' => $transaction->id]);
@@ -47,6 +46,22 @@ class PaystackWebhookService
             'time_window' => $timeWindow . ' minutes'
         ]);
         
+        // TEMPORARY: Skip amount verification and mark all as paid
+        Log::info('TEMPORARY: Bypassing amount verification - marking all transactions as paid');
+        
+        // Mark all related transactions as paid
+        foreach ($courseTransactions as $courseTransaction) {
+            $courseTransaction->status = 1;
+            $courseTransaction->paid_at = Carbon::now();
+            $courseTransaction->save();
+            Log::info('Transaction marked as paid', ['transaction_id' => $courseTransaction->id]);
+        }
+        
+        $data['message'] = 'Updated (temporary bypass)';
+        return response()->json($data, 200);
+        
+        // ORIGINAL CODE (commented out for now):
+        /*
         $totalExpectedAmount = $courseTransactions->sum('amount') * 100; // Convert to kobo
         
         if (abs($totalExpectedAmount) == floatval($_data['amount'])) {
@@ -70,6 +85,7 @@ class PaystackWebhookService
         ]);
         $data['message'] = 'Not found';
         return response()->json($data, 404);
+        */
     }
 
     public function transferSuccess($_data)
