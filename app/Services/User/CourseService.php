@@ -99,9 +99,10 @@ class CourseService
             $resp = $cloudinary->store($input['cover_file'], "course-images");
             $input['cover_url'] = $resp[0];
             $input['cover_url_id'] = $resp[1];
-            $input['institute_slug'] = Auth::user()->institute_slug;
         }
-
+        // Always set user_id and institute_slug
+        $input['user_id'] = Auth::id();
+        $input['institute_slug'] = Auth::user()->institute_slug;
         $course = Course::create($input);
 
         if (isset($input['categories'])) {
@@ -180,8 +181,12 @@ class CourseService
     {
         $course = Course::published()->findOrFail($course->id);
 
+        // Find the institute user by slug
+        $instituteUser = User::where('institute_slug', $course->institute_slug)->first();
+        $instituteUserId = $instituteUser ? $instituteUser->id : null;
+
         // Add validation for required stakeholder IDs
-        if (empty($course->user_id) || empty($course->institute_id)) {
+        if (empty($course->user_id) || empty($course->institute_slug) || empty($instituteUserId)) {
             throw new \Exception('Course creator or institute is not set. Please contact support.');
         }
 
@@ -206,7 +211,7 @@ class CourseService
         $sharingRatio = [0.5, 0.3, 0.2]; // 50:30:20
         $stakeholders = [
             'creator' => $course->user_id,
-            'institute' => $course->institute_id,
+            'institute' => $instituteUserId,
             'wesonline' => 1 // Assuming WESonline has a user_id of 1
         ];
 
@@ -236,7 +241,7 @@ class CourseService
         if ($type == 'paystack') {
             $_paystackService = new PaystackService();
             $creatorSubaccount = Subaccount::where('user_id', $course->user_id)->first()->subaccount_code;
-            $instituteSubaccount = Subaccount::where('user_id', $course->institute_id)->first()->subaccount_code;
+            $instituteSubaccount = Subaccount::where('user_id', $course->institute_slug)->first()->subaccount_code;
 
             $_data = $_paystackService->initializeTransaction([
                 'email' => $user->email,

@@ -17,7 +17,8 @@ class Booking extends Model
         'date',
         'time',
         'reason',
-        'status'
+        'status',
+        'hours',
     ];
 
     public function mentee()
