@@ -180,6 +180,11 @@ class CourseService
     {
         $course = Course::published()->findOrFail($course->id);
 
+        // Add validation for required stakeholder IDs
+        if (empty($course->user_id) || empty($course->institute_id)) {
+            throw new \Exception('Course creator or institute is not set. Please contact support.');
+        }
+
         if ($course->has_active_payment) {
             $data['message'] = 'You have an active Subscription';
             return [
