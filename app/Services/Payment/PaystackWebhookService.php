@@ -22,16 +22,30 @@ class PaystackWebhookService
         }
         Log::info('Transaction found', ['transaction_id' => $transaction->id]);
         
-        // Find all transactions for this course (since Paystack sends total amount)
-        $courseTransactions = Transaction::whereIn('id', function($query) use ($transaction) {
+        // Find all transactions created in the same subscription session
+        // Look for transactions with the same course and created within a short time window
+        $courseId = $transaction->courses()->first()->id ?? null;
+        if (!$courseId) {
+            Log::error('No course found for transaction', ['transaction_id' => $transaction->id]);
+            return response()->json(['message' => 'No course found for transaction'], 404);
+        }
+        
+        // Get transactions for this specific course created within 5 minutes of the current transaction
+        $timeWindow = 5; // minutes
+        $courseTransactions = Transaction::whereIn('id', function($query) use ($courseId, $transaction, $timeWindow) {
             $query->select('transaction_id')
                   ->from('transaction_course')
-                  ->whereIn('course_id', function($subQuery) use ($transaction) {
-                      $subQuery->select('course_id')
-                               ->from('transaction_course')
-                               ->where('transaction_id', $transaction->id);
-                  });
+                  ->where('course_id', $courseId)
+                  ->where('created_at', '>=', $transaction->created_at->subMinutes($timeWindow))
+                  ->where('created_at', '<=', $transaction->created_at->addMinutes($timeWindow));
         })->get();
+        
+        Log::info('Found course transactions for webhook', [
+            'course_id' => $courseId,
+            'transaction_count' => $courseTransactions->count(),
+            'transaction_ids' => $courseTransactions->pluck('id'),
+            'time_window' => $timeWindow . ' minutes'
+        ]);
         
         $totalExpectedAmount = $courseTransactions->sum('amount') * 100; // Convert to kobo
         
@@ -49,6 +63,7 @@ class PaystackWebhookService
         }
         
         Log::warning('Amount mismatch for course transactions', [
+            'course_id' => $courseId,
             'course_transaction_ids' => $courseTransactions->pluck('id'),
             'expected_total' => $totalExpectedAmount,
             'actual' => floatval($_data['amount'])
