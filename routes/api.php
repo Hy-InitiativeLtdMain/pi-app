@@ -409,6 +409,12 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
     // Mentor routes
     Route::group(['prefix' => 'mentors'], function () {
+        Route::get('dashboard', [\App\Http\Controllers\Mentorship\DashboardController::class, 'index']);
+        Route::get('todos', [\App\Http\Controllers\Mentorship\DashboardController::class, 'todos']);
+        Route::post('todos/{id}/complete', [\App\Http\Controllers\Mentorship\DashboardController::class, 'completeTodo']);
+        Route::get('badges', [\App\Http\Controllers\Mentorship\DashboardController::class, 'badges']);
+        Route::get('notifications', [\App\Http\Controllers\Mentorship\DashboardController::class, 'notifications']);
+        Route::get('search', [\App\Http\Controllers\Mentorship\DashboardController::class, 'search']);
         Route::apiResource('availability', AvailabilityController::class)->except('show')->names([
             'index' => 'mentorship.availability.index',
             'store' => 'mentorship.availability.store',
