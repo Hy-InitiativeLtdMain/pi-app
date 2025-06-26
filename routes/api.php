@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/paystack-hook', [WebhooksManager::class, 'paymentWebhook']);
 Route::post('/flw-hook', [WebhooksManager::class, 'flwWebhook']);
+Route::get('/paystack-callback', [\App\Http\Controllers\User\PaystackManager::class, 'handleCallback']);
 
 Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], function () {
 
@@ -485,5 +486,3 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     Route::get('event', [EventController::class, 'index']);
     Route::get('event/{event}', [EventController::class, 'show']);
 });
-
-Route::get('/paystack-callback', [\App\Http\Controllers\User\PaystackManager::class, 'handleCallback']);
