@@ -180,29 +180,35 @@ class CourseService
     public function subscribe(User $user, Course $course, $type)
     {
         $course = Course::published()->findOrFail($course->id);
+        Log::info('Starting course subscription', ['user_id' => $user->id, 'course_id' => $course->id]);
 
-        // Find the institute user by slug
+        // Validate stakeholders
         $instituteUser = User::where('institute_slug', $course->institute_slug)->first();
         $instituteUserId = $instituteUser ? $instituteUser->id : null;
-
-        // Add validation for required stakeholder IDs
-        if (empty($course->user_id) || empty($course->institute_slug) || empty($instituteUserId)) {
-            throw new \Exception('Course creator or institute is not set. Please contact support.');
+        $missing = [];
+        if (empty($course->user_id)) $missing[] = 'Course creator (user_id)';
+        if (empty($course->institute_slug)) $missing[] = 'Course institute_slug';
+        if (empty($instituteUserId)) $missing[] = 'Institute user (by slug)';
+        if ($missing) {
+            $msg = 'Missing required: ' . implode(', ', $missing);
+            Log::error($msg, ['course_id' => $course->id]);
+            throw new \Exception($msg);
         }
 
         if ($course->has_active_payment) {
-            $data['message'] = 'You have an active Subscription';
+            Log::info('User already has active payment', ['user_id' => $user->id, 'course_id' => $course->id]);
             return [
-                'data' => $data,
+                'data' => ['message' => 'You have an active Subscription'],
                 'code' => 200
             ];
         }
-
         if ($course->pendingPayment != null) {
-            $data['message'] = 'You have a Pending Payment';
-            $data['transaction'] = $course->pendingPayment;
+            Log::info('User has pending payment', ['user_id' => $user->id, 'course_id' => $course->id]);
             return [
-                'data' => $data,
+                'data' => [
+                    'message' => 'You have a Pending Payment',
+                    'transaction' => $course->pendingPayment
+                ],
                 'code' => 200
             ];
         }
@@ -215,71 +221,100 @@ class CourseService
             'wesonline' => 1 // Assuming WESonline has a user_id of 1
         ];
 
+        // Create transactions
+        $transactions = $this->createTransactions($course, $type, $price, $sharingRatio, $stakeholders);
+
+        // Subaccount checks and creation
+        $creatorSub = $this->getOrCreateSubaccount($course->user_id, 'CR_');
+        $instituteSub = $this->getOrCreateSubaccount($instituteUserId, 'INST_');
+        $creatorSubaccount = $creatorSub->subaccount_code;
+        $instituteSubaccount = $instituteSub->subaccount_code;
+
+        $data = [
+            'message' => 'Subscription was successful',
+            'transactions' => $transactions,
+            'course' => $course
+        ];
+
+        // Payment initialization
+        if ($type == 'paystack') {
+            $paystackResult = $this->initializePaystackPayment($user, $price, $transactions[0]->ref, $creatorSubaccount, $instituteSubaccount, $sharingRatio);
+            if ($paystackResult['error']) {
+                Log::error('Paystack payment initialization failed', ['error' => $paystackResult['error']]);
+                return [
+                    'data' => ['message' => 'Payment initialization failed', 'error' => $paystackResult['error']],
+                    'code' => 500
+                ];
+            }
+            $data['payment'] = $paystackResult['payment'];
+        }
+
+        Log::info('Course subscription completed', ['user_id' => $user->id, 'course_id' => $course->id]);
+        return [
+            'data' => $data,
+            'code' => 200
+        ];
+    }
+
+    // Helper: Create transactions for stakeholders
+    private function createTransactions($course, $type, $price, $sharingRatio, $stakeholders)
+    {
         $transactions = [];
         foreach ($sharingRatio as $index => $ratio) {
             $amount = $price * $ratio;
-            $ref = 'CRS' . (str_pad((Str::random(3) . mt_rand(0, 9999)), 7, '0', STR_PAD_LEFT));
+            $ref = 'CRS' . strtoupper(Str::random(7));
             $transaction = Transaction::create([
                 'ref' => $ref,
                 'type' => $type,
                 'amount' => $amount,
                 'user_id' => $stakeholders[array_keys($stakeholders)[$index]]
             ]);
-
             TransactionCourse::create([
                 'course_id' => $course->id,
                 'transaction_id' => $transaction->id,
             ]);
-
+            Log::info('Transaction created', ['ref' => $ref, 'amount' => $amount, 'user_id' => $stakeholders[array_keys($stakeholders)[$index]]]);
             $transactions[] = $transaction;
         }
+        return $transactions;
+    }
 
-        $data['message'] = 'Subscription was successful';
-        $data['transactions'] = $transactions;
-        $data['course'] = $course;
-
-        // Subaccount checks and creation
-        $creatorSub = Subaccount::where('user_id', $course->user_id)->first();
-        if (!$creatorSub) {
-            $creatorSub = Subaccount::create([
-                'user_id' => $course->user_id,
-                'subaccount_code' => 'CR_' . uniqid(), // Replace with actual logic to generate subaccount code
+    // Helper: Get or create subaccount
+    private function getOrCreateSubaccount($userId, $prefix)
+    {
+        $sub = Subaccount::where('user_id', $userId)->first();
+        if (!$sub) {
+            // NOTE: Replace this with real subaccount creation logic if available
+            $sub = Subaccount::create([
+                'user_id' => $userId,
+                'subaccount_code' => $prefix . uniqid(),
             ]);
-            if (!$creatorSub) {
-                throw new \Exception('Failed to create creator subaccount. Please contact support.');
-            }
+            Log::info('Subaccount created', ['user_id' => $userId, 'subaccount_code' => $sub->subaccount_code]);
         }
-        $instituteSub = Subaccount::where('user_id', $instituteUserId)->first();
-        if (!$instituteSub) {
-            $instituteSub = Subaccount::create([
-                'user_id' => $instituteUserId,
-                'subaccount_code' => 'INST_' . uniqid(), // Replace with actual logic to generate subaccount code
-            ]);
-            if (!$instituteSub) {
-                throw new \Exception('Failed to create institute subaccount. Please contact support.');
-            }
-        }
-        $creatorSubaccount = $creatorSub->subaccount_code;
-        $instituteSubaccount = $instituteSub->subaccount_code;
+        return $sub;
+    }
 
-        if ($type == 'paystack') {
+    // Helper: Initialize Paystack payment
+    private function initializePaystackPayment($user, $price, $reference, $creatorSubaccount, $instituteSubaccount, $sharingRatio)
+    {
+        try {
             $_paystackService = new PaystackService();
             $_data = $_paystackService->initializeTransaction([
                 'email' => $user->email,
                 'amount' => $price,
-                'reference' => $transactions[0]->ref,
+                'reference' => $reference,
                 'subaccounts' => [
                     ['subaccount' => $creatorSubaccount, 'share' => $sharingRatio[0] * 100],
                     ['subaccount' => $instituteSubaccount, 'share' => $sharingRatio[1] * 100]
                 ]
             ]);
-            $data['payment'] = $_data;
+            if ($_data['code'] != 200 || !($_data['data']['status'] ?? false)) {
+                return ['error' => $_data['data']['message'] ?? 'Unknown error', 'payment' => null];
+            }
+            return ['error' => null, 'payment' => $_data['data']];
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage(), 'payment' => null];
         }
-
-        return [
-            'data' => $data,
-            'code' => 200
-        ];
     }
 
     public function createCourseWithAI(UploadedFile $file, Course $course)
