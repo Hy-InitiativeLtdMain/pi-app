@@ -78,11 +78,15 @@ class CourseController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:approved,declined',
-            'feedback' => 'nullable'
+            'feedback' => 'nullable|string'
         ]);
 
         $course->update($validated);
-        event(new FlagCourse($course));
+        
+        // Pass feedback to the event if course is declined
+        $feedback = $validated['status'] === 'declined' ? $validated['feedback'] : null;
+        event(new FlagCourse($course, $feedback));
+        
         return response()->json(['message' => 'Course status updated successfully']);
     }
     // get a course
