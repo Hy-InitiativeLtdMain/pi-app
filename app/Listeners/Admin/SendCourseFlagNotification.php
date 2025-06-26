@@ -29,6 +29,6 @@ class SendCourseFlagNotification implements ShouldQueue
 
         $user = User::where('id', $user_id)->first();
 
-        $user->notify(new CourseFlagNotification($event->course));
+        $user->notify(new CourseFlagNotification($event->course, $event->feedback));
     }
 }

@@ -12,12 +12,14 @@ class CourseFlagNotification extends Notification
     use Queueable;
 
     private $course;
+    private $feedback;
     /**
      * Create a new notification instance.
      */
-    public function __construct($course)
+    public function __construct($course, $feedback = null)
     {
         $this->course = $course;
+        $this->feedback = $feedback;
     }
 
     /**
@@ -45,7 +47,12 @@ class CourseFlagNotification extends Notification
             ->view('vendor.notifications.course.approved.approved', ['user' => $notifiable, 'course' => $this->course, 'institute' => $this->course->institute_slug]);
         } elseif ($status == 'declined') {
             $message->subject('Course Approval Status: Declined')
-            ->view('vendor.notifications.course.approved.declined', ['user' => $notifiable, 'course' => $this->course, 'institute' => $this->course->institute_slug]);
+            ->view('vendor.notifications.course.approved.declined', [
+                'user' => $notifiable, 
+                'course' => $this->course, 
+                'institute' => $this->course->institute_slug,
+                'feedback' => $this->feedback
+            ]);
         } else {
             $message->subject('Course Approval Status: Pending')
             ->line('Your course is currently under review.')
@@ -74,6 +81,11 @@ class CourseFlagNotification extends Notification
         } elseif ($status == 'declined') {
             $title = 'Course Approval Status: Declined';
             $message = "Your course '" . $heading . "' has been declined.";
+            
+            // Add feedback to the message if provided
+            if ($this->feedback) {
+                $message .= " Feedback: " . $this->feedback;
+            }
         } else {
             $title = 'Course Approval Status: Pending';
             $message = "Your course '" . $heading . "' is currently under review.";
@@ -85,6 +97,7 @@ class CourseFlagNotification extends Notification
             'category' => "Course",
             "type" => "Course",
             "id" => $this->course->id,
+            "feedback" => $this->feedback,
         ];
     }
 }
