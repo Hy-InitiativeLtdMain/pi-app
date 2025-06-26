@@ -117,15 +117,15 @@ class DashboardController extends Controller
     /**
      * Get mentor notifications.
      */
-    public function notifications(Request $request)
-    {
-        // Placeholder response
-        return response()->json([
-            'notifications' => [
-                ['id' => 1, 'message' => 'Welcome to the dashboard!', 'read' => false],
-            ]
-        ]);
-    }
+    // public function notifications(Request $request)
+    // {
+    //     // Placeholder response
+    //     return response()->json([
+    //         'notifications' => [
+    //             ['id' => 1, 'message' => 'Welcome to the dashboard!', 'read' => false],
+    //         ]
+    //     ]);
+    // }
 
     /**
      * Search dashboard data.
