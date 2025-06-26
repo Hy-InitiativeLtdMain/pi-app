@@ -238,11 +238,32 @@ class CourseService
         $data['transactions'] = $transactions;
         $data['course'] = $course;
 
+        // Subaccount checks and creation
+        $creatorSub = Subaccount::where('user_id', $course->user_id)->first();
+        if (!$creatorSub) {
+            $creatorSub = Subaccount::create([
+                'user_id' => $course->user_id,
+                'subaccount_code' => 'CR_' . uniqid(), // Replace with actual logic to generate subaccount code
+            ]);
+            if (!$creatorSub) {
+                throw new \Exception('Failed to create creator subaccount. Please contact support.');
+            }
+        }
+        $instituteSub = Subaccount::where('user_id', $instituteUserId)->first();
+        if (!$instituteSub) {
+            $instituteSub = Subaccount::create([
+                'user_id' => $instituteUserId,
+                'subaccount_code' => 'INST_' . uniqid(), // Replace with actual logic to generate subaccount code
+            ]);
+            if (!$instituteSub) {
+                throw new \Exception('Failed to create institute subaccount. Please contact support.');
+            }
+        }
+        $creatorSubaccount = $creatorSub->subaccount_code;
+        $instituteSubaccount = $instituteSub->subaccount_code;
+
         if ($type == 'paystack') {
             $_paystackService = new PaystackService();
-            $creatorSubaccount = Subaccount::where('user_id', $course->user_id)->first()->subaccount_code;
-            $instituteSubaccount = Subaccount::where('user_id', $course->institute_slug)->first()->subaccount_code;
-
             $_data = $_paystackService->initializeTransaction([
                 'email' => $user->email,
                 'amount' => $price,
