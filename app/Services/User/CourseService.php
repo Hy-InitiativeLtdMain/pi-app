@@ -214,6 +214,12 @@ class CourseService
         }
 
         $price = $course->price;
+        Log::info('Course subscription payment initialization', [
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'course_title' => $course->title,
+            'price' => $price,
+        ]);
         $sharingRatio = [0.5, 0.3, 0.2]; // 50:30:20
         $stakeholders = [
             'creator' => $course->user_id,
