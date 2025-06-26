@@ -21,17 +21,36 @@ class PaystackWebhookService
             return response()->json(['message' => 'Transaction not found'], 404);
         }
         Log::info('Transaction found', ['transaction_id' => $transaction->id]);
-        if (abs(floatval($transaction->total_amount)) * 100 == floatval($_data['amount'])) {
-            $transaction->status = 1;
-            $transaction->paid_at = Carbon::now();
-            $transaction->save();
-            Log::info('Transaction marked as paid', ['transaction_id' => $transaction->id]);
+        
+        // Find all transactions for this course (since Paystack sends total amount)
+        $courseTransactions = Transaction::whereIn('id', function($query) use ($transaction) {
+            $query->select('transaction_id')
+                  ->from('transaction_course')
+                  ->whereIn('course_id', function($subQuery) use ($transaction) {
+                      $subQuery->select('course_id')
+                               ->from('transaction_course')
+                               ->where('transaction_id', $transaction->id);
+                  });
+        })->get();
+        
+        $totalExpectedAmount = $courseTransactions->sum('amount') * 100; // Convert to kobo
+        
+        if (abs($totalExpectedAmount) == floatval($_data['amount'])) {
+            // Mark all related transactions as paid
+            foreach ($courseTransactions as $courseTransaction) {
+                $courseTransaction->status = 1;
+                $courseTransaction->paid_at = Carbon::now();
+                $courseTransaction->save();
+                Log::info('Transaction marked as paid', ['transaction_id' => $courseTransaction->id]);
+            }
+            
             $data['message'] = 'Updated';
             return response()->json($data, 200);
         }
-        Log::warning('Amount mismatch for transaction', [
-            'transaction_id' => $transaction->id,
-            'expected' => abs(floatval($transaction->total_amount)) * 100,
+        
+        Log::warning('Amount mismatch for course transactions', [
+            'course_transaction_ids' => $courseTransactions->pluck('id'),
+            'expected_total' => $totalExpectedAmount,
             'actual' => floatval($_data['amount'])
         ]);
         $data['message'] = 'Not found';
