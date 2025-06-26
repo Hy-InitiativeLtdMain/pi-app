@@ -15,12 +15,15 @@ class FlagCourse
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $course;
+    public $feedback;
+    
     /**
      * Create a new event instance.
      */
-    public function __construct($course)
+    public function __construct($course, $feedback = null)
     {
         $this->course = $course;
+        $this->feedback = $feedback;
     }
 
     /**
