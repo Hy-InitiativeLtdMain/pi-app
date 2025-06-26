@@ -38,4 +38,14 @@ class PaystackManager extends Controller
         $_data = $this->paystackService->initializeTransaction($validated);
         return response($_data['data'], $_data['code']);
     }
+
+    public function handleCallback(Request $request)
+    {
+        // You can process the query params here (e.g., reference, status)
+        $params = $request->all();
+        return response()->json([
+            'message' => 'Paystack callback received',
+            'params' => $params
+        ]);
+    }
 }

@@ -485,3 +485,5 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     Route::get('event', [EventController::class, 'index']);
     Route::get('event/{event}', [EventController::class, 'show']);
 });
+
+Route::get('/paystack-callback', [\App\Http\Controllers\User\PaystackManager::class, 'handleCallback']);
