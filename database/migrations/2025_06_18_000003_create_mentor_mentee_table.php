@@ -22,6 +22,6 @@ class CreateMentorMenteeTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('mentor_mentee');
+        Schema::dropIfExists('mentor_mentees');
     }
 }
