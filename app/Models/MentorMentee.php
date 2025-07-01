@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MentorMentee extends Model
 {
-    protected $table = 'mentor_mentee';
+    protected $table = 'mentor_mentees';
 
     protected $fillable = [
         'mentor_id',
