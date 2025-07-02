@@ -469,12 +469,12 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     ]);
 
     Route::resource('mentee', MenteeManager::class)->except(['index', 'show'])->names([
-        'store' => 'mentorship.mentee.store',
-        'update' => 'mentorship.mentee.update',
-        'destroy' => 'mentorship.mentee.destroy',
-        'edit' => 'mentorship.mentee.edit',
+        'store' => 'mentorship.mentee.hold',
+        'update' => 'mentorship.mentee.upgrade',
+        'destroy' => 'mentorship.mentee.kill',
+        'edit' => 'mentorship.mentee.reform',
         'create' => 'mentorship.mentee.form',
-        'show' => 'mentorship.mentee.show',
+        'show' => 'mentorship.mentee.display',
     ]);
 
     // Mentee Assignment Routes (for 3mtt institute) - Admin only
