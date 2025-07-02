@@ -413,6 +413,14 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     // Mentor routes
     Route::group(['prefix' => 'mentors'], function () {
         Route::post('appointments', [MentorManager::class, 'createAppointment']);
+        Route::get('appointments', [MentorManager::class, 'getAppointments']);
+        // Get a specific appointment for the authenticated mentor
+        Route::get('appointments/{id}', [MentorManager::class, 'getAppointment']);
+        // Update a specific appointment for the authenticated mentor
+        Route::put('appointments/{id}', [MentorManager::class, 'updateAppointment']);
+        Route::patch('appointments/{id}', [MentorManager::class, 'updateAppointment']);
+        // Delete a specific appointment for the authenticated mentor
+        Route::delete('appointments/{id}', [MentorManager::class, 'deleteAppointment']);
         Route::get('dashboard', [\App\Http\Controllers\Mentorship\DashboardController::class, 'index']);
         Route::get('todos', [\App\Http\Controllers\Mentorship\DashboardController::class, 'todos']);
         Route::post('todos/{id}/complete', [\App\Http\Controllers\Mentorship\DashboardController::class, 'completeTodo']);
@@ -488,4 +496,5 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     Route::get('mentor-profile', [MentorManager::class, 'showProfile']);
     Route::get('event', [EventController::class, 'index']);
     Route::get('event/{event}', [EventController::class, 'show']);
+    
 });

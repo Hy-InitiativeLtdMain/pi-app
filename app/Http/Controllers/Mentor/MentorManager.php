@@ -578,4 +578,127 @@ class MentorManager extends Controller
             'appointment' => $appointment->load('mentees'),
         ], 201);
     }
+
+    /**
+     * Get all appointments for the authenticated mentor.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAppointments()
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        $appointments = $mentor->appointments()->with('mentees')->orderByDesc('scheduled_at')->get();
+
+        return $this->successResponse([
+            'appointments' => $appointments
+        ], 200);
+    }
+
+    /**
+     * Get a specific appointment for the authenticated mentor.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAppointment($id)
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        $appointment = $mentor->appointments()->with('mentees')->find($id);
+        if (!$appointment) {
+            return $this->errorResponse('Appointment not found', 404);
+        }
+
+        return $this->successResponse([
+            'appointment' => $appointment
+        ], 200);
+    }
+
+    /**
+     * Update a specific appointment for the authenticated mentor.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateAppointment(Request $request, $id)
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        $appointment = $mentor->appointments()->find($id);
+        if (!$appointment) {
+            return $this->errorResponse('Appointment not found', 404);
+        }
+
+        $validated = $request->validate([
+            'meeting_link' => 'nullable|string',
+            'description' => 'nullable|string',
+            'scheduled_at' => 'nullable|date',
+            'mentee_ids' => 'nullable|array',
+            'mentee_ids.*' => 'integer|exists:mentees,id',
+        ]);
+
+        $appointment->update([
+            'meeting_link' => $validated['meeting_link'] ?? $appointment->meeting_link,
+            'description' => $validated['description'] ?? $appointment->description,
+            'scheduled_at' => $validated['scheduled_at'] ?? $appointment->scheduled_at,
+        ]);
+
+        if (isset($validated['mentee_ids'])) {
+            $appointment->mentees()->sync($validated['mentee_ids']);
+        }
+
+        return $this->successResponse([
+            'message' => 'Appointment updated successfully',
+            'appointment' => $appointment->load('mentees'),
+        ], 200);
+    }
+
+    /**
+     * Delete a specific appointment for the authenticated mentor.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteAppointment($id)
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        $appointment = $mentor->appointments()->find($id);
+        if (!$appointment) {
+            return $this->errorResponse('Appointment not found', 404);
+        }
+
+        $appointment->mentees()->detach();
+        $appointment->delete();
+
+        return $this->successResponse([
+            'message' => 'Appointment deleted successfully.'
+        ], 200);
+    }
 }
