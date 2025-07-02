@@ -535,4 +535,47 @@ class MentorManager extends Controller
             200
         );
     }
+
+    /**
+     * Create an appointment (session) for the mentor with selected mentees.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createAppointment(Request $request)
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        $validated = $request->validate([
+            'meeting_link' => 'nullable|string',
+            'description' => 'nullable|string',
+            'scheduled_at' => 'required|date',
+            'mentee_ids' => 'nullable|array',
+            'mentee_ids.*' => 'integer|exists:mentees,id',
+        ]);
+
+        // Get all mentees assigned to this mentor if mentee_ids not provided
+        $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
+        if (empty($menteeIds)) {
+            return $this->errorResponse('No mentees assigned to this mentor', 400);
+        }
+
+        $appointment = $mentor->appointments()->create([
+            'meeting_link' => $validated['meeting_link'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'scheduled_at' => $validated['scheduled_at'],
+        ]);
+        $appointment->mentees()->sync($menteeIds);
+
+        return $this->successResponse([
+            'message' => 'Appointment created successfully',
+            'appointment' => $appointment->load('mentees'),
+        ], 201);
+    }
 }
