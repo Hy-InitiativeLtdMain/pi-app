@@ -473,7 +473,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         'update' => 'mentorship.mentee.update',
         'destroy' => 'mentorship.mentee.destroy',
         'edit' => 'mentorship.mentee.edit',
-        'create' => 'mentorship.mentee.create',
+        'create' => 'mentorship.mentee.form',
         'show' => 'mentorship.mentee.show',
     ]);
 
