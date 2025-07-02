@@ -378,6 +378,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::post('/create-subaccount', [PaystackManager::class, 'createSubaccount']);
         Route::get('/subaccounts', [PaystackManager::class, 'getSubaccounts']);
     });
+
+    Route::group(['prefix' => 'mentorship', 'middleware' => ['auth:api']], function () {
+        // Appointment creation for mentors
+        Route::post('appointments', [MentorManager::class, 'createAppointment']);
+    });
 });
 
 Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship']], function (){
