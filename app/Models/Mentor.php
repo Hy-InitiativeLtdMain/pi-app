@@ -74,6 +74,12 @@ class Mentor extends Model
         return $this->hasMany(Booking::class);
     }
 
+    // Add relationship for appointments
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
     // Define the no_of_mentees function to count the number of mentees
     public function getNumberOfMentees($status = null)
     {
