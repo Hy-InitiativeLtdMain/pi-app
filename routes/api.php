@@ -379,10 +379,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
         Route::get('/subaccounts', [PaystackManager::class, 'getSubaccounts']);
     });
 
-    Route::group(['prefix' => 'mentorship', 'middleware' => ['auth:api']], function () {
-        // Appointment creation for mentors
-        Route::post('appointments', [MentorManager::class, 'createAppointment']);
-    });
+    
 });
 
 Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship']], function (){
@@ -415,6 +412,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
     // Mentor routes
     Route::group(['prefix' => 'mentors'], function () {
+        Route::post('appointments', [MentorManager::class, 'createAppointment']);
         Route::get('dashboard', [\App\Http\Controllers\Mentorship\DashboardController::class, 'index']);
         Route::get('todos', [\App\Http\Controllers\Mentorship\DashboardController::class, 'todos']);
         Route::post('todos/{id}/complete', [\App\Http\Controllers\Mentorship\DashboardController::class, 'completeTodo']);
