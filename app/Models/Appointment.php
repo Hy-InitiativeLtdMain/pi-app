@@ -11,6 +11,8 @@ class Appointment extends Model
 
     protected $fillable = [
         'mentor_id',
+        'title',
+        'meeting_type',
         'meeting_link',
         'description',
         'scheduled_at',

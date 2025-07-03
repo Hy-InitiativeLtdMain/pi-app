@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('meeting_link')->nullable();
             $table->text('description')->nullable();
             $table->timestamp('scheduled_at');
+            $table->string('title');
+            $table->string('meeting_type')->nullable();
             $table->timestamps();
 
             $table->foreign('mentor_id')->references('id')->on('mentors')->onDelete('cascade');
