@@ -553,6 +553,8 @@ class MentorManager extends Controller
         }
 
         $validated = $request->validate([
+            'title' => 'required|string',
+            'meeting_type' => 'nullable|string',
             'meeting_link' => 'nullable|string',
             'description' => 'nullable|string',
             'scheduled_at' => 'required|date',
@@ -567,6 +569,8 @@ class MentorManager extends Controller
         }
 
         $appointment = $mentor->appointments()->create([
+            'title' => $validated['title'],
+            'meeting_type' => $validated['meeting_type'] ?? null,
             'meeting_link' => $validated['meeting_link'] ?? null,
             'description' => $validated['description'] ?? null,
             'scheduled_at' => $validated['scheduled_at'],
@@ -650,6 +654,8 @@ class MentorManager extends Controller
         }
 
         $validated = $request->validate([
+            'title' => 'sometimes|required|string',
+            'meeting_type' => 'nullable|string',
             'meeting_link' => 'nullable|string',
             'description' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
@@ -658,6 +664,8 @@ class MentorManager extends Controller
         ]);
 
         $appointment->update([
+            'title' => $validated['title'] ?? $appointment->title,
+            'meeting_type' => $validated['meeting_type'] ?? $appointment->meeting_type,
             'meeting_link' => $validated['meeting_link'] ?? $appointment->meeting_link,
             'description' => $validated['description'] ?? $appointment->description,
             'scheduled_at' => $validated['scheduled_at'] ?? $appointment->scheduled_at,
