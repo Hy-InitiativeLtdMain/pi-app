@@ -484,7 +484,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
     ]);
 
     // Mentee Assignment Routes (for 3mtt institute) - Admin only
-    Route::group(['prefix' => 'admin', 'middleware' => ['auth:api', 'auth.admin.access']], function () {
+    Route::group(['prefix' => 'admin'], function () {
         Route::get('/mentors/needing-assignments', [MentorManager::class, 'getMentorsNeedingAssignments']);
         Route::post('/mentors/run-automated-assignment', [MentorManager::class, 'runAutomatedMenteeAssignment']);
         Route::post('/mentors/{mentor}/assign-mentees', [MentorManager::class, 'manuallyAssignMentees']);
