@@ -73,9 +73,19 @@ class JWTMentorshipAuth
                 }
                 Auth::login($user);
                 return $next($request);
+            } elseif ($role === 'Mentor') {
+                // Create or update mentor
+                $mentor = Mentor::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'email' => $email,
+                        'track' => $track,
+                        'institute' => $institute,
+                    ]);
+                
             }
 
-            if ($role !== 'Mentor') {
+            if ($role !== 'Mentor' || $role !== 'Student') {
                 return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
             }
 
@@ -87,6 +97,7 @@ class JWTMentorshipAuth
             }
             Auth::login($user);
             return $next($request);
+            
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unauthorized - ' . $e->getMessage()], 401);
         }
