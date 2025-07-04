@@ -85,8 +85,8 @@ class JWTMentorshipAuth
                 
             }
 
-            if ($role !== 'Mentor' || $role !== 'Student') {
-                return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
+            if ($role !== "Mentor" || $role !== 'Student') {
+                return response()->json(['error' => 'Access denied. Only Mentors and Students can access this resource'], 403);
             }
 
             // Update mentor's track if needed
@@ -97,7 +97,7 @@ class JWTMentorshipAuth
             }
             Auth::login($user);
             return $next($request);
-            
+
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unauthorized - ' . $e->getMessage()], 401);
         }
