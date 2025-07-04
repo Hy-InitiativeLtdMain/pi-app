@@ -60,15 +60,13 @@ class JWTMentorshipAuth
                     [
                         'email' => $email,
                         'level' => 'Unknown',
-                        'course' => $track,
                         'track' => $track,
-                        'institute_slug' => $institute,
+                        'institute' => $institute,
                     ]
                 );
                 // Update track if needed
                 if ($mentee && $track && $mentee->track !== $track) {
                     $mentee->track = $track;
-                    $mentee->course = $track;
                     $mentee->save();
                 }
                 Auth::login($user);
@@ -78,6 +76,7 @@ class JWTMentorshipAuth
                 $mentor = Mentor::firstOrCreate(
                     ['user_id' => $user->id],
                     [
+                        'first_name' => $name,
                         'email' => $email,
                         'track' => $track,
                         'institute' => $institute,
