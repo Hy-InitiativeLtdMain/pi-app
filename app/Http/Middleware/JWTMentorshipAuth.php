@@ -42,8 +42,7 @@ class JWTMentorshipAuth
             }
             if ($role !== "Mentor") {
                 return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
-            }
-             if ($role !== "Student") {
+            }elseif ($role !== "Student") {
                 return response()->json(['error' => 'Access denied. Only Students can access this resource'], 403);
             }
 
