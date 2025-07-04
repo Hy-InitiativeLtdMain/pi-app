@@ -40,6 +40,12 @@ class JWTMentorshipAuth
             if (!$userId || !$email) {
                 return response()->json(['error' => 'Invalid token payload: missing required claims'], 401);
             }
+            if ($role !== "Mentor") {
+                return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
+            }
+             if ($role !== "Student") {
+                return response()->json(['error' => 'Access denied. Only Students can access this resource'], 403);
+            }
 
             // Helper to create or update user
             $user = User::firstOrCreate(
@@ -82,10 +88,6 @@ class JWTMentorshipAuth
                         'institute' => $institute,
                     ]);
                 
-            }
-            // dd($role);
-            if ($role !== "Mentor") {
-                return response()->json(['error' => 'Access denied. Only Mentors and Students can access this resource'], 403);
             }
 
             // Update mentor's track if needed
