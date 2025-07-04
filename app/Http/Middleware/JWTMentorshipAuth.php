@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Mentee;
 use App\Models\User;
+use App\Models\Mentor;
 use Closure;
 use Illuminate\Http\Request;
 use Firebase\JWT\JWT;
@@ -39,39 +40,8 @@ class JWTMentorshipAuth
             if (!$userId || !$email) {
                 return response()->json(['error' => 'Invalid token payload: missing required claims'], 401);
             }
-            if ($role === 'Mentee' || $role === 'Student') {
-                // Allow access and create a mentee in the Mentee model
-                $user = User::firstOrCreate(
-                    ['email' => $email],
-                    [
-                        'user_uuid' => $userId,
-                        'password' => bcrypt('SecretKey010'),
-                        'role' => $role,
-                        'institute_slug' => $institute,
-                        'track' => $track,
-                    ]
-                );
 
-                // Create a mentee record if not exists
-                Mentee::firstOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'email' => $email,
-                        'level' => 'Unknown',
-                        'course' => $track,
-                        'track' => $track,
-                        'institute_slug' => $institute,
-                    ]
-                );
-
-                Auth::login($user);
-                return $next($request);
-            }
-
-            if ($role !== 'Mentor') {
-                return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
-            }
-
+            // Helper to create or update user
             $user = User::firstOrCreate(
                 ['email' => $email],
                 [
@@ -83,6 +53,38 @@ class JWTMentorshipAuth
                 ]
             );
 
+            if ($role === 'Mentee' || $role === 'Student') {
+                // Create or update mentee
+                $mentee = Mentee::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'email' => $email,
+                        'level' => 'Unknown',
+                        'course' => $track,
+                        'track' => $track,
+                        'institute_slug' => $institute,
+                    ]
+                );
+                // Update track if needed
+                if ($mentee && $track && $mentee->track !== $track) {
+                    $mentee->track = $track;
+                    $mentee->course = $track;
+                    $mentee->save();
+                }
+                Auth::login($user);
+                return $next($request);
+            }
+
+            if ($role !== 'Mentor') {
+                return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
+            }
+
+            // Update mentor's track if needed
+            $mentor = Mentor::where('user_id', $user->id)->first();
+            if ($mentor && $track && $mentor->track !== $track) {
+                $mentor->track = $track;
+                $mentor->save();
+            }
             Auth::login($user);
             return $next($request);
         } catch (\Exception $e) {
