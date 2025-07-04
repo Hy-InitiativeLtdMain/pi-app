@@ -81,9 +81,8 @@ class JWTMentorshipAuth
                         'email' => $email,
                         'track' => $track,
                         'institute' => $institute,
-                    ]);
-                
-            }
+                    ]);           
+		 }
             // dd($role);
             if ($role !== "Mentor") {
                 return response()->json(['error' => 'Access denied. Only Mentors and Students can access this resource'], 403);
