@@ -337,19 +337,54 @@ class MentorManager extends Controller
         if ($mentor->institute !== '3mtt') {
             return $this->errorResponse('This assignment system is only for 3mtt institute mentors', 400);
         }
-        
+
         // Check if mentor can accept more mentees
         $capacityCheck = $this->checkMentorCapacity($mentor);
-        
+
         if (!$capacityCheck['can_accept_more']) {
             return $this->errorResponse('Mentor cannot accept more mentees. Current count: ' . $capacityCheck['current_mentees'], 400);
         }
-        
-        $result = $this->assignMenteesToMentor($mentor);
-        
+
+        // Check if mentee_id is provided in the request
+        $menteeId = $request->input('mentee_id');
+        if (!$menteeId) {
+            return $this->errorResponse('No mentee_id provided for manual assignment.', 400);
+        }
+
+        // Check if the mentee exists
+        $mentee = \App\Models\Mentee::find($menteeId);
+        if (!$mentee) {
+            return $this->errorResponse('Mentee not found.', 404);
+        }
+
+        // Check if the mentee has already been assigned to any mentor
+        $alreadyAssigned = \App\Models\MentorMentee::where('mentee_id', $menteeId)->exists();
+        if ($alreadyAssigned) {
+            return $this->errorResponse('This mentee has already been assigned to a mentor.', 400);
+        }
+
+        // Assign the mentee to the mentor
+        try {
+            \App\Models\MentorMentee::create([
+                'mentor_id' => $mentor->id,
+                'mentee_id' => $menteeId,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to assign mentee: ' . $e->getMessage(), 500);
+        }
+
+        // Recalculate mentor capacity after assignment
+        $finalMenteeCount = \App\Models\MentorMentee::where('mentor_id', $mentor->id)->count();
+        $maxMentees = 10;
+
         return $this->successResponse([
-            'message' => $result['message'],
-            'data' => $result
+            'message' => "Mentee assigned successfully.",
+            'data' => [
+                'mentor_id' => $mentor->id,
+                'mentee_id' => $menteeId,
+                'total_mentees' => $finalMenteeCount,
+                'remaining_slots' => max(0, $maxMentees - $finalMenteeCount)
+            ]
         ], 200);
     }
 
