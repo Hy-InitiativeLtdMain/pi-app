@@ -394,16 +394,28 @@ class MentorManager extends Controller
      */
     public function getMentorsNeedingAssignments()
     {
-        $mentors = Mentor::where('status', 'approved')
+        // All approved 3mtt mentors with a track
+        $mentorsWithTrack = Mentor::where('status', 'approved')
             ->whereNotNull('track')
-            ->where('institute', '3mtt') // Only target 3mtt mentors
+            ->where('institute', '3mtt')
             ->get();
-        
+
+        // All approved 3mtt mentors without a track
+        $mentorsWithoutTrack = Mentor::where('status', 'approved')
+            ->whereNull('track')
+            ->where('institute', '3mtt')
+            ->get();
+
+        // All approved 3mtt mentors (regardless of track)
+        $all3mttMentors = Mentor::where('status', 'approved')
+            ->where('institute', '3mtt')
+            ->get();
+
         $mentorsNeedingAssignments = [];
-        
-        foreach ($mentors as $mentor) {
+
+        foreach ($mentorsWithTrack as $mentor) {
             $capacityCheck = $this->checkMentorCapacity($mentor);
-            
+
             if ($capacityCheck['can_accept_more']) {
                 $mentorsNeedingAssignments[] = [
                     'mentor' => new MentorResource($mentor),
@@ -411,10 +423,13 @@ class MentorManager extends Controller
                 ];
             }
         }
-        
+
         return $this->successResponse([
             'mentors_needing_assignments' => $mentorsNeedingAssignments,
-            'total_mentors_needing_assignments' => count($mentorsNeedingAssignments)
+            'total_mentors_needing_assignments' => count($mentorsNeedingAssignments),
+            'total_3mtt_mentors_with_track' => $mentorsWithTrack->count(),
+            'total_3mtt_mentors_without_track' => $mentorsWithoutTrack->count(),
+            'total_3mtt_mentors' => $all3mttMentors->count(),
         ], 200);
     }
 
