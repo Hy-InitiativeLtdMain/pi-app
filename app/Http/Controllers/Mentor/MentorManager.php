@@ -759,4 +759,19 @@ class MentorManager extends Controller
             'message' => 'Appointment deleted successfully.'
         ], 200);
     }
+
+    /**
+     * Get all mentees assigned to the authenticated 3mtt mentor
+     */
+    public function getAssignedMentees()
+    {
+        $user = auth()->user();
+        $mentor = $user->mentor;
+        if (!$mentor || $mentor->institute !== '3mtt') {
+            return $this->errorResponse('Only 3mtt mentors can access this resource', 403);
+        }
+        $assignedMenteeIds = \App\Models\MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id');
+        $mentees = \App\Models\Mentee::whereIn('id', $assignedMenteeIds)->get();
+        return $this->showAll(\App\Http\Resources\Mentee\MenteeResource::collection($mentees), 200);
+    }
 }
