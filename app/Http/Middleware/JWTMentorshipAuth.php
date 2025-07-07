@@ -65,11 +65,20 @@ class JWTMentorshipAuth
                         'level' => 'Unknown',
                         'track' => $track,
                         'institute' => $institute,
+                        'name' => $decoded->name ?? null,
                     ]
                 );
-                // Update track if needed
+                // Update track or name if needed
+                $updated = false;
                 if ($mentee && $track && $mentee->track !== $track) {
                     $mentee->track = $track;
+                    $updated = true;
+                }
+                if ($mentee && isset($decoded->name) && $mentee->name !== $decoded->name) {
+                    $mentee->name = $decoded->name;
+                    $updated = true;
+                }
+                if ($updated) {
                     $mentee->save();
                 }
                 Auth::login($user);
