@@ -96,7 +96,7 @@ class JWTMentorshipAuth
                 }
                 Auth::login($user);
                 return $next($request);
-
+	  }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unauthorized - ' . $e->getMessage()], 401);
         }
