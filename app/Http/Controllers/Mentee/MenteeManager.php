@@ -90,4 +90,19 @@ class MenteeManager extends Controller
         $mentee->delete();
         return $this->successResponse(null, 204);
     }
+
+    /**
+     * Update the mentee profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->mentee) {
+            return $this->errorResponse('Mentee not found', 404);
+        }
+        $mentee = $user->mentee;
+        $validated = $request->validate(\App\Http\Requests\MenteeRequest::$_updateRules);
+        $mentee->update($validated);
+        return $this->successResponse(new \App\Http\Resources\Mentee\MenteeResource($mentee->fresh()), 200);
+    }
 }
