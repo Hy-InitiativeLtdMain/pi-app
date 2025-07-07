@@ -51,6 +51,9 @@ jobs:
             git pull origin develop
             composer install 
 
+            php artisan migrate:rollback --force
+            php artisan migrate --path=database/migrations/2025_07_02_172541_create_appointments_table.php --force
+            php artisan migrate --path=database/migrations/2025_07_02_172607_create_appointment_mentees_table.php --force
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
