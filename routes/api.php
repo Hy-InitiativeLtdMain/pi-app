@@ -234,6 +234,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
             Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMenteeReview']);
             Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
 
+            // Mentee profile endpoints
+            
         });
 
         Route::group(['middleware' => ['auth:api', 'auth.user.state']], function () {
@@ -384,6 +386,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'json.response']], func
 
 Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship']], function (){
     Route::group(['prefix' => 'mentees'], function () {
+        Route::get('/profile', [\App\Http\Controllers\Mentee\MenteeManager::class, 'showProfile']);
+        Route::post('/profile', [\App\Http\Controllers\Mentee\MenteeManager::class, 'updateProfile']);
+        // Mentee dashboard endpoint
+        Route::get('/dashboard', [\App\Http\Controllers\Mentee\MenteeDashboardController::class, 'index']);
+
         Route::get('/bookings', [BookingManager::class, 'index']);
         Route::post('/bookings', [BookingManager::class, 'storeOrUpdate']);
         Route::get('/bookings/{id}', [BookingManager::class, 'show']);
