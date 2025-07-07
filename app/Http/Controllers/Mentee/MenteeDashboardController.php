@@ -23,7 +23,7 @@ class MenteeDashboardController extends Controller
         }
         // Dashboard stats for mentee
         $totalMentors = DB::table('mentor_mentees')->where('mentee_id', $mentee->id)->count();
-        $totalSessions = DB::table('appointments')->where('mentee_id', $mentee->id)->count();
+        $totalSessions = DB::table('appointment_mentees')->where('mentee_id', $mentee->id)->count();
         $totalLearningHours = DB::table('bookings')->where('mentee_id', $mentee->id)->where('status', 'completed')->sum('hours');
         // To-dos: check mentee profile completeness
         $requiredFields = [
