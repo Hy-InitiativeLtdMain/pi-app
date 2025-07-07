@@ -22,6 +22,7 @@ use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\MentorMenteeAssignmentService;
 
 class MentorManager extends Controller
 {
@@ -178,7 +179,13 @@ class MentorManager extends Controller
 
         try {
             $mentor->update($request->all());
-            return $this->showOne(new MentorResource($mentor->fresh()), 200);
+            // Assign mentees after update
+            $assignmentService = app(MentorMenteeAssignmentService::class);
+            $assignmentResult = $assignmentService->assignMenteesToMentor($mentor->fresh());
+            return $this->successResponse([
+                'mentor' => new MentorResource($mentor->fresh()),
+                'mentee_assignment' => $assignmentResult
+            ], 200);
         } catch (\Exception $e) {
             return $this->errorResponse('Error updating mentor profile: ' . $e->getMessage(), 500);
         }
@@ -199,110 +206,6 @@ class MentorManager extends Controller
         }
         $mentor->delete();
         return $this->successResponse('Mentor profile deleted successfully', 204);
-    }
-
-    /**
-     * Assign mentees to a mentor based on track and institute
-     * @param Mentor $mentor
-     * @return array
-     */
-    private function assignMenteesToMentor(Mentor $mentor)
-    {
-        $assignedCount = 0;
-        $maxMentees = 10;
-        $checkedMenteeIds = [];
-        
-        // Get current mentee count for this mentor
-        $currentMenteeCount = MentorMentee::where('mentor_id', $mentor->id)->count();
-        
-        // If mentor already has 10 mentees, return early
-        if ($currentMenteeCount >= $maxMentees) {
-            return [
-                'assigned' => 0,
-                'message' => 'Mentor already has maximum number of mentees (10)',
-                'total_mentees' => $currentMenteeCount
-            ];
-        }
-        
-        // Calculate how many more mentees can be assigned
-        $remainingSlots = $maxMentees - $currentMenteeCount;
-        
-        $track = $mentor->track;
-        $institute = $mentor->institute;
-        
-        if (!$track) {
-            return [
-                'assigned' => 0,
-                'message' => 'Mentor track not specified',
-                'total_mentees' => $currentMenteeCount
-            ];
-        }
-        
-        // Check if mentor is from 3mtt institute
-        if ($institute !== '3mtt') {
-            return [
-                'assigned' => 0,
-                'message' => 'Mentor is not from 3mtt institute',
-                'total_mentees' => $currentMenteeCount
-            ];
-        }
-        
-        while ($assignedCount < $remainingSlots) {
-            // Build query for available mentees - only from 3mtt institute
-            $menteesQuery = Mentee::where('track', $track)
-                ->where('institute', '3mtt') // Only target 3mtt mentees
-                ->whereNotIn('id', $checkedMenteeIds);
-            
-            // Get next batch of random mentees not already checked
-            $mentees = $menteesQuery->inRandomOrder()
-                ->limit($remainingSlots - $assignedCount)
-                ->get();
-
-            if ($mentees->isEmpty()) {
-                break; // No more mentees to assign
-            }
-
-            foreach ($mentees as $mentee) {
-                $checkedMenteeIds[] = $mentee->id;
-                
-                // Check if mentee is not already assigned to any mentor
-                $alreadyAssigned = MentorMentee::where('mentee_id', $mentee->id)->exists();
-                
-                if (!$alreadyAssigned) {
-                    MentorMentee::create([
-                        'mentor_id' => $mentor->id,
-                        'mentee_id' => $mentee->id,
-                    ]);
-                    $assignedCount++;
-                    
-                    if ($assignedCount >= $remainingSlots) {
-                        break 2;
-                    }
-                }
-            }
-        }
-        
-        $finalMenteeCount = MentorMentee::where('mentor_id', $mentor->id)->count();
-        
-        // Send Firebase notification if mentees were assigned
-        if ($assignedCount > 0) {
-            try {
-                $firebaseNotificationService = app(FirebaseNotificationService::class);
-                $firebaseNotificationService->sendMenteeAssignmentNotification($mentor, $assignedCount);
-            } catch (\Exception $e) {
-                Log::error('Failed to send Firebase mentee assignment notification', [
-                    'mentor_id' => $mentor->id,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        }
-        
-        return [
-            'assigned' => $assignedCount,
-            'message' => "Assigned {$assignedCount} new mentees to mentor",
-            'total_mentees' => $finalMenteeCount,
-            'remaining_slots' => $maxMentees - $finalMenteeCount
-        ];
     }
 
     /**
