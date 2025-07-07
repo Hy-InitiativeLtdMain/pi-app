@@ -9,6 +9,7 @@ use App\Http\Requests\MenteeRequest;
 use App\Http\Resources\Mentee\MenteeResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\MentorMenteeAssignmentService;
 
 class MenteeManager extends Controller
 {
@@ -103,6 +104,12 @@ class MenteeManager extends Controller
         $mentee = $user->mentee;
         $validated = $request->validate(\App\Http\Requests\MenteeRequest::$_updateRules);
         $mentee->update($validated);
-        return $this->successResponse(new \App\Http\Resources\Mentee\MenteeResource($mentee->fresh()), 200);
+        // Assign mentor after update
+        $assignmentService = app(MentorMenteeAssignmentService::class);
+        $assignmentResult = $assignmentService->assignMentorToMentee($mentee->fresh());
+        return $this->successResponse([
+            'mentee' => new \App\Http\Resources\Mentee\MenteeResource($mentee->fresh()),
+            'mentor_assignment' => $assignmentResult
+        ], 200);
     }
 }
