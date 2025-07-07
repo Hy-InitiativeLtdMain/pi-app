@@ -31,8 +31,10 @@ class MenteeRequest extends FormRequest
 
     public static $_updateRules = [
         'name' => 'string',
-            'phone' => 'string',
-            'level' => 'string',
-            'course' => 'string'
-        ];
+        'phone' => 'string',
+        'level' => 'string',
+        'course' => 'string',
+        'track' => 'string',
+        'institute' => 'string',
+    ];
 }
