@@ -470,6 +470,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('/mentor/profile/reviews', [UserReviewController::class, 'fetchMentorReviews']);
         Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMentorReview']);
         Route::apiResource('skill-categories', SkillCategoryController::class);
+        Route::get('assigned-mentees', [MentorManager::class, 'getAssignedMentees']);
     });
 
     Route::resource('mentor', MentorManager::class)->except('index')->names([
