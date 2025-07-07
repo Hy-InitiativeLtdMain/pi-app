@@ -64,14 +64,19 @@ class JWTMentorshipAuth
                         'email' => $email,
                         'level' => 'Unknown',
                         'track' => $track,
+                        'course' => $track,
                         'institute' => $institute,
                         'name' => $decoded->name ?? null,
                     ]
                 );
-                // Update track or name if needed
+                // Update track, course, or name if needed
                 $updated = false;
                 if ($mentee && $track && $mentee->track !== $track) {
                     $mentee->track = $track;
+                    $updated = true;
+                }
+                if ($mentee && $track && $mentee->course !== $track) {
+                    $mentee->course = $track;
                     $updated = true;
                 }
                 if ($mentee && isset($decoded->name) && $mentee->name !== $decoded->name) {
