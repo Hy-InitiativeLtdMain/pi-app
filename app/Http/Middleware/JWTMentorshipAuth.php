@@ -40,57 +40,51 @@ class JWTMentorshipAuth
             if (!$userId || !$email) {
                 return response()->json(['error' => 'Invalid token payload: missing required claims'], 401);
             }
-            if ($role !== "Mentor") {
-                return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
-            } elseif ($role !== "Student") {
-                return response()->json(['error' => 'Access denied. Only Students can access this resource'], 403);
-            } else {
+            if (!in_array($role, ['Mentor', 'Student', 'Mentee'])) {
+                return response()->json(['error' => 'Access denied. Only Mentors or Students can access this resource'], 403);
+            }
 
-                // Helper to create or update user
-                $user = User::firstOrCreate(
-                    ['email' => $email],
+            // Helper to create or update user
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'user_uuid' => $userId,
+                    'password' => bcrypt('SecretKey010'),
+                    'role' => $role,
+                    'institute_slug' => $institute,
+                    'track' => $track,
+                ]
+            );
+
+            if ($role === 'Mentee' || $role === 'Student') {
+                // Create or update mentee
+                $mentee = Mentee::firstOrCreate(
+                    ['user_id' => $user->id],
                     [
-                        'user_uuid' => $userId,
-                        'password' => bcrypt('SecretKey010'),
-                        'role' => $role,
-                        'institute_slug' => $institute,
+                        'email' => $email,
+                        'level' => 'Unknown',
                         'track' => $track,
+                        'institute' => $institute,
                     ]
                 );
-
-                if ($role === 'Mentee' || $role === 'Student') {
-                    // Create or update mentee
-                    $mentee = Mentee::firstOrCreate(
-                        ['user_id' => $user->id],
-                        [
-                            'email' => $email,
-                            'level' => 'Unknown',
-                            'track' => $track,
-                            'institute' => $institute,
-                        ]
-                    );
-                    // Update track if needed
-                    if ($mentee && $track && $mentee->track !== $track) {
-                        $mentee->track = $track;
-                        $mentee->save();
-                    }
-                    Auth::login($user);
-                    return $next($request);
-                } elseif ($role === 'Mentor') {
-                    // Create or update mentor
-                    $mentor = Mentor::firstOrCreate(
-                        ['user_id' => $user->id],
-                        [
-                            'first_name' => $name,
-                            'email' => $email,
-                            'track' => $track,
-                            'institute' => $institute,
-                        ]);
-                    
+                // Update track if needed
+                if ($mentee && $track && $mentee->track !== $track) {
+                    $mentee->track = $track;
+                    $mentee->save();
                 }
-
+                Auth::login($user);
+                return $next($request);
+            } elseif ($role === 'Mentor') {
+                // Create or update mentor
+                $mentor = Mentor::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'first_name' => $decoded->name ?? null,
+                        'email' => $email,
+                        'track' => $track,
+                        'institute' => $institute,
+                    ]);
                 // Update mentor's track if needed
-                $mentor = Mentor::where('user_id', $user->id)->first();
                 if ($mentor && $track && $mentor->track !== $track) {
                     $mentor->track = $track;
                     $mentor->save();
