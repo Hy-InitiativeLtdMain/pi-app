@@ -44,59 +44,58 @@ class JWTMentorshipAuth
                 return response()->json(['error' => 'Access denied. Only Mentors can access this resource'], 403);
             } elseif ($role !== "Student") {
                 return response()->json(['error' => 'Access denied. Only Students can access this resource'], 403);
-            }
+            } else {
 
-            // Helper to create or update user
-            $user = User::firstOrCreate(
-                ['email' => $email],
-                [
-                    'user_uuid' => $userId,
-                    'password' => bcrypt('SecretKey010'),
-                    'role' => $role,
-                    'institute_slug' => $institute,
-                    'track' => $track,
-                ]
-            );
-
-            if ($role === 'Mentee' || $role === 'Student') {
-                // Create or update mentee
-                $mentee = Mentee::firstOrCreate(
-                    ['user_id' => $user->id],
+                // Helper to create or update user
+                $user = User::firstOrCreate(
+                    ['email' => $email],
                     [
-                        'email' => $email,
-                        'level' => 'Unknown',
+                        'user_uuid' => $userId,
+                        'password' => bcrypt('SecretKey010'),
+                        'role' => $role,
+                        'institute_slug' => $institute,
                         'track' => $track,
-                        'institute' => $institute,
                     ]
                 );
-                // Update track if needed
-                if ($mentee && $track && $mentee->track !== $track) {
-                    $mentee->track = $track;
-                    $mentee->save();
+
+                if ($role === 'Mentee' || $role === 'Student') {
+                    // Create or update mentee
+                    $mentee = Mentee::firstOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'email' => $email,
+                            'level' => 'Unknown',
+                            'track' => $track,
+                            'institute' => $institute,
+                        ]
+                    );
+                    // Update track if needed
+                    if ($mentee && $track && $mentee->track !== $track) {
+                        $mentee->track = $track;
+                        $mentee->save();
+                    }
+                    Auth::login($user);
+                    return $next($request);
+                } elseif ($role === 'Mentor') {
+                    // Create or update mentor
+                    $mentor = Mentor::firstOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'first_name' => $name,
+                            'email' => $email,
+                            'track' => $track,
+                            'institute' => $institute,
+                        ]);
+                }
+
+                // Update mentor's track if needed
+                $mentor = Mentor::where('user_id', $user->id)->first();
+                if ($mentor && $track && $mentor->track !== $track) {
+                    $mentor->track = $track;
+                    $mentor->save();
                 }
                 Auth::login($user);
                 return $next($request);
-            } elseif ($role === 'Mentor') {
-                // Create or update mentor
-                $mentor = Mentor::firstOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'first_name' => $name,
-                        'email' => $email,
-                        'track' => $track,
-                        'institute' => $institute,
-
-                    ]);
-            }
-
-            // Update mentor's track if needed
-            $mentor = Mentor::where('user_id', $user->id)->first();
-            if ($mentor && $track && $mentor->track !== $track) {
-                $mentor->track = $track;
-                $mentor->save();
-            }
-            Auth::login($user);
-            return $next($request);
 
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unauthorized - ' . $e->getMessage()], 401);
