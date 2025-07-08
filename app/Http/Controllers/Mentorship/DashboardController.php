@@ -16,10 +16,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         // Dashboard stats
-        $totalFellowsManaged = DB::table('mentor_mentees')->where('mentor_id', $user->id)->count();
+        $totalFellowsManaged = DB::table('mentor_mentees')->where('mentor_id', $user->mentor->id)->count();
         // Count sessions as number of appointments for this mentor
-        $totalSessionsDone = DB::table('appointments')->where('mentor_id', $user->id)->count();
-        $totalMentoringHours = DB::table('bookings')->where('mentor_id', $user->id)->where('status', 'completed')->sum('hours');
+        $totalSessionsDone = DB::table('appointments')->where('mentor_id', $user->mentor->id)->count();
+        $totalMentoringHours = DB::table('bookings')->where('mentor_id', $user->mentor->id)->where('status', 'completed')->sum('hours');
         // To-dos: check mentor profile completeness
         $mentor = $user->mentor;
         $requiredFields = [
