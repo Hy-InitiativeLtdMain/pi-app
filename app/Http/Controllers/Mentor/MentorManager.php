@@ -349,12 +349,13 @@ class MentorManager extends Controller
         
         $results = [];
         $totalAssigned = 0;
+        $assignmentService = app(\App\Services\MentorMenteeAssignmentService::class);
         
         foreach ($mentors as $mentor) {
             $capacityCheck = $this->checkMentorCapacity($mentor);
             
             if ($capacityCheck['can_accept_more']) {
-                $assignmentResult = $this->assignMenteesToMentor($mentor);
+                $assignmentResult = $assignmentService->assignMenteesToMentor($mentor);
                 $totalAssigned += $assignmentResult['assigned'];
                 
                 $results[] = [
