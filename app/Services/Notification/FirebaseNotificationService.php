@@ -41,7 +41,8 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentor->user->user_uuid,
                 $title,
-                $body
+                $body,
+                'booking_created'
             );
 
             Log::info('Firebase booking notification sent to mentor', [
@@ -86,7 +87,8 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentee->user->user_uuid,
                 $title,
-                $body
+                $body,
+                'booking_' . strtolower($statusMessage)
             );
 
             Log::info('Firebase booking approval notification sent to mentee', [
@@ -126,7 +128,8 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $user->user_uuid,
                 $title,
-                $body
+                $body,
+                'booking_reminder'
             );
 
             Log::info('Firebase booking reminder notification sent', [
@@ -167,7 +170,8 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentor->user->user_uuid,
                 $title,
-                $body
+                $body,
+                'mentor_application_' . strtolower($statusMessage)
             );
 
             Log::info('Firebase mentor approval notification sent', [
@@ -204,7 +208,8 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentor->user->user_uuid,
                 $title,
-                $body
+                $body,
+                'mentee_assignment'
             );
 
             Log::info('Firebase mentee assignment notification sent', [
@@ -238,7 +243,8 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentor->user->user_uuid,
                     $title,
-                    $body
+                    $body,
+                    'session_cancelled'
                 );
             }
 
@@ -250,7 +256,8 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentee->user->user_uuid,
                     $title,
-                    $body
+                    $body,
+                    'session_cancelled'
                 );
             }
 
@@ -285,7 +292,8 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentor->user->user_uuid,
                     $title,
-                    $body
+                    $body,
+                    'session_rescheduled'
                 );
             }
 
@@ -297,7 +305,8 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentee->user->user_uuid,
                     $title,
-                    $body
+                    $body,
+                    'session_rescheduled'
                 );
             }
 
@@ -334,7 +343,8 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $reviewedUser->user_uuid,
                 $title,
-                $body
+                $body,
+                'review_submitted'
             );
 
             Log::info('Firebase review notification sent', [
