@@ -20,6 +20,7 @@ class MenteeResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'user_uuid' => $this->user->user_uuid,
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
