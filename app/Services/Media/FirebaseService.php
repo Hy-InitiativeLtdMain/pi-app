@@ -53,9 +53,10 @@ class FirebaseService
      * @param string $userId
      * @param string $title
      * @param string $body
+     * @param string|null $action
      * @return array The stored notification data
      */
-    public function storeNotification(string $userId, string $title, string $body): array
+    public function storeNotification(string $userId, string $title, string $body, string $action = null): array
     {
         $database = $this->firestore->database();
 
@@ -66,6 +67,10 @@ class FirebaseService
             'read'      => false,
             'timestamp' => now()->toIso8601String(),
         ];
+
+        if ($action) {
+            $notificationData['action'] = $action;
+        }
 
         $database
             ->collection('notifications')

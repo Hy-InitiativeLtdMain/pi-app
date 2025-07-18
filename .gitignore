@@ -1,3 +1,14 @@
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+# Docker named volumes (if any are created as folders)
+dbdata/
+# Docker Compose override files
+docker-compose.override.yml
+# Docker environment files
+.env.docker
+
 /.phpunit.cache
 /node_modules
 /public/build

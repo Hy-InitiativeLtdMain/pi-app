@@ -64,3 +64,35 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Docker Setup
+
+### Prerequisites
+- [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Build and Run
+
+1. Copy `.env.example` to `.env` and adjust settings if needed (especially DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+2. Run:
+   ```sh
+   docker-compose up --build
+   ```
+3. Install dependencies (if not already):
+   ```sh
+   docker-compose exec app composer install
+   ```
+4. Generate app key:
+   ```sh
+   docker-compose exec app php artisan key:generate
+   ```
+5. Run migrations:
+   ```sh
+   docker-compose exec app php artisan migrate
+   ```
+6. Access the app at [http://localhost:8000](http://localhost:8000)
+
+### Stopping
+
+```sh
+docker-compose down
+```
