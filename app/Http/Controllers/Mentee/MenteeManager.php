@@ -7,8 +7,11 @@ use App\Traits\ApiResponser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MenteeRequest;
 use App\Http\Resources\Mentee\MenteeResource;
+use App\Models\MentorMentee;
+use App\Models\AppointmentMentee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Services\MentorMenteeAssignmentService;
 
 class MenteeManager extends Controller
@@ -111,5 +114,141 @@ class MenteeManager extends Controller
             'mentee' => new \App\Http\Resources\Mentee\MenteeResource($mentee->fresh()),
             'mentor_assignment' => $assignmentResult
         ], 200);
+    }
+
+    /**
+     * Get fellow mentees under the same mentor as the authenticated mentee
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getFellowMentees()
+    {
+        $user = auth()->user();
+        $mentee = $user->mentee;
+        
+        if (!$mentee) {
+            return $this->errorResponse('Mentee profile not found', 404);
+        }
+
+        // Find the mentor assigned to this mentee
+        $mentorMenteeRelation = MentorMentee::where('mentee_id', $mentee->id)->first();
+        
+        if (!$mentorMenteeRelation) {
+            return $this->successResponse([
+                'message' => 'No mentor assigned yet, so no fellow mentees to show',
+                'data' => [
+                    'fellow_mentees' => [],
+                    'count' => 0,
+                    'mentor_info' => null
+                ]
+            ], 200);
+        }
+
+        $mentorId = $mentorMenteeRelation->mentor_id;
+
+        // Get all mentees under the same mentor, excluding the current mentee
+        $fellowMenteeIds = MentorMentee::where('mentor_id', $mentorId)
+            ->where('mentee_id', '!=', $mentee->id)
+            ->pluck('mentee_id');
+
+        $fellowMentees = Mentee::whereIn('id', $fellowMenteeIds)
+            ->with('user')
+            ->get();
+
+        // Get team lead information
+        $teamLeadRelation = MentorMentee::where('mentor_id', $mentorId)
+            ->where('team_lead', true)
+            ->with('mentee')
+            ->first();
+
+        // Get mentor information
+        $mentor = \App\Models\Mentor::find($mentorId);
+
+        // Add team lead flag to fellow mentees
+        $fellowMenteesWithTeamLead = $fellowMentees->map(function ($fellowMentee) use ($teamLeadRelation) {
+            $menteeResource = new MenteeResource($fellowMentee);
+            $menteeData = $menteeResource->toArray(request());
+            $menteeData['is_team_lead'] = $teamLeadRelation && $teamLeadRelation->mentee_id == $fellowMentee->id;
+            return $menteeData;
+        });
+
+        return $this->successResponse([
+            'message' => 'Fellow mentees retrieved successfully',
+            'data' => [
+                'fellow_mentees' => $fellowMenteesWithTeamLead,
+                'count' => $fellowMentees->count(),
+                'mentor_info' => $mentor ? [
+                    'id' => $mentor->id,
+                    'name' => trim($mentor->firstname . ' ' . $mentor->lastname),
+                    'email' => $mentor->email,
+                    'company' => $mentor->company,
+                    'track' => $mentor->track
+                ] : null,
+                'team_lead_info' => $teamLeadRelation ? [
+                    'mentee_id' => $teamLeadRelation->mentee_id,
+                    'mentee_name' => $teamLeadRelation->mentee ? trim($teamLeadRelation->mentee->name ?? '') : 'Unknown',
+                    'is_current_user' => $teamLeadRelation->mentee_id == $mentee->id
+                ] : null
+            ]
+        ], 200);
+    }
+
+    /**
+     * Get the current mentee's mentor information
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMyMentor()
+    {
+        $user = auth()->user();
+        $mentee = $user->mentee;
+        
+        if (!$mentee) {
+            return $this->errorResponse('Mentee profile not found', 404);
+        }
+
+        // Find the mentor assigned to this mentee
+        $mentorMenteeRelation = MentorMentee::where('mentee_id', $mentee->id)
+            ->with(['mentor'])
+            ->first();
+        
+        if (!$mentorMenteeRelation || !$mentorMenteeRelation->mentor) {
+            return $this->successResponse([
+                'message' => 'No mentor assigned yet',
+                'data' => null
+            ], 200);
+        }
+
+        $mentor = $mentorMenteeRelation->mentor;
+        
+        return $this->successResponse([
+            'message' => 'Mentor information retrieved successfully',
+            'data' => [
+                'mentor' => new \App\Http\Resources\Mentor\MentorResource($mentor),
+                'assigned_at' => $mentorMenteeRelation->created_at,
+                'is_team_lead' => $mentorMenteeRelation->team_lead
+            ]
+        ], 200);
+    }
+
+    /**
+     * Get the count of completed sessions for authenticated mentee.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCompletedSessionsCount()
+    {
+        $user = auth()->user();
+        $menteeId = $user->mentee->id;
+
+        $count = AppointmentMentee::where('mentee_id', $menteeId)
+            ->whereHas('appointment', function($query) {
+                $query->where('end_time', '<', now())
+                      ->orWhere(function($query) {
+                          $query->whereNull('end_time')
+                                ->where('start_time', '<', now());
+                      });
+            })
+            ->count();
+
+        return $this->successResponse(['completed_sessions_count' => $count], 200);
     }
 }
