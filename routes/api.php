@@ -434,6 +434,10 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('badges', [\App\Http\Controllers\Mentorship\DashboardController::class, 'badges']);
         Route::get('notifications', [\App\Http\Controllers\Mentorship\DashboardController::class, 'notifications']);
         Route::get('search', [\App\Http\Controllers\Mentorship\DashboardController::class, 'search']);
+        // Session management and statistics routes
+        Route::get('sessions/stats', [\App\Http\Controllers\Mentorship\DashboardController::class, 'sessionStats']);
+        Route::get('sessions/upcoming', [\App\Http\Controllers\Mentorship\DashboardController::class, 'upcomingSessions']);
+        Route::get('sessions/summary-by-month', [\App\Http\Controllers\Mentorship\DashboardController::class, 'sessionSummaryByMonth']);
         Route::apiResource('availability', AvailabilityController::class)->except('show')->names([
             'index' => 'mentorship.availability.index',
             'store' => 'mentorship.availability.store',
