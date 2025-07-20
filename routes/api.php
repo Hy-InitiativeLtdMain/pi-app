@@ -415,6 +415,9 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
         Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMenteeReview']);
         Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
+        
+        // Get completed sessions count for authenticated mentee
+        Route::get('/sessions/count', [MenteeManager::class, 'getCompletedSessionsCount']);
     });
 
     // Mentor routes
@@ -475,6 +478,10 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMentorReview']);
         Route::apiResource('skill-categories', SkillCategoryController::class);
         Route::get('assigned-mentees', [MentorManager::class, 'getAssignedMentees']);
+        
+        // Team lead management routes
+        Route::post('team-lead', [MentorManager::class, 'setTeamLead']);
+        Route::get('team-lead', [MentorManager::class, 'getTeamLead']);
     });
 
     Route::resource('mentor', MentorManager::class)->except('index')->names([

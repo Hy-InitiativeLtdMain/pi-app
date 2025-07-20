@@ -11,6 +11,7 @@ class MentorMentee extends Model
     protected $fillable = [
         'mentor_id',
         'mentee_id',
+        'team_lead',
     ];
 
     // Define the relationship: a mentor can have many mentees
@@ -23,5 +24,11 @@ class MentorMentee extends Model
     public function mentor()
     {
         return $this->belongsTo(Mentor::class, 'mentor_id', 'id');
+    }
+
+    // Define the relationship: get the specific mentee
+    public function mentee()
+    {
+        return $this->belongsTo(Mentee::class, 'mentee_id', 'id');
     }
 }
