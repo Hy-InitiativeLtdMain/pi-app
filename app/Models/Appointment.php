@@ -16,6 +16,8 @@ class Appointment extends Model
         'meeting_link',
         'description',
         'scheduled_at',
+        'scheduled_end',
+        'total_time',
     ];
 
     public function mentor()
