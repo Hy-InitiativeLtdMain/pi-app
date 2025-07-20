@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -15,11 +16,49 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $currentDateTime = Carbon::now();
+        
         // Dashboard stats
         $totalFellowsManaged = DB::table('mentor_mentees')->where('mentor_id', $user->mentor->id)->count();
-        // Count sessions as number of appointments for this mentor
-        $totalSessionsDone = DB::table('appointments')->where('mentor_id', $user->mentor->id)->count();
-        $totalMentoringHours = DB::table('bookings')->where('mentor_id', $user->mentor->id)->where('status', 'completed')->sum('hours');
+        
+        // Calculate completed sessions (past appointments based on scheduled_end or scheduled_at)
+        $completedSessions = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->where(function($query) use ($currentDateTime) {
+                $query->where('scheduled_end', '<', $currentDateTime)
+                      ->orWhere(function($subQuery) use ($currentDateTime) {
+                          $subQuery->whereNull('scheduled_end')
+                                   ->where('scheduled_at', '<', $currentDateTime);
+                      });
+            })
+            ->count();
+            
+        // Calculate pending sessions (future appointments)
+        $pendingSessions = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->where(function($query) use ($currentDateTime) {
+                $query->where('scheduled_end', '>=', $currentDateTime)
+                      ->orWhere(function($subQuery) use ($currentDateTime) {
+                          $subQuery->whereNull('scheduled_end')
+                                   ->where('scheduled_at', '>=', $currentDateTime);
+                      });
+            })
+            ->count();
+            
+        
+        $totalMentoringMinutes = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->where(function($query) use ($currentDateTime) {
+                $query->where('scheduled_end', '<', $currentDateTime)
+                        ->orWhere(function($subQuery) use ($currentDateTime) {
+                            $subQuery->whereNull('scheduled_end')
+                                    ->where('scheduled_at', '<', $currentDateTime);
+                        });
+            })
+            ->whereNotNull('total_time')
+            ->sum('total_time');
+        $totalMentoringHours = round($totalMentoringMinutes / 60, 1);
+        
         // To-dos: check mentor profile completeness
         $mentor = $user->mentor;
         $requiredFields = [
@@ -50,7 +89,9 @@ class DashboardController extends Controller
         }
         return response()->json([
             'total_fellows_managed' => $totalFellowsManaged,
-            'total_sessions_done' => $totalSessionsDone,
+            'total_sessions_done' => $completedSessions,
+            'total_sessions_completed' => $completedSessions,
+            'total_sessions_pending' => $pendingSessions,
             'total_mentoring_hours' => $totalMentoringHours,
             'todos' => $todos,
         ]);
@@ -127,6 +168,122 @@ class DashboardController extends Controller
     //         ]
     //     ]);
     // }
+
+    /**
+     * Get detailed session statistics.
+     */
+    public function sessionStats(Request $request)
+    {
+        $user = Auth::user();
+        $currentDateTime = Carbon::now();
+        
+        // Get completed sessions with details
+        $completedSessions = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->where(function($query) use ($currentDateTime) {
+                $query->where('scheduled_end', '<', $currentDateTime)
+                      ->orWhere(function($subQuery) use ($currentDateTime) {
+                          $subQuery->whereNull('scheduled_end')
+                                   ->where('scheduled_at', '<', $currentDateTime);
+                      });
+            })
+            ->select('id', 'title', 'scheduled_at', 'scheduled_end', 'total_time', 'meeting_type')
+            ->orderBy('scheduled_at', 'desc')
+            ->get();
+            
+        // Get pending sessions with details
+        $pendingSessions = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->where(function($query) use ($currentDateTime) {
+                $query->where('scheduled_end', '>=', $currentDateTime)
+                      ->orWhere(function($subQuery) use ($currentDateTime) {
+                          $subQuery->whereNull('scheduled_end')
+                                   ->where('scheduled_at', '>=', $currentDateTime);
+                      });
+            })
+            ->select('id', 'title', 'scheduled_at', 'scheduled_end', 'total_time', 'meeting_type')
+            ->orderBy('scheduled_at', 'asc')
+            ->get();
+            
+        return response()->json([
+            'completed_sessions' => [
+                'count' => $completedSessions->count(),
+                'sessions' => $completedSessions
+            ],
+            'pending_sessions' => [
+                'count' => $pendingSessions->count(), 
+                'sessions' => $pendingSessions
+            ],
+            'total_hours_completed' => $this->calculateTotalHours($completedSessions)
+        ]);
+    }
+    
+    /**
+     * Calculate total hours from sessions.
+     */
+    private function calculateTotalHours($sessions)
+    {
+        $totalMinutes = 0;
+        foreach ($sessions as $session) {
+            if ($session->total_time) {
+                $totalMinutes += $session->total_time;
+            } else if ($session->scheduled_end && $session->scheduled_at) {
+                // Calculate duration from scheduled times
+                $start = Carbon::parse($session->scheduled_at);
+                $end = Carbon::parse($session->scheduled_end);
+                $totalMinutes += $start->diffInMinutes($end);
+            }
+        }
+        return round($totalMinutes / 60, 1);
+    }
+    
+    /**
+     * Get upcoming sessions (next 7 days).
+     */
+    public function upcomingSessions(Request $request)
+    {
+        $user = Auth::user();
+        $currentDateTime = Carbon::now();
+        $nextWeek = Carbon::now()->addDays(7);
+        
+        $upcomingSessions = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->where('scheduled_at', '>=', $currentDateTime)
+            ->where('scheduled_at', '<=', $nextWeek)
+            ->select('id', 'title', 'scheduled_at', 'scheduled_end', 'total_time', 'meeting_type', 'description')
+            ->orderBy('scheduled_at', 'asc')
+            ->get();
+            
+        return response()->json([
+            'upcoming_sessions' => $upcomingSessions,
+            'count' => $upcomingSessions->count()
+        ]);
+    }
+    
+    /**
+     * Get session summary by month.
+     */
+    public function sessionSummaryByMonth(Request $request)
+    {
+        $user = Auth::user();
+        $year = $request->input('year', date('Y'));
+        
+        $monthlySummary = DB::table('appointments')
+            ->where('mentor_id', $user->mentor->id)
+            ->whereYear('scheduled_at', $year)
+            ->selectRaw('MONTH(scheduled_at) as month, COUNT(*) as total_sessions')
+            ->selectRaw('SUM(CASE WHEN scheduled_at < NOW() THEN 1 ELSE 0 END) as completed_sessions')
+            ->selectRaw('SUM(CASE WHEN scheduled_at >= NOW() THEN 1 ELSE 0 END) as pending_sessions')
+            ->selectRaw('SUM(CASE WHEN scheduled_at < NOW() THEN total_time ELSE 0 END) as completed_minutes')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+            
+        return response()->json([
+            'year' => $year,
+            'monthly_summary' => $monthlySummary
+        ]);
+    }
 
     /**
      * Search dashboard data.
