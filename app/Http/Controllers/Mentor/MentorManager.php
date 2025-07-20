@@ -518,10 +518,14 @@ class MentorManager extends Controller
             'scheduled_end' => 'nullable|date',
         ]);
 
-        // Determine total_time (in minutes)
-        $totalTime = $validated['total_time'] ?? 120; // default 2 hours
         $scheduledAt = $validated['scheduled_at'];
-        $scheduledEnd = $validated['scheduled_end'] ?? (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
+        if (!empty($validated['scheduled_end'])) {
+            $scheduledEnd = $validated['scheduled_end'];
+            $totalTime = (new \Carbon\Carbon($scheduledAt))->diffInMinutes(new \Carbon\Carbon($scheduledEnd));
+        } else {
+            $totalTime = $validated['total_time'] ?? 120; // default 2 hours
+            $scheduledEnd = (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
+        }
 
         // Get all mentees assigned to this mentor if mentee_ids not provided
         $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
@@ -636,12 +640,16 @@ class MentorManager extends Controller
             'scheduled_at' => $validated['scheduled_at'] ?? $appointment->scheduled_at,
         ];
 
-        // Handle total_time and scheduled_end
-        $totalTime = $validated['total_time'] ?? $appointment->total_time ?? 120;
         $scheduledAt = $validated['scheduled_at'] ?? $appointment->scheduled_at;
-        $scheduledEnd = $validated['scheduled_end'] ?? (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
-        $updateData['total_time'] = $totalTime;
+        if (!empty($validated['scheduled_end'])) {
+            $scheduledEnd = $validated['scheduled_end'];
+            $totalTime = (new \Carbon\Carbon($scheduledAt))->diffInMinutes(new \Carbon\Carbon($scheduledEnd));
+        } else {
+            $totalTime = $validated['total_time'] ?? $appointment->total_time ?? 120;
+            $scheduledEnd = (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
+        }
         $updateData['scheduled_end'] = $scheduledEnd;
+        $updateData['total_time'] = $totalTime;
 
         $appointment->update($updateData);
 
