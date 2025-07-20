@@ -706,4 +706,94 @@ class MentorManager extends Controller
         $mentees = \App\Models\Mentee::whereIn('id', $assignedMenteeIds)->get();
         return $this->showAll(\App\Http\Resources\Mentee\MenteeResource::collection($mentees), 200);
     }
+
+    /**
+     * Set or unset a mentee as team lead for the authenticated mentor
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function setTeamLead(Request $request)
+    {
+        $user = auth()->user();
+        $mentor = $user->mentor;
+        
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+
+        // Validate the request
+        $validated = $request->validate([
+            'mentee_id' => 'required|integer|exists:mentees,id',
+            'team_lead' => 'required|boolean'
+        ]);
+
+        // Check if the mentee is assigned to this mentor
+        $mentorMentee = MentorMentee::where('mentor_id', $mentor->id)
+            ->where('mentee_id', $validated['mentee_id'])
+            ->first();
+
+        if (!$mentorMentee) {
+            return $this->errorResponse('This mentee is not assigned to your mentorship', 404);
+        }
+
+        // If setting as team lead, first remove any existing team lead for this mentor
+        if ($validated['team_lead']) {
+            MentorMentee::where('mentor_id', $mentor->id)
+                ->where('team_lead', true)
+                ->update(['team_lead' => false]);
+        }
+
+        // Update the team lead status
+        $mentorMentee->update(['team_lead' => $validated['team_lead']]);
+
+        $message = $validated['team_lead'] 
+            ? 'Mentee has been set as team lead successfully'
+            : 'Team lead status has been removed from mentee';
+
+        return $this->successResponse([
+            'message' => $message,
+            'data' => [
+                'mentor_id' => $mentor->id,
+                'mentee_id' => $validated['mentee_id'],
+                'team_lead' => $validated['team_lead'],
+                'updated_at' => $mentorMentee->fresh()->updated_at
+            ]
+        ], 200);
+    }
+
+    /**
+     * Get the current team lead for the authenticated mentor
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTeamLead()
+    {
+        $user = auth()->user();
+        $mentor = $user->mentor;
+        
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+
+        $teamLead = MentorMentee::where('mentor_id', $mentor->id)
+            ->where('team_lead', true)
+            ->with('mentee')
+            ->first();
+
+        if (!$teamLead) {
+            return $this->successResponse([
+                'message' => 'No team lead assigned yet',
+                'data' => null
+            ], 200);
+        }
+
+        return $this->successResponse([
+            'message' => 'Team lead found',
+            'data' => [
+                'mentor_id' => $mentor->id,
+                'mentee_id' => $teamLead->mentee_id,
+                'mentee' => $teamLead->mentee ? new \App\Http\Resources\Mentee\MenteeResource($teamLead->mentee) : null,
+                'assigned_at' => $teamLead->updated_at
+            ]
+        ], 200);
+    }
 }
