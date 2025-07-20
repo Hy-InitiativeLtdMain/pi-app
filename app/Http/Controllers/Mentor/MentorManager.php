@@ -514,7 +514,14 @@ class MentorManager extends Controller
             'scheduled_at' => 'required|date',
             'mentee_ids' => 'nullable|array',
             'mentee_ids.*' => 'integer|exists:mentees,id',
+            'total_time' => 'nullable|integer', // in minutes
+            'scheduled_end' => 'nullable|date',
         ]);
+
+        // Determine total_time (in minutes)
+        $totalTime = $validated['total_time'] ?? 120; // default 2 hours
+        $scheduledAt = $validated['scheduled_at'];
+        $scheduledEnd = $validated['scheduled_end'] ?? (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
 
         // Get all mentees assigned to this mentor if mentee_ids not provided
         $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
@@ -527,7 +534,9 @@ class MentorManager extends Controller
             'meeting_type' => $validated['meeting_type'] ?? null,
             'meeting_link' => $validated['meeting_link'] ?? null,
             'description' => $validated['description'] ?? null,
-            'scheduled_at' => $validated['scheduled_at'],
+            'scheduled_at' => $scheduledAt,
+            'scheduled_end' => $scheduledEnd,
+            'total_time' => $totalTime,
         ]);
         $appointment->mentees()->sync($menteeIds);
 
@@ -615,15 +624,26 @@ class MentorManager extends Controller
             'scheduled_at' => 'nullable|date',
             'mentee_ids' => 'nullable|array',
             'mentee_ids.*' => 'integer|exists:mentees,id',
+            'total_time' => 'nullable|integer', // in minutes
+            'scheduled_end' => 'nullable|date',
         ]);
 
-        $appointment->update([
+        $updateData = [
             'title' => $validated['title'] ?? $appointment->title,
             'meeting_type' => $validated['meeting_type'] ?? $appointment->meeting_type,
             'meeting_link' => $validated['meeting_link'] ?? $appointment->meeting_link,
             'description' => $validated['description'] ?? $appointment->description,
             'scheduled_at' => $validated['scheduled_at'] ?? $appointment->scheduled_at,
-        ]);
+        ];
+
+        // Handle total_time and scheduled_end
+        $totalTime = $validated['total_time'] ?? $appointment->total_time ?? 120;
+        $scheduledAt = $validated['scheduled_at'] ?? $appointment->scheduled_at;
+        $scheduledEnd = $validated['scheduled_end'] ?? (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
+        $updateData['total_time'] = $totalTime;
+        $updateData['scheduled_end'] = $scheduledEnd;
+
+        $appointment->update($updateData);
 
         if (isset($validated['mentee_ids'])) {
             $appointment->mentees()->sync($validated['mentee_ids']);
