@@ -418,6 +418,8 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         
         // Get completed sessions count for authenticated mentee
         Route::get('/sessions/count', [MenteeManager::class, 'getCompletedSessionsCount']);
+        Route::get('/fellow-mentees', [MenteeManager::class, 'getFellowMentees']);
+        Route::get('/my-mentor', [MenteeManager::class, 'getMyMentor']);
     });
 
     // Mentor routes
