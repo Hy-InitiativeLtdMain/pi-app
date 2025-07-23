@@ -11,9 +11,11 @@ class Appointment extends Model
 
     protected $fillable = [
         'mentor_id',
+        'mentee_id',
         'title',
         'meeting_type',
         'meeting_link',
+        'start_meeting_link',
         'description',
         'scheduled_at',
         'scheduled_end',
@@ -28,5 +30,10 @@ class Appointment extends Model
     public function mentees()
     {
         return $this->belongsToMany(Mentee::class, 'appointment_mentees');
+    }
+
+    public function mentee()
+    {
+        return $this->belongsTo(Mentee::class, 'mentee_id');
     }
 }
