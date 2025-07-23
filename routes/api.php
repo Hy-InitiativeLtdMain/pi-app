@@ -420,6 +420,8 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('/sessions/count', [MenteeManager::class, 'getCompletedSessionsCount']);
         Route::get('/fellow-mentees', [MenteeManager::class, 'getFellowMentees']);
         Route::get('/my-mentor', [MenteeManager::class, 'getMyMentor']);
+        Route::get('/mentee-appointments', [MenteeManager::class, 'getMyAppointments']);
+        Route::get('/mentee-created-appointments', [MenteeManager::class, 'getMenteeCreatedAppointments']);
     });
 
     // Mentor routes

@@ -251,4 +251,45 @@ class MenteeManager extends Controller
 
         return $this->successResponse(['completed_sessions_count' => $count], 200);
     }
+
+    /**
+     * Get all appointments for the authenticated mentee
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMyAppointments()
+    {
+        $user = auth()->user();
+        $mentee = $user->mentee;
+        if (!$mentee) {
+            return $this->errorResponse('Mentee profile not found', 404);
+        }
+        $appointments = \App\Models\AppointmentMentee::where('mentee_id', $mentee->id)
+            ->with('appointment')
+            ->get()
+            ->pluck('appointment')
+            ->filter(); // Remove nulls if any
+        return $this->successResponse([
+            'appointments' => $appointments
+        ], 200);
+    }
+
+    /**
+     * Get all appointments created by the authenticated mentee (fellows_call)
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMenteeCreatedAppointments()
+    {
+        $user = auth()->user();
+        $mentee = $user->mentee;
+        if (!$mentee) {
+            return $this->errorResponse('Mentee profile not found', 404);
+        }
+        $appointments = \App\Models\Appointment::where('mentee_id', $mentee->id)
+            ->where('meeting_type', 'fellows_call')
+            ->orderByDesc('scheduled_at')
+            ->get();
+        return $this->successResponse([
+            'appointments' => $appointments
+        ], 200);
+    }
 }

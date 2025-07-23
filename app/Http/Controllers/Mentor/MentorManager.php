@@ -499,10 +499,11 @@ class MentorManager extends Controller
     public function createAppointment(Request $request)
     {
         $mentor = auth()->user()->mentor;
-        if (!$mentor) {
-            return $this->errorResponse('Mentor profile not found', 404);
+        $mentee = auth()->user()->mentee;
+        if (!$mentor && !$mentee) {
+            return $this->errorResponse('User is neither a mentor nor a mentee', 403);
         }
-        if ($mentor->status !== 'approved') {
+        if ($mentor && $mentor->status !== 'approved') {
             return $this->errorResponse('Mentor account not approved', 403);
         }
 
@@ -510,12 +511,14 @@ class MentorManager extends Controller
             'title' => 'required|string',
             'meeting_type' => 'nullable|string',
             'meeting_link' => 'nullable|string',
+            'start_meeting_link' => 'nullable|string',
             'description' => 'nullable|string',
             'scheduled_at' => 'required|date',
             'mentee_ids' => 'nullable|array',
             'mentee_ids.*' => 'integer|exists:mentees,id',
             'total_time' => 'nullable|integer', // in minutes
             'scheduled_end' => 'nullable|date',
+            'mentee_id' => 'nullable|integer|exists:mentees,id',
         ]);
 
         $scheduledAt = $validated['scheduled_at'];
@@ -527,26 +530,46 @@ class MentorManager extends Controller
             $scheduledEnd = (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
         }
 
-        // Get all mentees assigned to this mentor if mentee_ids not provided
-        $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
-        if (empty($menteeIds)) {
-            return $this->errorResponse('No mentees assigned to this mentor', 400);
+        if (($validated['meeting_type'] ?? null) === 'fellows_call') {
+            $appointment = 
+                \App\Models\Appointment::create([
+                    'title' => $validated['title'],
+                    'meeting_type' => $validated['meeting_type'],
+                    'meeting_link' => $validated['meeting_link'] ?? null,
+                    'start_meeting_link' => $validated['start_meeting_link'] ?? null,
+                    'description' => $validated['description'] ?? null,
+                    'scheduled_at' => $scheduledAt,
+                    'scheduled_end' => $scheduledEnd,
+                    'total_time' => $totalTime,
+                    'mentee_id' => $mentee ? $mentee->id : ($validated['mentee_id'] ?? null),
+                    'mentor_id' => null,
+                ]);
+            // Optionally, sync all mentees to this fellows_call if needed
+        } else if ($mentor) {
+            // Get all mentees assigned to this mentor if mentee_ids not provided
+            $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
+            if (empty($menteeIds)) {
+                return $this->errorResponse('No mentees assigned to this mentor', 400);
+            }
+            $appointment = $mentor->appointments()->create([
+                'title' => $validated['title'],
+                'meeting_type' => $validated['meeting_type'] ?? null,
+                'meeting_link' => $validated['meeting_link'] ?? null,
+                'start_meeting_link' => $validated['start_meeting_link'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'scheduled_at' => $scheduledAt,
+                'scheduled_end' => $scheduledEnd,
+                'total_time' => $totalTime,
+            ]);
+            $appointment->mentees()->sync($menteeIds);
+        } else {
+            return $this->errorResponse('Only mentors can create non-fellows_call appointments', 403);
         }
-
-        $appointment = $mentor->appointments()->create([
-            'title' => $validated['title'],
-            'meeting_type' => $validated['meeting_type'] ?? null,
-            'meeting_link' => $validated['meeting_link'] ?? null,
-            'description' => $validated['description'] ?? null,
-            'scheduled_at' => $scheduledAt,
-            'scheduled_end' => $scheduledEnd,
-            'total_time' => $totalTime,
-        ]);
-        $appointment->mentees()->sync($menteeIds);
 
         return $this->successResponse([
             'message' => 'Appointment created successfully',
             'appointment' => $appointment->load('mentees'),
+            'start_meeting_link' => $appointment->start_meeting_link,
         ], 201);
     }
 
@@ -565,7 +588,14 @@ class MentorManager extends Controller
             return $this->errorResponse('Mentor account not approved', 403);
         }
 
-        $appointments = $mentor->appointments()->with('mentees')->orderByDesc('scheduled_at')->get();
+        $appointments = $mentor->appointments()
+            ->where(function($query) {
+                $query->whereNull('meeting_type')->orWhere('meeting_type', '!=', 'fellows_call');
+            })
+            ->whereNull('mentee_id')
+            ->with('mentees')
+            ->orderByDesc('scheduled_at')
+            ->get();
 
         return $this->successResponse([
             'appointments' => $appointments
@@ -594,7 +624,8 @@ class MentorManager extends Controller
         }
 
         return $this->successResponse([
-            'appointment' => $appointment
+            'appointment' => $appointment,
+            'start_meeting_link' => $appointment->start_meeting_link,
         ], 200);
     }
 
@@ -624,6 +655,7 @@ class MentorManager extends Controller
             'title' => 'sometimes|required|string',
             'meeting_type' => 'nullable|string',
             'meeting_link' => 'nullable|string',
+            'start_meeting_link' => 'nullable|string',
             'description' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
             'mentee_ids' => 'nullable|array',
@@ -636,6 +668,7 @@ class MentorManager extends Controller
             'title' => $validated['title'] ?? $appointment->title,
             'meeting_type' => $validated['meeting_type'] ?? $appointment->meeting_type,
             'meeting_link' => $validated['meeting_link'] ?? $appointment->meeting_link,
+            'start_meeting_link' => $validated['start_meeting_link'] ?? $appointment->start_meeting_link,
             'description' => $validated['description'] ?? $appointment->description,
             'scheduled_at' => $validated['scheduled_at'] ?? $appointment->scheduled_at,
         ];
@@ -660,6 +693,7 @@ class MentorManager extends Controller
         return $this->successResponse([
             'message' => 'Appointment updated successfully',
             'appointment' => $appointment->load('mentees'),
+            'start_meeting_link' => $appointment->start_meeting_link,
         ], 200);
     }
 
