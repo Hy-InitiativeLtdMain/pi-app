@@ -17,6 +17,8 @@ class MenteeResource extends JsonResource
     {
         $count = Booking::where('mentee_id', $this->id)->where('status', 'Approved')->count();
 
+        // Check if mentee is a team lead
+        $isTeamLead = \App\Models\MentorMentee::where('mentee_id', $this->id)->where('team_lead', true)->exists();
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -29,6 +31,7 @@ class MenteeResource extends JsonResource
             'track' => $this->track,
             'institute' => $this->institute,
             'no_of_mentors' => $count,
+            'isTeamLead' => $isTeamLead,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
