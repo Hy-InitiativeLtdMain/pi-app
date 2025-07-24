@@ -274,7 +274,7 @@ class MenteeManager extends Controller
     }
 
     /**
-     * Get all appointments created by the authenticated mentee (fellows_call)
+     * Get all appointments created by fellow mentees under the same mentor (fellows_call)
      * @return \Illuminate\Http\JsonResponse
      */
     public function getMenteeCreatedAppointments()
@@ -284,12 +284,45 @@ class MenteeManager extends Controller
         if (!$mentee) {
             return $this->errorResponse('Mentee profile not found', 404);
         }
-        $appointments = \App\Models\Appointment::where('mentee_id', $mentee->id)
+
+        // Find the mentor assigned to this mentee
+        $mentorMenteeRelation = MentorMentee::where('mentee_id', $mentee->id)->first();
+        
+        if (!$mentorMenteeRelation) {
+            return $this->successResponse([
+                'message' => 'No mentor assigned yet, so no fellow appointments to show',
+                'appointments' => []
+            ], 200);
+        }
+
+        $mentorId = $mentorMenteeRelation->mentor_id;
+
+        // Get all mentee IDs under the same mentor (including current mentee)
+        $fellowMenteeIds = MentorMentee::where('mentor_id', $mentorId)
+            ->pluck('mentee_id');
+
+        // Get all appointments created by any fellow mentee (fellows_call)
+        $appointments = \App\Models\Appointment::whereIn('mentee_id', $fellowMenteeIds)
             ->where('meeting_type', 'fellows_call')
+            ->with(['mentee.user']) // Include mentee and user info to show who created each appointment
             ->orderByDesc('scheduled_at')
             ->get();
+
+        // Add creator information to each appointment
+        $appointmentsWithCreator = $appointments->map(function ($appointment) {
+            $appointmentData = $appointment->toArray();
+            $appointmentData['created_by'] = [
+                'mentee_id' => $appointment->mentee_id,
+                'name' => $appointment->mentee && $appointment->mentee->user ? 
+                    trim($appointment->mentee->user->firstname . ' ' . $appointment->mentee->user->lastname) : 'Unknown',
+                'email' => $appointment->mentee && $appointment->mentee->user ? 
+                    $appointment->mentee->user->email : null
+            ];
+            return $appointmentData;
+        });
+
         return $this->successResponse([
-            'appointments' => $appointments
+            'appointments' => $appointmentsWithCreator
         ], 200);
     }
 }
