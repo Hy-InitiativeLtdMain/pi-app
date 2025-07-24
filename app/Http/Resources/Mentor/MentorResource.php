@@ -21,6 +21,7 @@ class MentorResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'user_uuid' => optional($this->user)->user_uuid,
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'email' => $this->email,
