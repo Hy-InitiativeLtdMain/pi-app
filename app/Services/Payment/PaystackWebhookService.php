@@ -20,72 +20,83 @@ class PaystackWebhookService
             Log::error('Transaction not found for reference', ['reference' => $_data['reference']]);
             return response()->json(['message' => 'Transaction not found'], 404);
         }
-        Log::info('Transaction found', ['transaction_id' => $transaction->id]);
+        Log::info('Transaction found', ['transaction_id' => $transaction->id, 'user_id' => $transaction->user_id]);
         
-        // TEMPORARY: Mark all course transactions as paid regardless of amount verification
+        // Get the course associated with this transaction
         $courseId = $transaction->courses()->first()->id ?? null;
         if (!$courseId) {
             Log::error('No course found for transaction', ['transaction_id' => $transaction->id]);
             return response()->json(['message' => 'No course found for transaction'], 404);
         }
         
-        // Get transactions for this specific course created within 5 minutes of the current transaction
-        $timeWindow = 5; // minutes
-        $courseTransactions = Transaction::whereIn('id', function($query) use ($courseId, $transaction, $timeWindow) {
-            $query->select('transaction_id')
-                  ->from('transaction_course')
-                  ->where('course_id', $courseId)
-                  ->where('created_at', '>=', $transaction->created_at->subMinutes($timeWindow))
-                  ->where('created_at', '<=', $transaction->created_at->addMinutes($timeWindow));
-        })->get();
+        // Get all transactions for this user and course that are not yet paid
+        // This is more reliable than using time windows
+        $courseTransactions = Transaction::whereHas('courses', function($query) use ($courseId) {
+                $query->where('courses.id', $courseId);
+            })
+            ->where('user_id', $transaction->user_id)
+            ->whereNull('paid_at')
+            ->get();
         
         Log::info('Found course transactions for webhook', [
             'course_id' => $courseId,
+            'user_id' => $transaction->user_id,
             'transaction_count' => $courseTransactions->count(),
-            'transaction_ids' => $courseTransactions->pluck('id'),
-            'time_window' => $timeWindow . ' minutes'
+            'transaction_ids' => $courseTransactions->pluck('id')
         ]);
         
-        // TEMPORARY: Skip amount verification and mark all as paid
-        Log::info('TEMPORARY: Bypassing amount verification - marking all transactions as paid');
-        
-        // Mark all related transactions as paid
-        foreach ($courseTransactions as $courseTransaction) {
-            $courseTransaction->status = 1;
-            $courseTransaction->paid_at = Carbon::now();
-            $courseTransaction->save();
-            Log::info('Transaction marked as paid', ['transaction_id' => $courseTransaction->id]);
+        if ($courseTransactions->isEmpty()) {
+            Log::warning('No unpaid transactions found for user and course', [
+                'user_id' => $transaction->user_id,
+                'course_id' => $courseId
+            ]);
+            return response()->json(['message' => 'No unpaid transactions found'], 404);
         }
         
-        $data['message'] = 'Updated (temporary bypass)';
-        return response()->json($data, 200);
-        
-        // ORIGINAL CODE (commented out for now):
-        /*
+        // Verify the payment amount matches the expected total
         $totalExpectedAmount = $courseTransactions->sum('amount') * 100; // Convert to kobo
+        $actualAmount = floatval($_data['amount']);
         
-        if (abs($totalExpectedAmount) == floatval($_data['amount'])) {
+        Log::info('Amount verification', [
+            'expected_total_kobo' => $totalExpectedAmount,
+            'actual_amount_kobo' => $actualAmount,
+            'amounts_match' => abs($totalExpectedAmount) == $actualAmount
+        ]);
+        
+        if (abs($totalExpectedAmount) == $actualAmount) {
             // Mark all related transactions as paid
             foreach ($courseTransactions as $courseTransaction) {
                 $courseTransaction->status = 1;
                 $courseTransaction->paid_at = Carbon::now();
                 $courseTransaction->save();
-                Log::info('Transaction marked as paid', ['transaction_id' => $courseTransaction->id]);
+                Log::info('Transaction marked as paid', [
+                    'transaction_id' => $courseTransaction->id,
+                    'user_id' => $courseTransaction->user_id,
+                    'course_id' => $courseId
+                ]);
             }
             
-            $data['message'] = 'Updated';
+            Log::info('Course access activated for user', [
+                'user_id' => $transaction->user_id,
+                'course_id' => $courseId,
+                'transactions_updated' => $courseTransactions->count()
+            ]);
+            
+            $data['message'] = 'Payment processed and course access activated';
             return response()->json($data, 200);
         }
         
         Log::warning('Amount mismatch for course transactions', [
             'course_id' => $courseId,
+            'user_id' => $transaction->user_id,
             'course_transaction_ids' => $courseTransactions->pluck('id'),
-            'expected_total' => $totalExpectedAmount,
-            'actual' => floatval($_data['amount'])
+            'expected_total_kobo' => $totalExpectedAmount,
+            'actual_amount_kobo' => $actualAmount
         ]);
-        $data['message'] = 'Not found';
-        return response()->json($data, 404);
-        */
+        
+        $data['message'] = 'Amount mismatch - payment not processed';
+        return response()->json($data, 400);
+
     }
 
     public function transferSuccess($_data)
