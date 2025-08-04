@@ -27,6 +27,7 @@ class MenteeResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'level' => $this->level,
+            'profile_picture' => $this->user->image,
             'course' => $this->course,
             'track' => $this->track,
             'institute' => $this->institute,
