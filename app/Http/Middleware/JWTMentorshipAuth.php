@@ -36,6 +36,7 @@ class JWTMentorshipAuth
             $role = $decoded->role ?? null;
             $track = $decoded->track ?? null;
             $institute = $decoded->institute ?? "3mtt";
+            $image = $decoded->profile_picture ?? null;
 
             if (!$userId || !$email) {
                 return response()->json(['error' => 'Invalid token payload: missing required claims'], 401);
@@ -53,6 +54,7 @@ class JWTMentorshipAuth
                     'role' => $role,
                     'institute_slug' => $institute,
                     'track' => $track,
+                    'image' => $image,
                 ]
             );
 
@@ -67,6 +69,7 @@ class JWTMentorshipAuth
                         'course' => $track,
                         'institute' => $institute,
                         'name' => $decoded->name ?? null,
+                        
                     ]
                 );
                 // Update track, course, or name if needed
