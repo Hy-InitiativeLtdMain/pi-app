@@ -181,7 +181,8 @@ class MenteeManager extends Controller
                     'name' => trim($mentor->firstname . ' ' . $mentor->lastname),
                     'email' => $mentor->email,
                     'company' => $mentor->company,
-                    'track' => $mentor->track
+                    'track' => $mentor->track,
+                    'profile_picture' => $mentor->user->image,
                 ] : null,
                 'team_lead_info' => $teamLeadRelation ? [
                     'mentee_id' => $teamLeadRelation->mentee_id,
