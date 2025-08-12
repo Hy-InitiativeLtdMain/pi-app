@@ -174,7 +174,12 @@ class MenteeManager extends Controller
         return $this->successResponse([
             'message' => 'Fellow mentees retrieved successfully',
             'data' => [
-                'fellow_mentees' => $fellowMenteesWithTeamLead,
+                'fellow_mentees' => $fellowMenteesWithTeamLead->map(function ($mentee) {
+                    // Add user_uuid and profile_picture to each fellow mentee
+                    $mentee['user_uuid'] = $mentee->user->user_uuid ?? null;
+                    $mentee['profile_picture'] = $mentee->user->image ?? null;
+                    return $mentee;
+                }),
                 'count' => $fellowMentees->count(),
                 'mentor_info' => $mentor ? [
                     'id' => $mentor->id,
@@ -182,7 +187,8 @@ class MenteeManager extends Controller
                     'email' => $mentor->email,
                     'company' => $mentor->company,
                     'track' => $mentor->track,
-                    'profile_picture' => $mentor->user->image,
+                    'profile_picture' => $mentor->user->image ?? null,
+                    'user_uuid' => $mentor->user->user_uuid ?? null,
                 ] : null,
                 'team_lead_info' => $teamLeadRelation ? [
                     'mentee_id' => $teamLeadRelation->mentee_id,
