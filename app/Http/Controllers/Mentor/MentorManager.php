@@ -700,8 +700,100 @@ class MentorManager extends Controller
     }
 
     /**
-     * Update a specific appointment for the authenticated mentor.
+     * Get the latest appointment before now for the authenticated mentor.
      *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getLatestAppointment()
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        // Use the provided local time as the source of truth for 'now'
+        $now = now()->toDateTimeString();
+
+        $appointment = $mentor->appointments()
+            ->where('scheduled_at', '<', $now)
+            ->orderByDesc('scheduled_at')
+            ->with('mentees')
+            ->first();
+
+        if (!$appointment) {
+            return $this->successResponse([
+                'message' => 'No past appointments found',
+                'appointment' => null
+            ], 200);
+        }
+
+        return $this->successResponse([
+            'appointment' => $appointment
+        ], 200);
+    }
+
+    /**
+     * Get the total mentoring hours for the authenticated mentor.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTotalMentoringHours()
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        // Sum total_time (assumed in minutes in the DB)
+        $totalMinutes = $mentor->appointments()->sum('total_time');
+        $totalHours = round($totalMinutes / 60, 2);
+
+        return $this->successResponse([
+            'total_minutes' => $totalMinutes,
+            'total_hours' => $totalHours
+        ], 200);
+    }
+
+    /**
+     * Get the total mentoring hours in the past week for the authenticated mentor.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getWeeklyMentoringHours()
+    {
+        $mentor = auth()->user()->mentor;
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
+        }
+        if ($mentor->status !== 'approved') {
+            return $this->errorResponse('Mentor account not approved', 403);
+        }
+
+        // Use the provided local time as the source of truth for 'now'
+        $now = now();
+        $sevenDaysAgo = $now->copy()->subDays(7);
+
+        $totalMinutes = $mentor->appointments()
+            ->where('scheduled_at', '>=', $sevenDaysAgo->toDateTimeString())
+            ->where('scheduled_at', '<=', $now->toDateTimeString())
+            ->sum('total_time');
+        $totalHours = round($totalMinutes / 60, 2);
+
+        return $this->successResponse([
+            'total_minutes' => $totalMinutes,
+            'total_hours' => $totalHours,
+            'from' => $sevenDaysAgo->toDateTimeString(),
+            'to' => $now->toDateTimeString()
+        ], 200);
+    }
+
+    /**
      * @param Request $request
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
