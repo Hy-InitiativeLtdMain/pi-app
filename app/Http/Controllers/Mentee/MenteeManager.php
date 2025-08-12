@@ -105,6 +105,15 @@ class MenteeManager extends Controller
             return $this->errorResponse('Mentee not found', 404);
         }
         $mentee = $user->mentee;
+        
+        // Ensure course and track are strings
+        if ($request->has('course') && !is_string($request->course)) {
+            $request->merge(['course' => (string) $request->course]);
+        }
+        if ($request->has('track') && !is_string($request->track)) {
+            $request->merge(['track' => (string) $request->track]);
+        }
+        
         $validated = $request->validate(\App\Http\Requests\MenteeRequest::$_updateRules);
         $mentee->update($validated);
         // Assign mentor after update
