@@ -426,6 +426,9 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
     // Mentor routes
     Route::group(['prefix' => 'mentors'], function () {
+        Route::get('appointments/latest', [MentorManager::class, 'getLatestAppointment']);
+        Route::get('appointments/total-hours', [MentorManager::class, 'getTotalMentoringHours']);
+        Route::get('appointments/weekly-hours', [MentorManager::class, 'getWeeklyMentoringHours']);
         Route::post('appointments', [MentorManager::class, 'createAppointment']);
         Route::get('appointments', [MentorManager::class, 'getAppointments']);
         // Get a specific appointment for the authenticated mentor
