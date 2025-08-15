@@ -100,6 +100,7 @@ class JWTMentorshipAuth
                         'email' => $email,
                         'track' => $track,
                         'institute' => $institute,
+                        'status' => 'approved',
                     ]);
                 // Update mentor's track if needed
                 if ($mentor && $track && $mentor->track !== $track) {
