@@ -11,10 +11,7 @@ use App\Models\MentorMentee;
 use App\Models\AppointmentMentee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-<<<<<<< HEAD
 use Illuminate\Support\Facades\DB;
-=======
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
 use App\Services\MentorMenteeAssignmentService;
 
 class MenteeManager extends Controller
@@ -108,7 +105,6 @@ class MenteeManager extends Controller
             return $this->errorResponse('Mentee not found', 404);
         }
         $mentee = $user->mentee;
-<<<<<<< HEAD
         
         // Ensure course and track are strings
         if ($request->has('course') && !is_string($request->course)) {
@@ -118,8 +114,6 @@ class MenteeManager extends Controller
             $request->merge(['track' => (string) $request->track]);
         }
         
-=======
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
         $validated = $request->validate(\App\Http\Requests\MenteeRequest::$_updateRules);
         $mentee->update($validated);
         // Assign mentor after update
@@ -130,7 +124,6 @@ class MenteeManager extends Controller
             'mentor_assignment' => $assignmentResult
         ], 200);
     }
-<<<<<<< HEAD
 
     /**
      * Get fellow mentees under the same mentor as the authenticated mentee
@@ -348,6 +341,4 @@ class MenteeManager extends Controller
             'appointments' => $appointmentsWithCreator
         ], 200);
     }
-=======
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
 }

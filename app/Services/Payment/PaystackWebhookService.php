@@ -20,22 +20,15 @@ class PaystackWebhookService
             Log::error('Transaction not found for reference', ['reference' => $_data['reference']]);
             return response()->json(['message' => 'Transaction not found'], 404);
         }
-<<<<<<< HEAD
         Log::info('Transaction found', ['transaction_id' => $transaction->id, 'user_id' => $transaction->user_id]);
         
         // Get the course associated with this transaction
-=======
-        Log::info('Transaction found', ['transaction_id' => $transaction->id]);
-        
-        // TEMPORARY: Mark all course transactions as paid regardless of amount verification
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
         $courseId = $transaction->courses()->first()->id ?? null;
         if (!$courseId) {
             Log::error('No course found for transaction', ['transaction_id' => $transaction->id]);
             return response()->json(['message' => 'No course found for transaction'], 404);
         }
         
-<<<<<<< HEAD
         // Get all transactions for this user and course that are not yet paid
         // This is more reliable than using time windows
         $courseTransactions = Transaction::whereHas('courses', function($query) use ($courseId) {
@@ -71,50 +64,11 @@ class PaystackWebhookService
         ]);
         
         if (abs($totalExpectedAmount) == $actualAmount) {
-=======
-        // Get transactions for this specific course created within 5 minutes of the current transaction
-        $timeWindow = 5; // minutes
-        $courseTransactions = Transaction::whereIn('id', function($query) use ($courseId, $transaction, $timeWindow) {
-            $query->select('transaction_id')
-                  ->from('transaction_course')
-                  ->where('course_id', $courseId)
-                  ->where('created_at', '>=', $transaction->created_at->subMinutes($timeWindow))
-                  ->where('created_at', '<=', $transaction->created_at->addMinutes($timeWindow));
-        })->get();
-        
-        Log::info('Found course transactions for webhook', [
-            'course_id' => $courseId,
-            'transaction_count' => $courseTransactions->count(),
-            'transaction_ids' => $courseTransactions->pluck('id'),
-            'time_window' => $timeWindow . ' minutes'
-        ]);
-        
-        // TEMPORARY: Skip amount verification and mark all as paid
-        Log::info('TEMPORARY: Bypassing amount verification - marking all transactions as paid');
-        
-        // Mark all related transactions as paid
-        foreach ($courseTransactions as $courseTransaction) {
-            $courseTransaction->status = 1;
-            $courseTransaction->paid_at = Carbon::now();
-            $courseTransaction->save();
-            Log::info('Transaction marked as paid', ['transaction_id' => $courseTransaction->id]);
-        }
-        
-        $data['message'] = 'Updated (temporary bypass)';
-        return response()->json($data, 200);
-        
-        // ORIGINAL CODE (commented out for now):
-        /*
-        $totalExpectedAmount = $courseTransactions->sum('amount') * 100; // Convert to kobo
-        
-        if (abs($totalExpectedAmount) == floatval($_data['amount'])) {
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             // Mark all related transactions as paid
             foreach ($courseTransactions as $courseTransaction) {
                 $courseTransaction->status = 1;
                 $courseTransaction->paid_at = Carbon::now();
                 $courseTransaction->save();
-<<<<<<< HEAD
                 Log::info('Transaction marked as paid', [
                     'transaction_id' => $courseTransaction->id,
                     'user_id' => $courseTransaction->user_id,
@@ -129,18 +83,11 @@ class PaystackWebhookService
             ]);
             
             $data['message'] = 'Payment processed and course access activated';
-=======
-                Log::info('Transaction marked as paid', ['transaction_id' => $courseTransaction->id]);
-            }
-            
-            $data['message'] = 'Updated';
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             return response()->json($data, 200);
         }
         
         Log::warning('Amount mismatch for course transactions', [
             'course_id' => $courseId,
-<<<<<<< HEAD
             'user_id' => $transaction->user_id,
             'course_transaction_ids' => $courseTransactions->pluck('id'),
             'expected_total_kobo' => $totalExpectedAmount,
@@ -150,15 +97,6 @@ class PaystackWebhookService
         $data['message'] = 'Amount mismatch - payment not processed';
         return response()->json($data, 400);
 
-=======
-            'course_transaction_ids' => $courseTransactions->pluck('id'),
-            'expected_total' => $totalExpectedAmount,
-            'actual' => floatval($_data['amount'])
-        ]);
-        $data['message'] = 'Not found';
-        return response()->json($data, 404);
-        */
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
     }
 
     public function transferSuccess($_data)

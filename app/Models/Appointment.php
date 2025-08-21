@@ -11,7 +11,6 @@ class Appointment extends Model
 
     protected $fillable = [
         'mentor_id',
-<<<<<<< HEAD
         'mentee_id',
         'title',
         'meeting_type',
@@ -21,13 +20,6 @@ class Appointment extends Model
         'scheduled_at',
         'scheduled_end',
         'total_time',
-=======
-        'title',
-        'meeting_type',
-        'meeting_link',
-        'description',
-        'scheduled_at',
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
     ];
 
     public function mentor()
@@ -39,12 +31,9 @@ class Appointment extends Model
     {
         return $this->belongsToMany(Mentee::class, 'appointment_mentees');
     }
-<<<<<<< HEAD
 
     public function mentee()
     {
         return $this->belongsTo(Mentee::class, 'mentee_id');
     }
-=======
->>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
 }
