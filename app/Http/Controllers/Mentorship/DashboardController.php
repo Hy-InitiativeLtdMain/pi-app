@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+<<<<<<< HEAD
 use Carbon\Carbon;
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
 
 class DashboardController extends Controller
 {
@@ -16,6 +19,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+<<<<<<< HEAD
         $currentDateTime = Carbon::now();
         
         // Dashboard stats
@@ -59,6 +63,13 @@ class DashboardController extends Controller
             ->sum('total_time');
         $totalMentoringHours = round($totalMentoringMinutes / 60, 1);
         
+=======
+        // Dashboard stats
+        $totalFellowsManaged = DB::table('mentor_mentees')->where('mentor_id', $user->mentor->id)->count();
+        // Count sessions as number of appointments for this mentor
+        $totalSessionsDone = DB::table('appointments')->where('mentor_id', $user->mentor->id)->count();
+        $totalMentoringHours = DB::table('bookings')->where('mentor_id', $user->mentor->id)->where('status', 'completed')->sum('hours');
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
         // To-dos: check mentor profile completeness
         $mentor = $user->mentor;
         $requiredFields = [
@@ -89,9 +100,13 @@ class DashboardController extends Controller
         }
         return response()->json([
             'total_fellows_managed' => $totalFellowsManaged,
+<<<<<<< HEAD
             'total_sessions_done' => $completedSessions,
             'total_sessions_completed' => $completedSessions,
             'total_sessions_pending' => $pendingSessions,
+=======
+            'total_sessions_done' => $totalSessionsDone,
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             'total_mentoring_hours' => $totalMentoringHours,
             'todos' => $todos,
         ]);
@@ -170,6 +185,7 @@ class DashboardController extends Controller
     // }
 
     /**
+<<<<<<< HEAD
      * Get detailed session statistics.
      */
     public function sessionStats(Request $request)
@@ -286,6 +302,8 @@ class DashboardController extends Controller
     }
 
     /**
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
      * Search dashboard data.
      */
     public function search(Request $request)
@@ -297,4 +315,8 @@ class DashboardController extends Controller
             'query' => $query
         ]);
     }
+<<<<<<< HEAD
 } 
+=======
+} 
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5

@@ -217,7 +217,7 @@ class MentorManager extends Controller
     {
         $currentMenteeCount = MentorMentee::where('mentor_id', $mentor->id)->count();
         $maxMentees = 10;
-
+        
         return [
             'mentor_id' => $mentor->id,
             'current_mentees' => $currentMenteeCount,
@@ -346,18 +346,18 @@ class MentorManager extends Controller
             ->whereNotNull('track')
             ->where('institute', '3mtt') // Only target 3mtt mentors
             ->get();
-
+        
         $results = [];
         $totalAssigned = 0;
         $assignmentService = app(\App\Services\MentorMenteeAssignmentService::class);
-
+        
         foreach ($mentors as $mentor) {
             $capacityCheck = $this->checkMentorCapacity($mentor);
-
+            
             if ($capacityCheck['can_accept_more']) {
                 $assignmentResult = $assignmentService->assignMenteesToMentor($mentor);
                 $totalAssigned += $assignmentResult['assigned'];
-
+                
                 $results[] = [
                     'mentor_id' => $mentor->id,
                     'mentor_name' => $mentor->firstname . ' ' . $mentor->lastname,
@@ -365,7 +365,7 @@ class MentorManager extends Controller
                 ];
             }
         }
-
+        
         return $this->successResponse([
             'message' => "Automated mentee assignment completed for 3mtt institute. Total new assignments: {$totalAssigned}",
             'total_new_assignments' => $totalAssigned,
@@ -499,11 +499,10 @@ class MentorManager extends Controller
     public function createAppointment(Request $request)
     {
         $mentor = auth()->user()->mentor;
-        $mentee = auth()->user()->mentee;
-        if (!$mentor && !$mentee) {
-            return $this->errorResponse('User is neither a mentor nor a mentee', 403);
+        if (!$mentor) {
+            return $this->errorResponse('Mentor profile not found', 404);
         }
-        if ($mentor && $mentor->status !== 'approved') {
+        if ($mentor->status !== 'approved') {
             return $this->errorResponse('Mentor account not approved', 403);
         }
 
@@ -511,135 +510,30 @@ class MentorManager extends Controller
             'title' => 'required|string',
             'meeting_type' => 'nullable|string',
             'meeting_link' => 'nullable|string',
-            'start_meeting_link' => 'nullable|string',
             'description' => 'nullable|string',
             'scheduled_at' => 'required|date',
             'mentee_ids' => 'nullable|array',
             'mentee_ids.*' => 'integer|exists:mentees,id',
-            'total_time' => 'nullable|integer', // in minutes
-            'scheduled_end' => 'nullable|date',
-            'mentee_id' => 'nullable|integer|exists:mentees,id',
         ]);
 
-        $scheduledAt = $validated['scheduled_at'];
-        if (!empty($validated['scheduled_end'])) {
-            $scheduledEnd = $validated['scheduled_end'];
-            $totalTime = (new \Carbon\Carbon($scheduledAt))->diffInMinutes(new \Carbon\Carbon($scheduledEnd));
-        } else {
-            $totalTime = $validated['total_time'] ?? 120; // default 2 hours
-            $scheduledEnd = (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
+        // Get all mentees assigned to this mentor if mentee_ids not provided
+        $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
+        if (empty($menteeIds)) {
+            return $this->errorResponse('No mentees assigned to this mentor', 400);
         }
 
-        // 30min buffer after end time
-        $bufferMinutes = 30;
-        $bufferedEnd = (new \Carbon\Carbon($scheduledEnd))->addMinutes($bufferMinutes);
-
-        // Helper to check for overlapping appointments
-        $hasClash = function ($query, $start, $end) use ($bufferMinutes) {
-            return $query->where(function ($q) use ($start, $end, $bufferMinutes) {
-                $q->where(function ($sub) use ($start, $end, $bufferMinutes) {
-                    $sub->where('scheduled_at', '<', (new \Carbon\Carbon($end))->addMinutes($bufferMinutes))
-                        ->where('scheduled_end', '>', (new \Carbon\Carbon($start))->subMinutes($bufferMinutes));
-                });
-            });
-        };
-
-        // If mentor is creating the appointment
-        if ($mentor) {
-            // Get all mentees assigned to this mentor if mentee_ids not provided
-            $menteeIds = $validated['mentee_ids'] ?? MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id')->toArray();
-            if (empty($menteeIds)) {
-                return $this->errorResponse('No mentees assigned to this mentor', 400);
-            }
-
-            // Check for mentee appointments that clash (with buffer)
-            $clashingMenteeAppointments = \App\Models\Appointment::whereIn('mentee_id', $menteeIds)
-                ->whereNull('mentor_id') // mentee-created
-                ->where(function ($q) use ($scheduledAt, $bufferedEnd, $bufferMinutes) {
-                    $q->where('scheduled_at', '<', $bufferedEnd)
-                        ->where('scheduled_end', '>', (new \Carbon\Carbon($scheduledAt))->subMinutes($bufferMinutes));
-                })
-                ->get();
-
-            // Notify and delete clashing mentee appointments
-            foreach ($clashingMenteeAppointments as $appt) {
-                // Notify mentee (implement notification as needed)
-                try {
-                    $menteeUser = $appt->mentee ? $appt->mentee->user : null;
-                    if ($menteeUser) {
-                        // You can use your notification service here
-                        // Example: app(FirebaseNotificationService::class)->sendToUser($menteeUser, ...);
-                        // For now, just log
-                        Log::info("Notifying mentee {$menteeUser->id} about appointment deletion due to mentor priority.");
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Failed to notify mentee: ' . $e->getMessage());
-                }
-                $appt->delete();
-            }
-
-            // Check for mentor's own appointment clashes (with buffer)
-            $mentorClash = $hasClash($mentor->appointments(), $scheduledAt, $scheduledEnd)->exists();
-            if ($mentorClash) {
-                return $this->errorResponse('Mentor already has an appointment that clashes with this time (including 30min buffer).', 409);
-            }
-
-            // Create the appointment
-            $appointment = $mentor->appointments()->create([
-                'title' => $validated['title'],
-                'meeting_type' => $validated['meeting_type'] ?? null,
-                'meeting_link' => $validated['meeting_link'] ?? null,
-                'start_meeting_link' => $validated['start_meeting_link'] ?? null,
-                'description' => $validated['description'] ?? null,
-                'scheduled_at' => $scheduledAt,
-                'scheduled_end' => $scheduledEnd,
-                'total_time' => $totalTime,
-            ]);
-            $appointment->mentees()->sync($menteeIds);
-        }
-        // If mentee is creating the appointment
-        else if ($mentee) {
-            // Check for mentee's own appointment clashes (with buffer)
-            $menteeClash = $hasClash($mentee->appointments(), $scheduledAt, $scheduledEnd)->exists();
-            if ($menteeClash) {
-                return $this->errorResponse('You already have an appointment that clashes with this time (including 30min buffer).', 409);
-            }
-
-            // Check for mentor appointments that clash (with buffer)
-            $mentorId = $mentee->mentorMentee ? $mentee->mentorMentee->mentor_id : null;
-            if ($mentorId) {
-                $mentorAppointments = \App\Models\Appointment::where('mentor_id', $mentorId)
-                    ->where(function ($q) use ($scheduledAt, $bufferedEnd, $bufferMinutes) {
-                        $q->where('scheduled_at', '<', $bufferedEnd)
-                            ->where('scheduled_end', '>', (new \Carbon\Carbon($scheduledAt))->subMinutes($bufferMinutes));
-                    })
-                    ->exists();
-                if ($mentorAppointments) {
-                    return $this->errorResponse('Your mentor already has an appointment that clashes with this time (including 30min buffer).', 409);
-                }
-            }
-
-            // Create the appointment for the mentee
-            $appointment = \App\Models\Appointment::create([
-                'title' => $validated['title'],
-                'meeting_type' => $validated['meeting_type'] ?? null,
-                'meeting_link' => $validated['meeting_link'] ?? null,
-                'start_meeting_link' => $validated['start_meeting_link'] ?? null,
-                'description' => $validated['description'] ?? null,
-                'scheduled_at' => $scheduledAt,
-                'scheduled_end' => $scheduledEnd,
-                'total_time' => $totalTime,
-                'mentee_id' => $mentee->id,
-                'mentor_id' => null,
-            ]);
-        } else {
-            return $this->errorResponse('Only mentors or mentees can create appointments', 403);
-        }
+        $appointment = $mentor->appointments()->create([
+            'title' => $validated['title'],
+            'meeting_type' => $validated['meeting_type'] ?? null,
+            'meeting_link' => $validated['meeting_link'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'scheduled_at' => $validated['scheduled_at'],
+        ]);
+        $appointment->mentees()->sync($menteeIds);
 
         return $this->successResponse([
             'message' => 'Appointment created successfully',
             'appointment' => $appointment->load('mentees'),
-            'start_meeting_link' => $appointment->start_meeting_link,
         ], 201);
     }
 
@@ -658,14 +552,7 @@ class MentorManager extends Controller
             return $this->errorResponse('Mentor account not approved', 403);
         }
 
-        $appointments = $mentor->appointments()
-            ->where(function ($query) {
-                $query->whereNull('meeting_type')->orWhere('meeting_type', '!=', 'fellows_call');
-            })
-            ->whereNull('mentee_id')
-            ->with('mentees')
-            ->orderByDesc('scheduled_at')
-            ->get();
+        $appointments = $mentor->appointments()->with('mentees')->orderByDesc('scheduled_at')->get();
 
         return $this->successResponse([
             'appointments' => $appointments
@@ -694,106 +581,13 @@ class MentorManager extends Controller
         }
 
         return $this->successResponse([
-            'appointment' => $appointment,
-            'start_meeting_link' => $appointment->start_meeting_link,
-        ], 200);
-    }
-
-    /**
-     * Get the latest appointment before now for the authenticated mentor.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getLatestAppointment()
-    {
-        $mentor = auth()->user()->mentor;
-        if (!$mentor) {
-            return $this->errorResponse('Mentor profile not found', 404);
-        }
-        if ($mentor->status !== 'approved') {
-            return $this->errorResponse('Mentor account not approved', 403);
-        }
-
-        // Use the provided local time as the source of truth for 'now'
-        $now = now()->toDateTimeString();
-
-        $appointment = $mentor->appointments()
-            ->where('scheduled_at', '<', $now)
-            ->orderByDesc('scheduled_at')
-            ->with('mentees')
-            ->first();
-
-        if (!$appointment) {
-            return $this->successResponse([
-                'message' => 'No past appointments found',
-                'appointment' => null
-            ], 200);
-        }
-
-        return $this->successResponse([
             'appointment' => $appointment
         ], 200);
     }
 
     /**
-     * Get the total mentoring hours for the authenticated mentor.
+     * Update a specific appointment for the authenticated mentor.
      *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getTotalMentoringHours()
-    {
-        $mentor = auth()->user()->mentor;
-        if (!$mentor) {
-            return $this->errorResponse('Mentor profile not found', 404);
-        }
-        if ($mentor->status !== 'approved') {
-            return $this->errorResponse('Mentor account not approved', 403);
-        }
-
-        // Sum total_time (assumed in minutes in the DB)
-        $totalMinutes = $mentor->appointments()->sum('total_time');
-        $totalHours = round($totalMinutes / 60, 2);
-
-        return $this->successResponse([
-            'total_minutes' => $totalMinutes,
-            'total_hours' => $totalHours
-        ], 200);
-    }
-
-    /**
-     * Get the total mentoring hours in the past week for the authenticated mentor.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getWeeklyMentoringHours()
-    {
-        $mentor = auth()->user()->mentor;
-        if (!$mentor) {
-            return $this->errorResponse('Mentor profile not found', 404);
-        }
-        if ($mentor->status !== 'approved') {
-            return $this->errorResponse('Mentor account not approved', 403);
-        }
-
-        // Use the provided local time as the source of truth for 'now'
-        $now = now();
-        $sevenDaysAgo = $now->copy()->subDays(7);
-
-        $totalMinutes = $mentor->appointments()
-            ->where('scheduled_at', '>=', $sevenDaysAgo->toDateTimeString())
-            ->where('scheduled_at', '<=', $now->toDateTimeString())
-            ->sum('total_time');
-        $totalHours = round($totalMinutes / 60, 2);
-
-        return $this->successResponse([
-            'total_minutes' => $totalMinutes,
-            'total_hours' => $totalHours,
-            'from' => $sevenDaysAgo->toDateTimeString(),
-            'to' => $now->toDateTimeString()
-        ], 200);
-    }
-
-    /**
      * @param Request $request
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
@@ -817,36 +611,19 @@ class MentorManager extends Controller
             'title' => 'sometimes|required|string',
             'meeting_type' => 'nullable|string',
             'meeting_link' => 'nullable|string',
-            'start_meeting_link' => 'nullable|string',
             'description' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
             'mentee_ids' => 'nullable|array',
             'mentee_ids.*' => 'integer|exists:mentees,id',
-            'total_time' => 'nullable|integer', // in minutes
-            'scheduled_end' => 'nullable|date',
         ]);
 
-        $updateData = [
+        $appointment->update([
             'title' => $validated['title'] ?? $appointment->title,
             'meeting_type' => $validated['meeting_type'] ?? $appointment->meeting_type,
             'meeting_link' => $validated['meeting_link'] ?? $appointment->meeting_link,
-            'start_meeting_link' => $validated['start_meeting_link'] ?? $appointment->start_meeting_link,
             'description' => $validated['description'] ?? $appointment->description,
             'scheduled_at' => $validated['scheduled_at'] ?? $appointment->scheduled_at,
-        ];
-
-        $scheduledAt = $validated['scheduled_at'] ?? $appointment->scheduled_at;
-        if (!empty($validated['scheduled_end'])) {
-            $scheduledEnd = $validated['scheduled_end'];
-            $totalTime = (new \Carbon\Carbon($scheduledAt))->diffInMinutes(new \Carbon\Carbon($scheduledEnd));
-        } else {
-            $totalTime = $validated['total_time'] ?? $appointment->total_time ?? 120;
-            $scheduledEnd = (new \Carbon\Carbon($scheduledAt))->addMinutes($totalTime);
-        }
-        $updateData['scheduled_end'] = $scheduledEnd;
-        $updateData['total_time'] = $totalTime;
-
-        $appointment->update($updateData);
+        ]);
 
         if (isset($validated['mentee_ids'])) {
             $appointment->mentees()->sync($validated['mentee_ids']);
@@ -855,7 +632,6 @@ class MentorManager extends Controller
         return $this->successResponse([
             'message' => 'Appointment updated successfully',
             'appointment' => $appointment->load('mentees'),
-            'start_meeting_link' => $appointment->start_meeting_link,
         ], 200);
     }
 
@@ -901,95 +677,5 @@ class MentorManager extends Controller
         $assignedMenteeIds = \App\Models\MentorMentee::where('mentor_id', $mentor->id)->pluck('mentee_id');
         $mentees = \App\Models\Mentee::whereIn('id', $assignedMenteeIds)->get();
         return $this->showAll(\App\Http\Resources\Mentee\MenteeResource::collection($mentees), 200);
-    }
-
-    /**
-     * Set or unset a mentee as team lead for the authenticated mentor
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function setTeamLead(Request $request)
-    {
-        $user = auth()->user();
-        $mentor = $user->mentor;
-
-        if (!$mentor) {
-            return $this->errorResponse('Mentor profile not found', 404);
-        }
-
-        // Validate the request
-        $validated = $request->validate([
-            'mentee_id' => 'required|integer|exists:mentees,id',
-            'team_lead' => 'required|boolean'
-        ]);
-
-        // Check if the mentee is assigned to this mentor
-        $mentorMentee = MentorMentee::where('mentor_id', $mentor->id)
-            ->where('mentee_id', $validated['mentee_id'])
-            ->first();
-
-        if (!$mentorMentee) {
-            return $this->errorResponse('This mentee is not assigned to your mentorship', 404);
-        }
-
-        // If setting as team lead, first remove any existing team lead for this mentor
-        if ($validated['team_lead']) {
-            MentorMentee::where('mentor_id', $mentor->id)
-                ->where('team_lead', true)
-                ->update(['team_lead' => false]);
-        }
-
-        // Update the team lead status
-        $mentorMentee->update(['team_lead' => $validated['team_lead']]);
-
-        $message = $validated['team_lead']
-            ? 'Mentee has been set as team lead successfully'
-            : 'Team lead status has been removed from mentee';
-
-        return $this->successResponse([
-            'message' => $message,
-            'data' => [
-                'mentor_id' => $mentor->id,
-                'mentee_id' => $validated['mentee_id'],
-                'team_lead' => $validated['team_lead'],
-                'updated_at' => $mentorMentee->fresh()->updated_at
-            ]
-        ], 200);
-    }
-
-    /**
-     * Get the current team lead for the authenticated mentor
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getTeamLead()
-    {
-        $user = auth()->user();
-        $mentor = $user->mentor;
-
-        if (!$mentor) {
-            return $this->errorResponse('Mentor profile not found', 404);
-        }
-
-        $teamLead = MentorMentee::where('mentor_id', $mentor->id)
-            ->where('team_lead', true)
-            ->with('mentee')
-            ->first();
-
-        if (!$teamLead) {
-            return $this->successResponse([
-                'message' => 'No team lead assigned yet',
-                'data' => null
-            ], 200);
-        }
-
-        return $this->successResponse([
-            'message' => 'Team lead found',
-            'data' => [
-                'mentor_id' => $mentor->id,
-                'mentee_id' => $teamLead->mentee_id,
-                'mentee' => $teamLead->mentee ? new \App\Http\Resources\Mentee\MenteeResource($teamLead->mentee) : null,
-                'assigned_at' => $teamLead->updated_at
-            ]
-        ], 200);
     }
 }

@@ -41,8 +41,12 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentor->user->user_uuid,
                 $title,
+<<<<<<< HEAD
                 $body,
                 'booking_created'
+=======
+                $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             );
 
             Log::info('Firebase booking notification sent to mentor', [
@@ -87,8 +91,12 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentee->user->user_uuid,
                 $title,
+<<<<<<< HEAD
                 $body,
                 'booking_' . strtolower($statusMessage)
+=======
+                $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             );
 
             Log::info('Firebase booking approval notification sent to mentee', [
@@ -128,8 +136,12 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $user->user_uuid,
                 $title,
+<<<<<<< HEAD
                 $body,
                 'booking_reminder'
+=======
+                $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             );
 
             Log::info('Firebase booking reminder notification sent', [
@@ -170,8 +182,12 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentor->user->user_uuid,
                 $title,
+<<<<<<< HEAD
                 $body,
                 'mentor_application_' . strtolower($statusMessage)
+=======
+                $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             );
 
             Log::info('Firebase mentor approval notification sent', [
@@ -208,8 +224,12 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $mentor->user->user_uuid,
                 $title,
+<<<<<<< HEAD
                 $body,
                 'mentee_assignment'
+=======
+                $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             );
 
             Log::info('Firebase mentee assignment notification sent', [
@@ -243,8 +263,12 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentor->user->user_uuid,
                     $title,
+<<<<<<< HEAD
                     $body,
                     'session_cancelled'
+=======
+                    $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
                 );
             }
 
@@ -256,8 +280,12 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentee->user->user_uuid,
                     $title,
+<<<<<<< HEAD
                     $body,
                     'session_cancelled'
+=======
+                    $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
                 );
             }
 
@@ -292,8 +320,12 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentor->user->user_uuid,
                     $title,
+<<<<<<< HEAD
                     $body,
                     'session_rescheduled'
+=======
+                    $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
                 );
             }
 
@@ -305,8 +337,12 @@ class FirebaseNotificationService
                 $this->firebaseService->storeNotification(
                     $mentee->user->user_uuid,
                     $title,
+<<<<<<< HEAD
                     $body,
                     'session_rescheduled'
+=======
+                    $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
                 );
             }
 
@@ -343,8 +379,12 @@ class FirebaseNotificationService
             $this->firebaseService->storeNotification(
                 $reviewedUser->user_uuid,
                 $title,
+<<<<<<< HEAD
                 $body,
                 'review_submitted'
+=======
+                $body
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
             );
 
             Log::info('Firebase review notification sent', [

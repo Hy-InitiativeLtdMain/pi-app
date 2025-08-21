@@ -36,7 +36,10 @@ class JWTMentorshipAuth
             $role = $decoded->role ?? null;
             $track = $decoded->track ?? null;
             $institute = $decoded->institute ?? "3mtt";
+<<<<<<< HEAD
             $image = $decoded->profile_picture ?? null;
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
 
             if (!$userId || !$email) {
                 return response()->json(['error' => 'Invalid token payload: missing required claims'], 401);
@@ -69,7 +72,10 @@ class JWTMentorshipAuth
                         'course' => $track,
                         'institute' => $institute,
                         'name' => $decoded->name ?? null,
+<<<<<<< HEAD
                         
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
                     ]
                 );
                 // Update track, course, or name if needed
@@ -100,7 +106,10 @@ class JWTMentorshipAuth
                         'email' => $email,
                         'track' => $track,
                         'institute' => $institute,
+<<<<<<< HEAD
                         'status' => 'approved',
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
                     ]);
                 // Update mentor's track if needed
                 if ($mentor && $track && $mentor->track !== $track) {
@@ -109,7 +118,12 @@ class JWTMentorshipAuth
                 }
                 Auth::login($user);
                 return $next($request);
+<<<<<<< HEAD
 	  }
+=======
+            }
+
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unauthorized - ' . $e->getMessage()], 401);
         }

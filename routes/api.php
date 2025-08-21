@@ -415,6 +415,7 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
 
         Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMenteeReview']);
         Route::get('/mentee/profile/reviews', [UserReviewController::class, 'fetchMenteeReviews']);
+<<<<<<< HEAD
         
         // Get completed sessions count for authenticated mentee
         Route::get('/sessions/count', [MenteeManager::class, 'getCompletedSessionsCount']);
@@ -422,13 +423,18 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('/my-mentor', [MenteeManager::class, 'getMyMentor']);
         Route::get('/mentee-appointments', [MenteeManager::class, 'getMyAppointments']);
         Route::get('/mentee-created-appointments', [MenteeManager::class, 'getMenteeCreatedAppointments']);
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
     });
 
     // Mentor routes
     Route::group(['prefix' => 'mentors'], function () {
+<<<<<<< HEAD
         Route::get('appointments/latest', [MentorManager::class, 'getLatestAppointment']);
         Route::get('appointments/total-hours', [MentorManager::class, 'getTotalMentoringHours']);
         Route::get('appointments/weekly-hours', [MentorManager::class, 'getWeeklyMentoringHours']);
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
         Route::post('appointments', [MentorManager::class, 'createAppointment']);
         Route::get('appointments', [MentorManager::class, 'getAppointments']);
         // Get a specific appointment for the authenticated mentor
@@ -444,10 +450,13 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('badges', [\App\Http\Controllers\Mentorship\DashboardController::class, 'badges']);
         Route::get('notifications', [\App\Http\Controllers\Mentorship\DashboardController::class, 'notifications']);
         Route::get('search', [\App\Http\Controllers\Mentorship\DashboardController::class, 'search']);
+<<<<<<< HEAD
         // Session management and statistics routes
         Route::get('sessions/stats', [\App\Http\Controllers\Mentorship\DashboardController::class, 'sessionStats']);
         Route::get('sessions/upcoming', [\App\Http\Controllers\Mentorship\DashboardController::class, 'upcomingSessions']);
         Route::get('sessions/summary-by-month', [\App\Http\Controllers\Mentorship\DashboardController::class, 'sessionSummaryByMonth']);
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
         Route::apiResource('availability', AvailabilityController::class)->except('show')->names([
             'index' => 'mentorship.availability.index',
             'store' => 'mentorship.availability.store',
@@ -485,10 +494,13 @@ Route::group(['prefix' => 'v1/mentorship', 'middleware' => ['cors', 'mentorship'
         Route::get('/{id}/profile/reviews', [UserReviewController::class, 'fetchMentorReview']);
         Route::apiResource('skill-categories', SkillCategoryController::class);
         Route::get('assigned-mentees', [MentorManager::class, 'getAssignedMentees']);
+<<<<<<< HEAD
         
         // Team lead management routes
         Route::post('team-lead', [MentorManager::class, 'setTeamLead']);
         Route::get('team-lead', [MentorManager::class, 'getTeamLead']);
+=======
+>>>>>>> 03568da4e7399e1049ec7daa40d35603a7baa4c5
     });
 
     Route::resource('mentor', MentorManager::class)->except('index')->names([
