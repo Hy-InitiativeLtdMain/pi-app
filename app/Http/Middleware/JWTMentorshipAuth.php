@@ -51,7 +51,7 @@ class JWTMentorshipAuth
                 [
                     'user_uuid' => $userId,
                     'password' => bcrypt('SecretKey010'),
-                    'registered_role' => $role,
+                    // 'registered_role' => false, // Regular users (mentors/mentees) are not admins
                     'institute_slug' => $institute,
                     'track' => $track,
                     'image' => $image,
