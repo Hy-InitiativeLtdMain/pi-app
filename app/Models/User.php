@@ -39,7 +39,8 @@ class User extends Authenticatable implements JWTSubject
         'signature',
         'institute_slug',
         'admin',
-        'interest'
+        'interest',
+        'track'
     ];
 
     /**

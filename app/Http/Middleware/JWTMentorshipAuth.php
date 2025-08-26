@@ -51,12 +51,18 @@ class JWTMentorshipAuth
                 [
                     'user_uuid' => $userId,
                     'password' => bcrypt('SecretKey010'),
-                    'role' => $role,
+                    'registered_role' => $role,
                     'institute_slug' => $institute,
                     'track' => $track,
                     'image' => $image,
                 ]
             );
+
+            // Update user's track if it has changed
+            if ($user && $track && $user->track !== $track) {
+                $user->track = $track;
+                $user->save();
+            }
 
             if ($role === 'Mentee' || $role === 'Student') {
                 // Create or update mentee
@@ -69,7 +75,7 @@ class JWTMentorshipAuth
                         'course' => $track,
                         'institute' => $institute,
                         'name' => $decoded->name ?? null,
-                        
+
                     ]
                 );
                 // Update track, course, or name if needed
@@ -101,7 +107,8 @@ class JWTMentorshipAuth
                         'track' => $track,
                         'institute' => $institute,
                         'status' => 'approved',
-                    ]);
+                    ]
+                );
                 // Update mentor's track if needed
                 if ($mentor && $track && $mentor->track !== $track) {
                     $mentor->track = $track;
