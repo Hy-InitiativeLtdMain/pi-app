@@ -17,6 +17,10 @@ class Question extends Model
         'quiz_id',
     ];
 
+    protected $casts = [
+        'options' => 'array',
+    ];
+
 
     /**
      * Get the quiz that owns the Question
